@@ -40,7 +40,6 @@ export default function RootLayout() {
 
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const isIos = Platform.OS === 'ios';
   const isWeb = Platform.OS === 'web';
   const isDesktop = width >= 768;
   const isNarrow = width < 420;
