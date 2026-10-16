@@ -39,3 +39,17 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+
+## Strict Rules References
+Pour toute génération de code ou d'interface, applique obligatoirement les consignes de ces fichiers :
+- Architecture & code propre : `.agents/rules/solid-architecture.md`
+- Design system & couleurs : `.agents/rules/ui-brand-guidelines.md`
+
+
+## Git Commit Rules
+When generating commit messages:
+- Write in English.
+- Always use the Conventional Commits format (`feat: ...`, `fix: ...`, `chore: ...`, `refactor: ...`).
+- Keep the first line under 72 characters.
+- Use the imperative mood (e.g. "feat: add user authentication").

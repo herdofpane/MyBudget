@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/components/ui/text';
+import { colors } from '@/theme/colors';
 
 export type NavRoute = 'index' | 'fixed-expenses' | 'variable-expenses' | 'details';
 
@@ -32,9 +33,9 @@ export function NavigationHeader({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 18,
-    paddingTop: 12,
+    paddingTop: 14,
     paddingBottom: 14,
-    backgroundColor: '#f4f0e8',
+    backgroundColor: colors.background,
     width: '100%',
     maxWidth: 960,
     alignSelf: 'center',
@@ -50,17 +51,19 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#7c6f85',
-    letterSpacing: 1,
+    color: colors.textMuted,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800',
-    color: '#231c2b',
+    color: colors.text,
+    letterSpacing: -0.5,
     marginTop: 2,
   },
   actionWrapper: {
     marginLeft: 12,
   },
 });
+

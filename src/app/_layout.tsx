@@ -8,6 +8,7 @@ import { PortalHost } from '@rn-primitives/portal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NAV_THEME } from '@/lib/theme';
 import { BudgetProvider } from '@/hooks/use-budget';
+import { colors } from '@/theme/colors';
 
 interface TabIconProps {
   name: keyof typeof Ionicons.glyphMap;
@@ -26,7 +27,7 @@ function TabIcon({ name, focusedName, focused, color }: TabIconProps) {
       <Ionicons
         name={focused ? focusedName : name}
         size={20}
-        color={focused ? '#9b6fba' : (color || '#7c6f85')}
+        color={focused ? colors.accent : (color || colors.textMuted)}
       />
     </View>
   );
@@ -42,28 +43,24 @@ export default function RootLayout() {
   const isIos = Platform.OS === 'ios';
   const isWeb = Platform.OS === 'web';
   const isDesktop = width >= 768;
+  const isNarrow = width < 420;
 
   const containerWidth = isDesktop ? Math.min(width, 960) : width;
-  const dockWidth = isDesktop ? Math.min(containerWidth - 32, 580) : width;
-  const dockLeft = isDesktop ? (containerWidth - dockWidth) / 2 : 0;
+  const horizontalMargin = isDesktop ? 32 : isNarrow ? 16 : 24;
+  const maxDock = isDesktop ? 580 : 500;
+  const dockWidth = Math.min(containerWidth - horizontalMargin, maxDock);
+  const dockLeft = (containerWidth - dockWidth) / 2;
 
-  const tabBarHeight = isIos
-    ? 64 + insets.bottom
-    : isDesktop
-    ? 80
+  // Hauteur et espacement du footer optimisés pour éviter tout écrasement ou rognage de texte
+  const dockBottom = isDesktop
+    ? 16
     : isWeb
-    ? 84
-    : 78 + (insets.bottom > 0 ? insets.bottom : 8);
-
-  const tabBarPaddingBottom = isIos
-    ? Math.max(insets.bottom, 16)
-    : isDesktop
     ? 12
-    : isWeb
-    ? 14
-    : insets.bottom > 0
-    ? insets.bottom + 6
-    : 12;
+    : Math.max(insets.bottom, 10);
+
+  const tabBarHeight = isDesktop ? 68 : 62;
+  const tabBarPaddingBottom = 4;
+  const tabBarPaddingTop = 4;
 
   return (
     <BudgetProvider>
@@ -75,45 +72,37 @@ export default function RootLayout() {
                 headerShown: false,
                 tabBarHideOnKeyboard: true,
                 tabBarStyle: {
-                  backgroundColor: '#ffffff',
-                  borderTopColor: '#e6dfd3',
-                  borderTopWidth: 1,
-                  borderBottomWidth: isDesktop ? 1 : 0,
-                  borderBottomColor: '#e6dfd3',
-                  borderLeftWidth: isDesktop ? 1 : 0,
-                  borderLeftColor: '#e6dfd3',
-                  borderRightWidth: isDesktop ? 1 : 0,
-                  borderRightColor: '#e6dfd3',
-                  borderRadius: isDesktop ? 24 : 0,
-                  borderTopLeftRadius: 22,
-                  borderTopRightRadius: 22,
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                  borderWidth: 1,
+                  borderRadius: isDesktop ? 24 : 20,
                   height: tabBarHeight,
                   paddingBottom: tabBarPaddingBottom,
-                  paddingTop: 6,
+                  paddingTop: tabBarPaddingTop,
                   position: 'absolute',
-                  bottom: isDesktop ? 16 : 0,
+                  bottom: dockBottom,
                   left: dockLeft,
-                  width: isDesktop ? dockWidth : '100%',
-                  right: isDesktop ? undefined : 0,
-                  shadowColor: '#231c2b',
-                  shadowOffset: { width: 0, height: isDesktop ? 4 : -3 },
-                  shadowOpacity: isDesktop ? 0.12 : 0.08,
-                  shadowRadius: isDesktop ? 14 : 10,
-                  elevation: isDesktop ? 10 : 8,
+                  width: dockWidth,
+                  shadowColor: colors.primary,
+                  shadowOffset: { width: 0, height: isDesktop ? 4 : 2 },
+                  shadowOpacity: isDesktop ? 0.08 : 0.06,
+                  shadowRadius: isDesktop ? 16 : 10,
+                  elevation: 8,
                 },
                 tabBarItemStyle: {
                   justifyContent: 'center',
                   alignItems: 'center',
-                  paddingTop: 6,
-                  paddingBottom: 6,
+                  paddingVertical: 3,
+                  paddingHorizontal: 2,
                 },
-                tabBarActiveTintColor: '#9b6fba',
-                tabBarInactiveTintColor: '#7c6f85',
+                tabBarActiveTintColor: colors.accent,
+                tabBarInactiveTintColor: colors.textMuted,
                 tabBarLabelStyle: {
-                  fontSize: 11,
+                  fontSize: isNarrow ? 10 : 11,
                   fontWeight: '700',
-                  marginTop: 3,
+                  marginTop: 2,
                   marginBottom: 0,
+                  lineHeight: 13,
                 },
               }}>
             {/* 1. ACCUEIL */}
@@ -136,7 +125,7 @@ export default function RootLayout() {
             <Tabs.Screen
               name="fixed-expenses"
               options={{
-                title: 'Charges Fixes',
+                title: isNarrow ? 'Fixes' : 'Charges Fixes',
                 tabBarIcon: ({ color, focused }) => (
                   <TabIcon
                     name="calendar-outline"
@@ -168,7 +157,7 @@ export default function RootLayout() {
             <Tabs.Screen
               name="details"
               options={{
-                title: 'Calcul & Détail',
+                title: isNarrow ? 'Calcul' : 'Calcul & Détail',
                 tabBarIcon: ({ color, focused }) => (
                   <TabIcon
                     name="calculator-outline"
@@ -199,22 +188,36 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   rootWrapper: {
     flex: 1,
-    backgroundColor: '#f4f0e8',
+    backgroundColor: colors.background,
     alignItems: 'center',
+    ...(Platform.OS === 'web'
+      ? {
+          height: '100vh',
+          maxHeight: '100vh',
+          overflow: 'hidden' as const,
+        }
+      : {}),
   },
   appContainer: {
     flex: 1,
     width: '100%',
+    ...(Platform.OS === 'web'
+      ? {
+          height: '100%',
+          maxHeight: '100%',
+          overflow: 'hidden' as const,
+        }
+      : {}),
   },
   iconContainer: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   iconContainerFocused: {
-    backgroundColor: 'rgba(155, 111, 186, 0.15)',
+    backgroundColor: '#ECFDF5',
   },
 });

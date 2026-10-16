@@ -8,68 +8,49 @@ import {
   PresetIcon,
 } from '@/types';
 
-// Données initiales du budget (synchronisées avec initial-budget.json)
+// Données initiales du budget (synchronisées avec le modèle mensuel et ponctuel)
 export const DEFAULT_BUDGET: BudgetData = {
-  income: 2850,
-  fixedExpenses: 1119.99,
-  checkingAccount: 2430.5,
-  savingsAccount: 12500.0,
+  income: 977,
+  fixedExpenses: 61.73,
+  checkingAccount: 915.27,
+  savingsAccount: 579.74,
+  targetNecessary: 123,
+  targetFacultative: 130,
+  oneTimeIncome: {
+    amount: 566.17,
+    necessary: 198.16,
+    facultative: 136.79,
+    savings: 231.22,
+  },
 };
 
-// Liste des charges fixes par défaut
+// Liste des charges fixes par défaut (Total = 61.73 € synchronisé avec le tableur CSV)
 export const DEFAULT_FIXED_EXPENSES: FixedExpenseItem[] = [
   {
     id: '1',
-    label: 'Loyer / Emprunt immo',
-    amount: 780,
-    category: 'logement',
-    icon: 'home-outline',
+    label: 'Abonnements & Forfait mobile',
+    amount: 19.99,
+    category: 'abonnements',
+    icon: 'phone-portrait-outline',
     dueDay: 5,
     isPaid: true,
   },
   {
     id: '2',
-    label: 'Électricité & Gaz',
-    amount: 95,
-    category: 'energie',
-    icon: 'flash-outline',
-    dueDay: 12,
-    isPaid: true,
-  },
-  {
-    id: '3',
-    label: 'Assurance habitation & auto',
-    amount: 85,
+    label: 'Assurance',
+    amount: 30.00,
     category: 'assurance',
     icon: 'shield-checkmark-outline',
     dueDay: 10,
     isPaid: true,
   },
   {
-    id: '4',
-    label: 'Internet & Téléphonie',
-    amount: 49.99,
-    category: 'abonnements',
-    icon: 'wifi-outline',
-    dueDay: 18,
-    isPaid: false,
-  },
-  {
-    id: '5',
-    label: 'Abonnements (Streaming, Musique)',
-    amount: 35,
-    category: 'abonnements',
-    icon: 'play-circle-outline',
-    dueDay: 22,
-    isPaid: false,
-  },
-  {
-    id: '6',
-    label: 'Pass Transport / Carburant',
-    amount: 75,
-    category: 'transport',
-    icon: 'car-outline',
-    dueDay: 1,
+    id: '3',
+    label: 'Frais bancaires & divers',
+    amount: 11.74,
+    category: 'autre',
+    icon: 'card-outline',
+    dueDay: 15,
     isPaid: true,
   },
 ];

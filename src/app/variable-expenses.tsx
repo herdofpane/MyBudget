@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -7,7 +7,8 @@ import {
   Pressable,
   StyleSheet,
   Platform,
-  Alert,
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,12 +20,14 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
-import { ConfirmDialog } from '@/components/confirm-dialog';
+import { ConfirmDialog, AppDialog } from '@/components/confirm-dialog';
+import { ListSkeleton } from '@/components/ui/loading-state';
 
 import { useBudget } from '@/hooks/use-budget';
 import { VariableCategory } from '@/types';
 import { PRESET_ICONS, PRESET_COLORS } from '@/data';
 import { formatEuro, formatEuroRound, formatPercent } from '@/constants/formatters';
+import { colors } from '@/theme/colors';
 
 const DURATION_PRESETS = [1, 3, 6, 12, 24];
 
@@ -36,7 +39,12 @@ export default function VariableExpensesScreen() {
     addVariableCategory,
     updateVariableCategory,
     deleteVariableCategory,
+    isLoading,
   } = useBudget();
+
+  // États de chargement des actions asynchrones
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // État du modal de suppression
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
@@ -44,6 +52,25 @@ export default function VariableExpensesScreen() {
   // État du modal de création / modification
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingCategory, setEditingCategory] = useState<VariableCategory | null>(null);
+
+  // État des pop-ups d'alerte / validation
+  const [feedbackDialog, setFeedbackDialog] = useState<{
+    visible: boolean;
+    type: 'warning' | 'error' | 'success';
+    title: string;
+    message: string;
+  } | null>(null);
+
+  // Support touche Échap sur le Web pour fermer le modal de formulaire
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !isModalVisible) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsModalVisible(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalVisible]);
+
   const [labelInput, setLabelInput] = useState('');
   const [amountInput, setAmountInput] = useState('');
   const [durationInput, setDurationInput] = useState('1');
@@ -79,38 +106,44 @@ export default function VariableExpensesScreen() {
     const duration = Math.max(0.01, parseFloat(durationInput.replace(',', '.')) || 1);
 
     if (!labelInput.trim() || isNaN(total) || total <= 0) {
-      if (Platform.OS === 'web') {
-        window.alert('Veuillez saisir un titre et un montant valide supérieur à 0.');
-      } else {
-        Alert.alert('Champs incomplets', 'Veuillez saisir un titre et un montant valide supérieur à 0.');
-      }
+      setFeedbackDialog({
+        visible: true,
+        type: 'warning',
+        title: 'Champs incomplets',
+        message: 'Veuillez saisir un titre et un montant prévisionnel valide supérieur à 0 €.',
+      });
       return;
     }
 
     const monthly = Math.round((total / duration) * 100) / 100;
 
-    if (editingCategory) {
-      await updateVariableCategory({
-        ...editingCategory,
-        label: labelInput.trim(),
-        totalAmount: total,
-        durationMonths: duration,
-        estimatedBudget: monthly,
-        icon: iconInput,
-        color: colorInput,
-      });
-    } else {
-      await addVariableCategory({
-        label: labelInput.trim(),
-        totalAmount: total,
-        durationMonths: duration,
-        estimatedBudget: monthly,
-        spent: 0,
-        icon: iconInput,
-        color: colorInput,
-      });
+    setIsSaving(true);
+    try {
+      if (editingCategory) {
+        await updateVariableCategory({
+          ...editingCategory,
+          label: labelInput.trim(),
+          totalAmount: total,
+          durationMonths: duration,
+          estimatedBudget: monthly,
+          icon: iconInput,
+          color: colorInput,
+        });
+      } else {
+        await addVariableCategory({
+          label: labelInput.trim(),
+          totalAmount: total,
+          durationMonths: duration,
+          estimatedBudget: monthly,
+          spent: 0,
+          icon: iconInput,
+          color: colorInput,
+        });
+      }
+      setIsModalVisible(false);
+    } finally {
+      setIsSaving(false);
     }
-    setIsModalVisible(false);
   };
 
   const handleDelete = (id: string, label: string) => {
@@ -119,8 +152,13 @@ export default function VariableExpensesScreen() {
 
   const handleConfirmDelete = async () => {
     if (deleteTarget) {
-      await deleteVariableCategory(deleteTarget.id);
-      setDeleteTarget(null);
+      setIsDeleting(true);
+      try {
+        await deleteVariableCategory(deleteTarget.id);
+        setDeleteTarget(null);
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -142,9 +180,12 @@ export default function VariableExpensesScreen() {
         subtitle="BUDGET COURANT"
       />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}>
+      {isLoading ? (
+        <ListSkeleton />
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}>
         
         {/* 1. CARTE DU TOTAL DES CHARGES VARIABLES (IMPACT MENSUEL LISSÉ) */}
         <Card style={styles.summaryCard}>
@@ -188,11 +229,16 @@ export default function VariableExpensesScreen() {
         <View style={styles.tableCard}>
           {/* EN-TÊTE DE LA CARTE TABLEAU */}
           <View style={styles.tableTopHeader}>
-            <View>
-              <Text style={styles.tableTitle}>Tableau des charges variables</Text>
-              <Text style={styles.tableSubtitle}>
-                {variableCategories.length} poste{variableCategories.length > 1 ? 's' : ''} de dépense avec lissage mensuel
-              </Text>
+            <View style={styles.tableTitleGroup}>
+              <View style={styles.tableTitleIconWrap}>
+                <Ionicons name="pie-chart-outline" size={18} color="#d9822b" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.tableTitle}>Charges variables & amortissements</Text>
+                <Text style={styles.tableSubtitle}>
+                  {variableCategories.length} poste{variableCategories.length > 1 ? 's' : ''} lissé{variableCategories.length > 1 ? 's' : ''} sur la durée
+                </Text>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -220,12 +266,12 @@ export default function VariableExpensesScreen() {
             </View>
           ) : (
             <View style={styles.tableInner}>
-              {/* LIGNE DES COLONNES DU TABLEAU (CONFORME À L'IMAGE DEMANDÉE) */}
+              {/* LIGNE DES COLONNES DU TABLEAU */}
               <View style={styles.tableHeaderRow}>
-                <Text style={[styles.tableColHeader, styles.colTitre]}>Titre</Text>
-                <Text style={[styles.tableColHeader, styles.colMontant]}>Montant</Text>
-                <Text style={[styles.tableColHeader, styles.colDuration]}>Durée de vie Sur x Mois</Text>
-                <Text style={[styles.tableColHeader, styles.colActions]}>Action</Text>
+                <Text style={[styles.tableColHeader, styles.colTitre]}>POSTE DE CHARGE</Text>
+                <Text style={[styles.tableColHeader, styles.colMontant]}>MONTANT TOTAL</Text>
+                <Text style={[styles.tableColHeader, styles.colDuration]}>DURÉE / LISSAGE</Text>
+                <Text style={[styles.tableColHeader, styles.colActions]}>ACTIONS</Text>
               </View>
 
               {/* LIGNES DES CHARGES VARIABLES */}
@@ -289,7 +335,7 @@ export default function VariableExpensesScreen() {
                         style={styles.tableActionBtn}
                         accessibilityLabel={`Modifier ${item.label}`}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                        <Ionicons name="pencil-outline" size={16} color="#7c6f85" />
+                        <Ionicons name="pencil-outline" size={16} color="#5C5264" />
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => handleDelete(item.id, item.label)}
@@ -324,11 +370,19 @@ export default function VariableExpensesScreen() {
           )}
         </View>
       </ScrollView>
+      )}
 
       {/* FORMULAIRE MODAL D'AJOUT / ÉDITION D'UNE CHARGE VARIABLE */}
-      <Modal visible={isModalVisible} animationType="fade" transparent>
+      <Modal
+        visible={isModalVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setIsModalVisible(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
-          <Pressable style={styles.modalCard} onPress={(e) => e.stopPropagation()}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.modalKeyboardWrap}>
+            <Pressable style={styles.modalCard} onPress={(e) => e.stopPropagation()}>
             <View style={styles.modalHeader}>
               <View style={styles.modalHeaderTitleGroup}>
                 <View style={styles.modalIconWrap}>
@@ -352,7 +406,7 @@ export default function VariableExpensesScreen() {
                 onPress={() => setIsModalVisible(false)}
                 style={styles.closeBtn}
                 accessibilityLabel="Fermer la boîte de dialogue">
-                <Ionicons name="close" size={20} color="#7c6f85" />
+                <Ionicons name="close" size={20} color="#5C5264" />
               </TouchableOpacity>
             </View>
 
@@ -368,7 +422,7 @@ export default function VariableExpensesScreen() {
                   value={labelInput}
                   onChangeText={setLabelInput}
                   placeholder="Ex: Entretien voiture, Vacances, Alimentation..."
-                  placeholderTextColor="#95899e"
+                  placeholderTextColor="#8E8296"
                   style={styles.input}
                   autoFocus={!editingCategory}
                 />
@@ -382,7 +436,7 @@ export default function VariableExpensesScreen() {
                   onChangeText={setAmountInput}
                   keyboardType="decimal-pad"
                   placeholder="Ex: 600.00"
-                  placeholderTextColor="#95899e"
+                  placeholderTextColor="#8E8296"
                   style={styles.input}
                 />
               </View>
@@ -404,7 +458,7 @@ export default function VariableExpensesScreen() {
                     }}
                     keyboardType="decimal-pad"
                     placeholder="1"
-                    placeholderTextColor="#95899e"
+                    placeholderTextColor="#8E8296"
                     style={[styles.input, styles.durationNumericInput]}
                   />
                   <Text style={styles.durationUnitText}>mois</Text>
@@ -508,43 +562,62 @@ export default function VariableExpensesScreen() {
 
               <TouchableOpacity
                 onPress={handleSave}
+                disabled={isSaving}
                 activeOpacity={0.85}
-                style={styles.saveActionBtn}>
-                <Ionicons name="checkmark" size={18} color="#ffffff" />
+                style={[styles.saveActionBtn, isSaving && { opacity: 0.8 }]}>
+                {isSaving ? (
+                  <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 6 }} />
+                ) : (
+                  <Ionicons name="checkmark" size={18} color="#ffffff" />
+                )}
                 <Text style={styles.saveActionBtnText}>
-                  {editingCategory ? 'Enregistrer' : 'Ajouter la charge'}
+                  {isSaving ? 'Enregistrement...' : editingCategory ? 'Enregistrer' : 'Ajouter la charge'}
                 </Text>
               </TouchableOpacity>
             </View>
           </Pressable>
-        </Pressable>
-      </Modal>
+        </KeyboardAvoidingView>
+      </Pressable>
+    </Modal>
 
-      {/* POPUP DE CONFIRMATION DE SUPPRESSION */}
-      <ConfirmDialog
-        visible={!!deleteTarget}
-        title="Supprimer la charge variable"
-        message="Êtes-vous sûr de vouloir supprimer la charge"
-        highlightText={deleteTarget?.label}
-        confirmLabel="Supprimer"
-        cancelLabel="Annuler"
-        isDestructive
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteTarget(null)}
+    {/* POPUP DE CONFIRMATION DE SUPPRESSION */}
+    <ConfirmDialog
+      visible={!!deleteTarget}
+      title="Supprimer la charge variable"
+      message="Êtes-vous sûr de vouloir supprimer la charge"
+      highlightText={deleteTarget?.label}
+      confirmLabel="Supprimer"
+      cancelLabel="Annuler"
+      isDestructive
+      isLoading={isDeleting}
+      onConfirm={handleConfirmDelete}
+      onCancel={() => setDeleteTarget(null)}
+    />
+
+    {/* POPUP DE VALIDATION ET D'ERREUR */}
+    {feedbackDialog && (
+      <AppDialog
+        visible={feedbackDialog.visible}
+        type={feedbackDialog.type}
+        title={feedbackDialog.title}
+        message={feedbackDialog.message}
+        confirmLabel="Compris"
+        onConfirm={() => setFeedbackDialog(null)}
       />
-    </SafeAreaView>
-  );
+    )}
+  </SafeAreaView>
+);
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f0e8',
+    backgroundColor: colors.background,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#d9822b',
+    backgroundColor: colors.accent,
     paddingHorizontal: 14,
     borderRadius: 20,
     gap: 4,
@@ -565,12 +638,12 @@ const styles = StyleSheet.create({
 
   /* CARTE DU TOTAL */
   summaryCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.card,
     borderRadius: 22,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#e6dfd3',
-    shadowColor: '#231c2b',
+    borderColor: colors.border,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
@@ -592,7 +665,7 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#7c6f85',
+    color: '#5C5264',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
@@ -618,7 +691,7 @@ const styles = StyleSheet.create({
   },
   summaryExact: {
     fontSize: 13,
-    color: '#7c6f85',
+    color: '#5C5264',
     fontWeight: '600',
     marginTop: 4,
   },
@@ -641,9 +714,9 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#faf7f2',
+    backgroundColor: '#FAF7F2',
     borderWidth: 1,
-    borderColor: '#e8e1d5',
+    borderColor: '#DFD8CA',
     borderRadius: 14,
     paddingVertical: 10,
     paddingHorizontal: 16,
@@ -655,20 +728,20 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#7c6f85',
+    color: '#8E8296',
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
   statValue: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#231c2b',
+    color: '#241E28',
     marginTop: 2,
   },
   statDivider: {
     width: 1,
     height: 26,
-    backgroundColor: '#e6dfd3',
+    backgroundColor: '#DFD8CA',
     marginHorizontal: 14,
   },
 
@@ -677,9 +750,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: '#e6dfd3',
+    borderColor: '#DFD8CA',
     overflow: 'hidden',
-    shadowColor: '#231c2b',
+    shadowColor: '#241E28',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
@@ -693,18 +766,34 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0eae0',
-    backgroundColor: '#ffffff',
+    borderBottomColor: colors.border,
+    backgroundColor: colors.card,
+  },
+  tableTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  tableTitleIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(217, 130, 43, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(217, 130, 43, 0.20)',
   },
   tableTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#231c2b',
-    letterSpacing: 0.2,
+    color: colors.primary,
+    letterSpacing: -0.2,
   },
   tableSubtitle: {
     fontSize: 11,
-    color: '#7c6f85',
+    color: colors.textMuted,
     fontWeight: '600',
     marginTop: 2,
   },
@@ -732,12 +821,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#231c2b',
+    color: colors.primary,
     marginTop: 4,
   },
   emptyText: {
     fontSize: 13,
-    color: '#7c6f85',
+    color: colors.textMuted,
     textAlign: 'center',
     maxWidth: 340,
     lineHeight: 18,
@@ -749,29 +838,30 @@ const styles = StyleSheet.create({
   },
   tableHeaderRow: {
     flexDirection: 'row',
-    backgroundColor: '#fcd9b8', // Couleur beige/orangée douce conforme à l'image
-    paddingVertical: 12,
+    backgroundColor: colors.background,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0c69d',
+    borderBottomColor: colors.border,
     alignItems: 'center',
   },
   tableColHeader: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#0e2646', // Texte sombre bien lisible
-    letterSpacing: 0.2,
+    fontSize: 10,
+    fontWeight: '800',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
   },
   colTitre: {
     flex: 1.2,
   },
   colMontant: {
-    width: 120,
+    width: 110,
     alignItems: 'flex-end',
     textAlign: 'right',
   },
   colDuration: {
-    width: 140,
+    width: 110,
     alignItems: 'center',
     textAlign: 'center',
   },
@@ -779,6 +869,8 @@ const styles = StyleSheet.create({
     width: 64,
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    textAlign: 'right',
+    paddingRight: 4,
     gap: 6,
   },
   tableRow: {
@@ -787,13 +879,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2ede4',
+    borderBottomColor: '#EAE4D8',
   },
   tableRowEven: {
     backgroundColor: '#ffffff',
   },
   tableRowOdd: {
-    backgroundColor: '#fbf9f6',
+    backgroundColor: '#FAF7F2',
   },
   tableRowLast: {
     borderBottomWidth: 0,
@@ -813,7 +905,7 @@ const styles = StyleSheet.create({
   tableItemTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#231c2b',
+    color: '#241E28',
   },
   tableAmountText: {
     fontSize: 14,
@@ -823,7 +915,7 @@ const styles = StyleSheet.create({
   tableMonthlySubText: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#7c6f85',
+    color: '#5C5264',
     marginTop: 2,
   },
   durationBadge: {
@@ -850,11 +942,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fdf6ee',
+    backgroundColor: '#FFFBEB',
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderTopWidth: 2,
-    borderTopColor: '#f5e3d0',
+    borderTopColor: '#FDE68A',
   },
   tableTotalLeft: {
     flex: 1,
@@ -865,12 +957,12 @@ const styles = StyleSheet.create({
   tableTotalTitle: {
     fontSize: 12,
     fontWeight: '900',
-    color: '#b06518',
+    color: '#92400e',
     letterSpacing: 0.5,
   },
   tableTotalSub: {
     fontSize: 10,
-    color: '#7c6f85',
+    color: colors.textMuted,
     marginTop: 2,
   },
   tableTotalAmount: {
@@ -880,17 +972,20 @@ const styles = StyleSheet.create({
   },
   tableTotalExact: {
     fontSize: 11,
-    color: '#7c6f85',
+    color: '#5C5264',
     marginTop: 1,
   },
 
-  /* MODAL */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(27, 20, 36, 0.65)',
+    backgroundColor: 'rgba(36, 30, 40, 0.60)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
+  },
+  modalKeyboardWrap: {
+    width: '100%',
+    alignItems: 'center',
   },
   modalCard: {
     backgroundColor: '#ffffff',
@@ -899,10 +994,10 @@ const styles = StyleSheet.create({
     maxWidth: 520,
     maxHeight: '90%',
     borderWidth: 1,
-    borderColor: '#e6dfd3',
-    shadowColor: '#1b1424',
+    borderColor: '#DFD8CA',
+    shadowColor: '#241E28',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 24,
     elevation: 12,
     overflow: 'hidden',
@@ -915,7 +1010,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0eae0',
+    borderBottomColor: '#DFD8CA',
     backgroundColor: '#ffffff',
   },
   modalHeaderTitleGroup: {
@@ -934,22 +1029,22 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#231c2b',
+    color: '#241E28',
   },
   modalSubtitle: {
     fontSize: 11,
-    color: '#7c6f85',
+    color: '#5C5264',
     marginTop: 1,
   },
   closeBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#faf7f2',
+    backgroundColor: '#FAF7F2',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e8e1d5',
+    borderColor: '#DFD8CA',
   },
   modalScrollBody: {
     paddingHorizontal: 22,
@@ -963,14 +1058,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#34293f',
+    color: '#241E28',
     letterSpacing: 0.2,
   },
   input: {
-    backgroundColor: '#faf7f2',
-    borderColor: '#ded6c7',
+    backgroundColor: '#FAF7F2',
+    borderColor: '#DFD8CA',
     borderWidth: 1,
-    color: '#231c2b',
+    color: '#241E28',
     borderRadius: 12,
     height: 46,
     paddingHorizontal: 14,
@@ -983,7 +1078,7 @@ const styles = StyleSheet.create({
   },
   durationHint: {
     fontSize: 11,
-    color: '#7c6f85',
+    color: '#5C5264',
     fontWeight: '600',
   },
   durationInputRow: {
@@ -998,7 +1093,7 @@ const styles = StyleSheet.create({
   durationUnitText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#65576f',
+    color: '#5C5264',
     marginRight: 6,
   },
   durationPillsWrap: {
@@ -1011,9 +1106,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: '#faf7f2',
+    backgroundColor: '#FAF7F2',
     borderWidth: 1,
-    borderColor: '#ded6c7',
+    borderColor: '#DFD8CA',
   },
   durationPillActive: {
     backgroundColor: 'rgba(217, 130, 43, 0.15)',
@@ -1022,7 +1117,7 @@ const styles = StyleSheet.create({
   durationPillText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#7c6f85',
+    color: '#5C5264',
   },
   durationPillTextActive: {
     color: '#d9822b',
@@ -1041,7 +1136,7 @@ const styles = StyleSheet.create({
   monthlySmoothingText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#34293f',
+    color: '#241E28',
   },
   monthlySmoothingHighlight: {
     fontSize: 13,
@@ -1050,7 +1145,7 @@ const styles = StyleSheet.create({
   },
   monthlySmoothingSub: {
     fontSize: 11,
-    color: '#7c6f85',
+    color: '#5C5264',
     marginTop: 2,
   },
   presetIconsRow: {
@@ -1063,9 +1158,9 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#faf7f2',
+    backgroundColor: '#FAF7F2',
     borderWidth: 1,
-    borderColor: '#e6dfd3',
+    borderColor: '#DFD8CA',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1090,7 +1185,7 @@ const styles = StyleSheet.create({
   colorPresetBtnSelected: {
     borderWidth: 2,
     borderColor: '#ffffff',
-    shadowColor: '#231c2b',
+    shadowColor: '#241E28',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -1103,7 +1198,7 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 22,
     borderTopWidth: 1,
-    borderTopColor: '#f0eae0',
+    borderTopColor: '#DFD8CA',
     backgroundColor: '#ffffff',
   },
   cancelActionBtn: {
@@ -1111,15 +1206,15 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#dcd4c6',
-    backgroundColor: '#faf7f2',
+    borderColor: '#DFD8CA',
+    backgroundColor: '#FAF7F2',
     justifyContent: 'center',
     alignItems: 'center',
   },
   cancelActionBtnText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#65576f',
+    color: '#5C5264',
   },
   saveActionBtn: {
     flex: 2,

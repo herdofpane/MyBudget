@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   ScrollView,
   TouchableOpacity,
-  Modal,
-  Pressable,
   TextInput,
   StyleSheet,
 } from 'react-native';
@@ -14,59 +12,33 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
-
-import { useBudget } from '@/hooks/use-budget';
-import { formatEuro } from '@/constants/formatters';
+import { AppDialog } from '@/components/confirm-dialog';
+import { HomeSkeleton } from '@/components/ui/loading-state';
+import { useHomeSummary } from '@/hooks/use-home-summary';
+import { colors } from '@/theme/colors';
 
 export default function HomeScreen() {
   const {
     budget,
-    fixedExpensesList,
+    isLoading,
+    isPrivate,
+    incomeInput,
+    resteAVivre,
+    epargneAmount,
+    checkingAmount,
     totalFixedExpenses,
-    remainingAllowance,
-    saveBudget,
-  } = useBudget();
+    infoDialog,
+    setInfoDialog,
+    setLocalIncome,
+    handleBlurIncome,
+    togglePrivate,
+    renderMoney,
+    renderMoneyRound,
+  } = useHomeSummary();
 
-  // Mode privé (masquer les soldes si besoin)
-  const [isPrivate, setIsPrivate] = useState(false);
-
-  // Modal d'ajustement des finances (revenus, compte courant, épargne)
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [formValues, setFormValues] = useState({
-    income: budget.income.toString(),
-    checkingAccount: budget.checkingAccount.toString(),
-    savingsAccount: budget.savingsAccount.toString(),
-  });
-
-  const openEditModal = () => {
-    setFormValues({
-      income: budget.income.toString(),
-      checkingAccount: budget.checkingAccount.toString(),
-      savingsAccount: budget.savingsAccount.toString(),
-    });
-    setIsEditModalVisible(true);
-  };
-
-  const handleSaveBudget = () => {
-    saveBudget({
-      income: parseFloat(formValues.income.replace(',', '.')) || 0,
-      fixedExpenses: totalFixedExpenses,
-      checkingAccount: parseFloat(formValues.checkingAccount.replace(',', '.')) || 0,
-      savingsAccount: parseFloat(formValues.savingsAccount.replace(',', '.')) || 0,
-    });
-    setIsEditModalVisible(false);
-  };
-
-  // Formattage avec prise en compte du mode privé
-  const renderMoney = (amount: number, prefix: string = '') => {
-    if (isPrivate) return '•••• €';
-    return `${prefix}${formatEuro(amount)}`;
-  };
-
-  // Date et rythme indicatif
+  // Date actuelle
   const now = new Date();
   const currentMonthName = now.toLocaleDateString('fr-FR', {
     month: 'long',
@@ -75,334 +47,282 @@ export default function HomeScreen() {
   const formattedMonth =
     currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1);
 
-  const totalDaysInMonth = new Date(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    0
-  ).getDate();
-  const daysRemaining = Math.max(1, totalDaysInMonth - now.getDate() + 1);
-  const dailyAllowance = Math.max(0, remainingAllowance / daysRemaining);
-
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <StatusBar style="dark" />
 
-      {/* EN-TÊTE PRINCIPAL */}
+      {/* EN-TÊTE PRINCIPAL ÉPURÉ — KLYRO */}
       <NavigationHeader
-        title="Mon Budget"
+        title="Klyro"
         subtitle={`VUE D'ENSEMBLE • ${formattedMonth.toUpperCase()}`}
         actionButton={
-          <View style={styles.headerActions}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setIsPrivate(!isPrivate)}
-              style={styles.iconHeaderButton}
-              accessibilityLabel="Masquer ou afficher les montants">
-              <Ionicons
-                name={isPrivate ? 'eye-off-outline' : 'eye-outline'}
-                size={18}
-                color="#65576f"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={openEditModal}
-              style={[styles.iconHeaderButton, styles.editHeaderBtn]}
-              accessibilityLabel="Modifier mes montants">
-              <Ionicons name="pencil-outline" size={17} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={togglePrivate}
+            style={styles.iconHeaderButton}
+            accessibilityLabel="Masquer ou afficher les montants">
+            <Ionicons
+              name={isPrivate ? 'eye-off-outline' : 'eye-outline'}
+              size={18}
+              color={colors.textMuted}
+            />
+          </TouchableOpacity>
         }
       />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}>
-        
-        {/* 1. CARTE HERO : LE RESTE À VIVRE (MONTANT CENTRAL) */}
-        <Card style={styles.heroCard}>
-          <View style={styles.heroTopRow}>
-            <View style={styles.heroBadge}>
-              <View style={styles.heroBadgeDot} />
-              <Text style={styles.heroBadgeText}>Reste à vivre mensuel</Text>
+      {isLoading ? (
+        <HomeSkeleton />
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}>
+
+          {/* 1. CARTE HERO : RESTE À VIVRE */}
+          <Card style={styles.heroCard}>
+            <View style={styles.heroTopRow}>
+              <View style={styles.heroBadge}>
+                <View style={styles.heroBadgeDot} />
+                <Text style={styles.heroBadgeText}>Reste à Vivre</Text>
+              </View>
+              <Text style={styles.heroFormulaHint}>Revenu - Charges Fixes</Text>
             </View>
 
-            <Badge variant="outline" style={styles.daysBadge}>
-              <Text style={styles.daysBadgeText}>{daysRemaining} jours restants</Text>
-            </Badge>
-          </View>
-
-          {/* MONTANT GÉANT DU RESTE À VIVRE */}
-          <Text style={styles.heroAmount}>{renderMoney(remainingAllowance)}</Text>
-
-          {/* FORMULE EXPLICITE DU RESTE À VIVRE */}
-          <View style={styles.formulaRow}>
-            <Ionicons name="calculator-outline" size={15} color="#d9822b" />
-            <Text style={styles.formulaText}>
-              Calcul : <Text style={styles.formulaHighlight}>{renderMoney(budget.income)}</Text> (Revenus) −{' '}
-              <Text style={styles.formulaHighlight}>{renderMoney(totalFixedExpenses)}</Text> (Charges fixes)
-            </Text>
-          </View>
-
-          {/* ESTIMATION JOURNALIÈRE DU RESTE À VIVRE */}
-          <View style={styles.heroFooter}>
-            <View style={styles.dailyItem}>
-              <Text style={styles.dailyLabel}>Rythme quotidien conseillé</Text>
-              <Text style={styles.dailyAmount}>~{renderMoney(dailyAllowance)} / jour</Text>
+            <View style={styles.heroAmountRow}>
+              <Text style={styles.heroAmount}>
+                {renderMoney(resteAVivre)}
+              </Text>
+              <View style={styles.heroRoundBadge}>
+                <Text style={styles.heroRoundBadgeText}>
+                  ≈ {renderMoneyRound(resteAVivre)}
+                </Text>
+              </View>
             </View>
+
+            {/* Formule explicative cliquable */}
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={() => router.push('/details')}
-              style={styles.heroDetailBtn}>
-              <Text style={styles.heroDetailBtnText}>Voir le calcul complet</Text>
-              <Ionicons name="chevron-forward" size={14} color="#d9822b" />
+              onPress={() =>
+                setInfoDialog({
+                  visible: true,
+                  title: 'Formule du Reste à Vivre',
+                  message:
+                    'Le Reste à Vivre représente la somme dont vous disposez réellement après avoir honoré toutes vos charges incompressibles du mois.',
+                  subtext:
+                    'Calcul : Revenu mensuel net (' +
+                    renderMoney(budget.income) +
+                    ') − Total des charges fixes (' +
+                    renderMoney(totalFixedExpenses) +
+                    ') = ' +
+                    renderMoney(resteAVivre) +
+                    '.',
+                })
+              }
+              style={styles.formulaRow}>
+              <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
+              <Text style={styles.formulaText}>
+                Disponible pour épargner & vivre après charges
+              </Text>
+              <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
             </TouchableOpacity>
+          </Card>
+
+          {/* 2. REVENU MENSUEL (MODIFIABLE DIRECTEMENT) */}
+          <Card style={styles.inputCard}>
+            <View style={styles.inputCardHeader}>
+              <View style={[styles.iconWrap, styles.iconGreen]}>
+                <Ionicons name="wallet-outline" size={20} color={colors.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.inputCardLabel}>Revenu Mensuel</Text>
+                <Text style={styles.inputCardSub}>
+                  Base salaires, primes ou aides nettes
+                </Text>
+              </View>
+              <Text style={styles.directInputBadge}>MODIFIABLE</Text>
+            </View>
+
+            <View style={styles.directInputRow}>
+              <TextInput
+                value={incomeInput}
+                onChangeText={setLocalIncome}
+                onBlur={handleBlurIncome}
+                keyboardType="decimal-pad"
+                placeholder="0"
+                placeholderTextColor={colors.textMuted}
+                style={styles.directTextInput}
+              />
+              <Text style={styles.euroUnitText}>€ / mois</Text>
+            </View>
+          </Card>
+
+          {/* 3. CHARGES FIXES MENSUELLES (LIEN VERS PAGE DÉDIÉE) */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => router.push('/fixed-expenses')}>
+            <Card style={styles.fixedExpenseCard}>
+              <View style={styles.fixedCardLeft}>
+                <View style={[styles.iconWrap, styles.iconPurple]}>
+                  <Ionicons name="calendar-outline" size={20} color={colors.lavender} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.fixedLabel}>Charges Fixes</Text>
+                  <Text style={styles.fixedSub}>
+                    Loyer, abonnements, assurances, crédits...
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.fixedCardRight}>
+                <Text style={styles.fixedAmount}>
+                  - {renderMoney(totalFixedExpenses)}
+                </Text>
+                <View style={styles.fixedLinkRow}>
+                  <Text style={styles.fixedLinkText}>Gérer le détail</Text>
+                  <Ionicons name="chevron-forward" size={12} color={colors.lavender} />
+                </View>
+              </View>
+            </Card>
+          </TouchableOpacity>
+
+          {/* 4. COMPTE COURANT & ÉPARGNE */}
+          <View style={styles.accountsRow}>
+            {/* COMPTE COURANT (NÉCESSAIRE + FACULTATIF) */}
+            <Card style={[styles.accountCard, styles.checkingCard]}>
+              <View style={styles.accountHeader}>
+                <Ionicons name="card-outline" size={18} color={colors.accent} />
+                <Text style={styles.accountLabel}>Compte Courant</Text>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    setInfoDialog({
+                      visible: true,
+                      title: 'Montant pour Compte Courant',
+                      message:
+                        'Ce montant couvre vos dépenses de vie quotidienne (alimentation, transport, sorties et facultatif).',
+                      subtext:
+                        'Formule tableur : Reste à vivre (' +
+                        renderMoney(resteAVivre) +
+                        ') − Montant pour Épargne (' +
+                        renderMoney(epargneAmount) +
+                        ') = ' +
+                        renderMoney(checkingAmount) +
+                        '.',
+                    })
+                  }>
+                  <Ionicons name="help-circle-outline" size={16} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.accountDisplayRow}>
+                <Text style={styles.accountDisplayAmount}>
+                  {renderMoney(checkingAmount)}
+                </Text>
+                <View style={styles.inlineRoundBadge}>
+                  <Text style={styles.inlineRoundBadgeText}>
+                    ≈ {renderMoneyRound(checkingAmount)}
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={styles.accountFormulaTitle}>Dépenses courantes</Text>
+              <Text style={styles.accountFormulaDetail}>
+                Reste à vivre − Épargne
+              </Text>
+            </Card>
+
+            {/* COMPTE ÉPARGNE (FORMULE RACINE CARRÉE) */}
+            <Card style={[styles.accountCard, styles.savingsCard]}>
+              <View style={styles.accountHeader}>
+                <Ionicons name="trending-up" size={18} color={colors.lavender} />
+                <Text style={styles.accountLabel}>Pour Épargne</Text>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    setInfoDialog({
+                      visible: true,
+                      title: 'Formule d’Épargne Klyro',
+                      message:
+                        'L’épargne est calculée selon la formule mathématique optimale du tableur :',
+                      subtext:
+                        'Épargne = Reste à Vivre − √(Reste à Vivre × Total Nécessaire). Avec un seuil nécessaire fixé à ' +
+                        renderMoney(budget.targetNecessary || 123) +
+                        ', le montant calculé est de ' +
+                        renderMoney(epargneAmount) +
+                        '.',
+                    })
+                  }>
+                  <Ionicons name="help-circle-outline" size={16} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.accountDisplayRow}>
+                <Text style={styles.accountDisplayAmount}>
+                  {renderMoney(epargneAmount)}
+                </Text>
+                <View style={styles.inlineRoundBadge}>
+                  <Text style={styles.inlineRoundBadgeText}>
+                    ≈ {renderMoneyRound(epargneAmount)}
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={styles.accountFormulaTitle}>Épargne optimisée</Text>
+              <Text style={styles.accountFormulaDetail}>
+                B4 − √(B4 × Nécessaire)
+              </Text>
+            </Card>
           </View>
-        </Card>
 
-        {/* 2. LES 4 MONTANTS CLÉS DU BUDGET (GRILLE RESPONSIVE 2x2) */}
-        <View style={styles.gridSection}>
-          <View style={styles.sectionTitleRow}>
-            <Text style={styles.sectionTitle}>Mes 4 montants clés</Text>
-            <TouchableOpacity onPress={openEditModal} activeOpacity={0.7}>
-              <Text style={styles.sectionEditLink}>Ajuster</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.kpiGrid}>
-            {/* 1. MONTANT DES REVENUS */}
+          {/* 5. LIENS DE GESTION DIRECTS */}
+          <View style={styles.navLinksCard}>
             <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={openEditModal}
-              style={[styles.kpiCard, styles.incomeCard]}>
-              <View style={styles.kpiHeaderRow}>
-                <View style={[styles.kpiIconWrap, styles.incomeIconBg]}>
-                  <Ionicons name="trending-up-outline" size={18} color="#059669" />
-                </View>
-                <Badge variant="outline" style={styles.kpiBadge}>
-                  <Text style={[styles.kpiBadgeText, { color: '#059669' }]}>Entrées</Text>
-                </Badge>
-              </View>
-
-              <Text style={styles.kpiLabel}>Mes revenus</Text>
-              <Text style={[styles.kpiAmount, { color: '#059669' }]}>
-                {renderMoney(budget.income, '+')}
-              </Text>
-              <Text style={styles.kpiSubtitle}>Revenu mensuel net</Text>
-            </TouchableOpacity>
-
-            {/* 2. MONTANT DES CHARGES FIXES */}
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => router.push('/fixed-expenses')}
-              style={[styles.kpiCard, styles.fixedCard]}>
-              <View style={styles.kpiHeaderRow}>
-                <View style={[styles.kpiIconWrap, styles.fixedIconBg]}>
-                  <Ionicons name="repeat-outline" size={18} color="#9b6fba" />
-                </View>
-                <Badge variant="outline" style={styles.kpiBadge}>
-                  <Text style={[styles.kpiBadgeText, { color: '#9b6fba' }]}>Prélèvements</Text>
-                </Badge>
-              </View>
-
-              <Text style={styles.kpiLabel}>Charges fixes</Text>
-              <Text style={[styles.kpiAmount, { color: '#dc2626' }]}>
-                -{renderMoney(totalFixedExpenses)}
-              </Text>
-              <Text style={styles.kpiSubtitle}>
-                {fixedExpensesList.length} charges récurrentes
-              </Text>
-            </TouchableOpacity>
-
-            {/* 3. MONTANT DU COMPTE COURANT */}
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={openEditModal}
-              style={[styles.kpiCard, styles.checkingCard]}>
-              <View style={styles.kpiHeaderRow}>
-                <View style={[styles.kpiIconWrap, styles.checkingIconBg]}>
-                  <Ionicons name="card-outline" size={18} color="#2563eb" />
-                </View>
-                <Badge variant="outline" style={styles.kpiBadge}>
-                  <Text style={[styles.kpiBadgeText, { color: '#2563eb' }]}>Disponible</Text>
-                </Badge>
-              </View>
-
-              <Text style={styles.kpiLabel}>Compte courant</Text>
-              <Text style={[styles.kpiAmount, { color: '#231c2b' }]}>
-                {renderMoney(budget.checkingAccount)}
-              </Text>
-              <Text style={styles.kpiSubtitle}>Solde bancaire actuel</Text>
-            </TouchableOpacity>
-
-            {/* 4. MONTANT DE L'ÉPARGNE */}
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={openEditModal}
-              style={[styles.kpiCard, styles.savingsCard]}>
-              <View style={styles.kpiHeaderRow}>
-                <View style={[styles.kpiIconWrap, styles.savingsIconBg]}>
-                  <MaterialCommunityIcons name="piggy-bank-outline" size={19} color="#0d9488" />
-                </View>
-                <Badge variant="outline" style={styles.kpiBadge}>
-                  <Text style={[styles.kpiBadgeText, { color: '#0d9488' }]}>Réserves</Text>
-                </Badge>
-              </View>
-
-              <Text style={styles.kpiLabel}>Mon épargne</Text>
-              <Text style={[styles.kpiAmount, { color: '#0d9488' }]}>
-                {renderMoney(budget.savingsAccount)}
-              </Text>
-              <Text style={styles.kpiSubtitle}>Total épargne sécurisée</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* 3. RACCOURCIS RAPIDES VERS LES TABLEAUX ET CALCULS */}
-        <View style={styles.shortcutsCard}>
-          <Text style={styles.shortcutsTitle}>Accès direct aux rubriques</Text>
-          <View style={styles.shortcutsRow}>
-            {/* Raccourci 1 : Charges Fixes */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => router.push('/fixed-expenses')}
-              style={styles.shortcutBtn}>
-              <View style={[styles.shortcutIconBg, { backgroundColor: 'rgba(155, 111, 186, 0.12)' }]}>
-                <Ionicons name="calendar-outline" size={20} color="#9b6fba" />
-              </View>
-              <Text style={styles.shortcutLabel}>Charges Fixes</Text>
-              <Text style={styles.shortcutSub}>{fixedExpensesList.length} charges</Text>
-            </TouchableOpacity>
-
-            {/* Raccourci 2 : Charges Variables */}
-            <TouchableOpacity
-              activeOpacity={0.8}
               onPress={() => router.push('/variable-expenses')}
-              style={styles.shortcutBtn}>
-              <View style={[styles.shortcutIconBg, { backgroundColor: 'rgba(217, 130, 43, 0.12)' }]}>
-                <Ionicons name="pie-chart-outline" size={20} color="#d9822b" />
+              activeOpacity={0.8}
+              style={styles.navLinkItem}>
+              <View style={[styles.navLinkIcon, { backgroundColor: '#ECFDF5' }]}>
+                <Ionicons name="pie-chart-outline" size={20} color={colors.accent} />
               </View>
-              <Text style={styles.shortcutLabel}>Charges Variables</Text>
-              <Text style={styles.shortcutSub}>Lissage mensuel</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.navLinkTitle}>Charges Variables & Lissage</Text>
+                <Text style={styles.navLinkSub}>
+                  Courses, shopping, santé et impact mensuel
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
             </TouchableOpacity>
 
-            {/* Raccourci 3 : Calcul & Détails */}
+            <View style={styles.navLinkDivider} />
+
             <TouchableOpacity
-              activeOpacity={0.8}
               onPress={() => router.push('/details')}
-              style={styles.shortcutBtn}>
-              <View style={[styles.shortcutIconBg, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
-                <Ionicons name="calculator-outline" size={20} color="#10b981" />
+              activeOpacity={0.8}
+              style={styles.navLinkItem}>
+              <View style={[styles.navLinkIcon, { backgroundColor: '#EEF2FF' }]}>
+                <MaterialCommunityIcons name="calculator-variant-outline" size={20} color={colors.lavender} />
               </View>
-              <Text style={styles.shortcutLabel}>Calcul & Épargne</Text>
-              <Text style={styles.shortcutSub}>Bilan complet</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.navLinkTitle}>Simulation & Calculs Avancés</Text>
+                <Text style={styles.navLinkSub}>
+                  Ventilation 49/37/14 et revenus ponctuels
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
 
-      {/* MODAL : MODIFIER MES REVENUS, COMPTE COURANT ET ÉPARGNE */}
-      <Modal
-        visible={isEditModalVisible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setIsEditModalVisible(false)}>
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setIsEditModalVisible(false)}>
-          <Pressable
-            style={styles.modalCard}
-            onPress={(e) => e.stopPropagation()}>
-            <View style={styles.modalHeader}>
-              <View style={styles.modalHeaderTitleGroup}>
-                <View style={styles.modalHeaderIconWrap}>
-                  <Ionicons name="wallet-outline" size={20} color="#9b6fba" />
-                </View>
-                <View>
-                  <Text style={styles.modalTitle}>Ajuster mes montants</Text>
-                  <Text style={styles.modalSubtitle}>Revenus, compte courant et épargne</Text>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => setIsEditModalVisible(false)}
-                style={styles.modalCloseBtn}
-                accessibilityLabel="Fermer la boîte de dialogue">
-                <Ionicons name="close" size={20} color="#7c6f85" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.modalScrollBody}
-              bounces={false}>
-              {/* CHAMP 1 : REVENU NET */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Revenu mensuel net (€)</Text>
-                <TextInput
-                  value={formValues.income}
-                  onChangeText={(val) =>
-                    setFormValues((prev) => ({ ...prev, income: val }))
-                  }
-                  keyboardType="decimal-pad"
-                  placeholder="Ex: 2850"
-                  placeholderTextColor="#95899e"
-                  style={styles.textInput}
-                  autoFocus
-                />
-              </View>
-
-              {/* CHAMP 2 : COMPTE COURANT */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Solde Compte Courant (€)</Text>
-                <TextInput
-                  value={formValues.checkingAccount}
-                  onChangeText={(val) =>
-                    setFormValues((prev) => ({ ...prev, checkingAccount: val }))
-                  }
-                  keyboardType="decimal-pad"
-                  placeholder="Ex: 2430.50"
-                  placeholderTextColor="#95899e"
-                  style={styles.textInput}
-                />
-              </View>
-
-              {/* CHAMP 3 : ÉPARGNE */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Montant Épargne totale (€)</Text>
-                <TextInput
-                  value={formValues.savingsAccount}
-                  onChangeText={(val) =>
-                    setFormValues((prev) => ({ ...prev, savingsAccount: val }))
-                  }
-                  keyboardType="decimal-pad"
-                  placeholder="Ex: 12500"
-                  placeholderTextColor="#95899e"
-                  style={styles.textInput}
-                />
-              </View>
-            </ScrollView>
-
-            <View style={styles.modalActionButtons}>
-              <TouchableOpacity
-                onPress={() => setIsEditModalVisible(false)}
-                activeOpacity={0.7}
-                style={styles.cancelActionBtn}>
-                <Text style={styles.cancelActionBtnText}>Annuler</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleSaveBudget}
-                activeOpacity={0.85}
-                style={styles.saveActionBtn}>
-                <Ionicons name="checkmark" size={18} color="#ffffff" />
-                <Text style={styles.saveActionBtnText}>Enregistrer</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      {/* POP-UP PÉDAGOGIQUE UNIVERSELLE */}
+      {infoDialog && (
+        <AppDialog
+          visible={infoDialog.visible}
+          type="info"
+          title={infoDialog.title}
+          message={infoDialog.message}
+          subtext={infoDialog.subtext}
+          confirmLabel="J'ai compris"
+          onConfirm={() => setInfoDialog(null)}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -410,31 +330,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f6f3ed',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  iconHeaderButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e8e1d5',
-    shadowColor: '#231c2b',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  editHeaderBtn: {
-    backgroundColor: '#9b6fba',
-    borderColor: '#8557a5',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -444,18 +340,33 @@ const styles = StyleSheet.create({
     maxWidth: 860,
     alignSelf: 'center',
   },
+  iconHeaderButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.card,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
 
-  /* CARTE DU RESTE À VIVRE (HERO) */
+  /* 1. CARTE HERO : RESTE À VIVRE */
   heroCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.card,
     borderRadius: 24,
     padding: 22,
     borderWidth: 1,
-    borderColor: '#e8e1d5',
-    shadowColor: '#231c2b',
+    borderColor: colors.border,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.07,
-    shadowRadius: 14,
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
     elevation: 4,
   },
   heroTopRow: {
@@ -467,7 +378,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(217, 130, 43, 0.1)',
+    backgroundColor: '#ECFDF5',
     paddingVertical: 5,
     paddingHorizontal: 12,
     borderRadius: 12,
@@ -476,395 +387,318 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#d9822b',
+    backgroundColor: colors.accent,
   },
   heroBadgeText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#b46314',
+    fontSize: 13,
+    fontWeight: '900',
+    color: colors.accentDark,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
-  daysBadge: {
-    backgroundColor: '#faf7f2',
-    borderColor: '#e8e1d5',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  daysBadgeText: {
+  heroFormulaHint: {
     fontSize: 11,
+    color: colors.textMuted,
     fontWeight: '700',
-    color: '#7c6f85',
+  },
+  heroAmountRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 10,
+    flexWrap: 'wrap',
+    marginTop: 10,
   },
   heroAmount: {
     fontSize: 38,
     fontWeight: '900',
-    color: '#d9822b',
-    marginTop: 10,
+    color: colors.primary,
     letterSpacing: -1,
+  },
+  heroRoundBadge: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  heroRoundBadgeText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: colors.accentDark,
   },
   formulaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#fbf9f6',
+    backgroundColor: '#F1F5F9',
     borderWidth: 1,
-    borderColor: '#f0eae0',
-    borderRadius: 12,
-    paddingVertical: 9,
+    borderColor: colors.border,
+    borderRadius: 14,
+    paddingVertical: 10,
     paddingHorizontal: 12,
-    marginTop: 12,
+    marginTop: 14,
   },
   formulaText: {
     fontSize: 12,
-    color: '#65576f',
+    color: colors.textMuted,
     fontWeight: '600',
     flex: 1,
   },
-  formulaHighlight: {
-    fontWeight: '800',
-    color: '#231c2b',
+
+  /* 2. REVENUE (INPUT DIRECT) */
+  inputCard: {
+    backgroundColor: colors.card,
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderLeftWidth: 5,
+    borderLeftColor: colors.accent,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    gap: 12,
   },
-  heroFooter: {
+  inputCardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#f0eae0',
-    paddingTop: 14,
-    marginTop: 14,
-    flexWrap: 'wrap',
+    gap: 12,
+  },
+  iconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconGreen: {
+    backgroundColor: '#ECFDF5',
+  },
+  iconPurple: {
+    backgroundColor: '#EEF2FF',
+  },
+  inputCardLabel: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: colors.text,
+  },
+  inputCardSub: {
+    fontSize: 11,
+    color: colors.textMuted,
+    fontWeight: '500',
+    marginTop: 1,
+  },
+  directInputBadge: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: colors.accentDark,
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    letterSpacing: 0.3,
+  },
+  directInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 52,
     gap: 8,
   },
-  dailyItem: {
+  directTextInput: {
     flex: 1,
+    fontSize: 22,
+    fontWeight: '900',
+    color: colors.accentDark,
+    height: '100%',
   },
-  dailyLabel: {
-    fontSize: 11,
-    color: '#7c6f85',
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  dailyAmount: {
+  euroUnitText: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#231c2b',
-    marginTop: 2,
-  },
-  heroDetailBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: 'rgba(217, 130, 43, 0.08)',
-    borderRadius: 10,
-  },
-  heroDetailBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#d9822b',
+    color: colors.textMuted,
   },
 
-  /* GRILLE DES 4 MONTANTS CLÉS */
-  gridSection: {
-    gap: 12,
-  },
-  sectionTitleRow: {
+  /* 3. CHARGE FIXE */
+  fixedExpenseCard: {
+    backgroundColor: colors.card,
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderLeftWidth: 5,
+    borderLeftColor: colors.lavender,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    gap: 10,
   },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#231c2b',
-    letterSpacing: 0.2,
-  },
-  sectionEditLink: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#9b6fba',
-  },
-  kpiGrid: {
+  fixedCardLeft: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     gap: 12,
-  },
-  kpiCard: {
     flex: 1,
-    minWidth: 155,
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
-    padding: 16,
+  },
+  fixedLabel: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: colors.text,
+  },
+  fixedSub: {
+    fontSize: 11,
+    color: colors.textMuted,
+    fontWeight: '500',
+    marginTop: 1,
+  },
+  fixedCardRight: {
+    alignItems: 'flex-end',
+  },
+  fixedAmount: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: colors.danger,
+  },
+  fixedLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    marginTop: 2,
+  },
+  fixedLinkText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.lavender,
+  },
+
+  /* 4. COMPTE COURANT & ÉPARGNE */
+  accountsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
+  accountCard: {
+    flex: 1,
+    minWidth: 150,
+    backgroundColor: colors.card,
+    borderRadius: 22,
+    padding: 18,
     borderWidth: 1,
-    borderColor: '#e8e1d5',
-    shadowColor: '#231c2b',
+    borderColor: colors.border,
+    gap: 8,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
   },
-  incomeCard: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#059669',
-  },
-  fixedCard: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#9b6fba',
-  },
   checkingCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#2563eb',
+    borderLeftColor: colors.accent,
   },
   savingsCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#0d9488',
+    borderLeftColor: colors.lavender,
   },
-  kpiHeaderRow: {
+  accountHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  accountLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: colors.text,
+    flex: 1,
+  },
+  accountDisplayRow: {
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    flexWrap: 'wrap',
+    gap: 6,
   },
-  kpiIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
-    justifyContent: 'center',
-    alignItems: 'center',
+  accountDisplayAmount: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: colors.text,
+    letterSpacing: -0.5,
   },
-  incomeIconBg: {
-    backgroundColor: 'rgba(5, 150, 105, 0.12)',
-  },
-  fixedIconBg: {
-    backgroundColor: 'rgba(155, 111, 186, 0.12)',
-  },
-  checkingIconBg: {
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-  },
-  savingsIconBg: {
-    backgroundColor: 'rgba(13, 148, 136, 0.12)',
-  },
-  kpiBadge: {
+  inlineRoundBadge: {
+    backgroundColor: '#F1F5F9',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  kpiBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.3,
-  },
-  kpiLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#7c6f85',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  kpiAmount: {
-    fontSize: 22,
-    fontWeight: '900',
-    marginTop: 4,
-    letterSpacing: -0.5,
-  },
-  kpiSubtitle: {
+  inlineRoundBadgeText: {
     fontSize: 11,
-    color: '#95899e',
+    fontWeight: '800',
+    color: colors.textMuted,
+  },
+  accountFormulaTitle: {
+    fontSize: 11,
+    color: colors.text,
+    fontWeight: '700',
+  },
+  accountFormulaDetail: {
+    fontSize: 10,
+    color: colors.textMuted,
     fontWeight: '600',
-    marginTop: 4,
+    marginTop: 2,
   },
 
-  /* RACCOURCIS DE GESTION RAPIDE */
-  shortcutsCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
-    padding: 16,
+  /* 5. NAVIGATION DIRECTE */
+  navLinksCard: {
+    backgroundColor: colors.card,
+    borderRadius: 22,
+    padding: 6,
     borderWidth: 1,
-    borderColor: '#e8e1d5',
-    gap: 12,
+    borderColor: colors.border,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  shortcutsTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#231c2b',
-    letterSpacing: 0.2,
-  },
-  shortcutsRow: {
+  navLinkItem: {
     flexDirection: 'row',
-    gap: 10,
-  },
-  shortcutBtn: {
-    flex: 1,
-    backgroundColor: '#faf7f2',
-    borderWidth: 1,
-    borderColor: '#e8e1d5',
-    borderRadius: 14,
-    padding: 12,
     alignItems: 'center',
-    gap: 4,
+    padding: 14,
+    gap: 14,
   },
-  shortcutIconBg: {
+  navLinkIcon: {
     width: 40,
     height: 40,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
   },
-  shortcutLabel: {
-    fontSize: 12,
+  navLinkTitle: {
+    fontSize: 14,
     fontWeight: '800',
-    color: '#231c2b',
-    textAlign: 'center',
+    color: colors.text,
   },
-  shortcutSub: {
-    fontSize: 10,
-    color: '#7c6f85',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-
-  /* MODAL D'AJUSTEMENT DU BUDGET */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(27, 20, 36, 0.65)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  modalCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    width: '100%',
-    maxWidth: 480,
-    maxHeight: '90%',
-    borderWidth: 1,
-    borderColor: '#e6dfd3',
-    shadowColor: '#1b1424',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 12,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 22,
-    paddingTop: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0eae0',
-    backgroundColor: '#ffffff',
-  },
-  modalHeaderTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  modalHeaderIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(155, 111, 186, 0.12)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#231c2b',
-  },
-  modalSubtitle: {
+  navLinkSub: {
     fontSize: 11,
-    color: '#7c6f85',
+    color: colors.textMuted,
     marginTop: 1,
   },
-  modalCloseBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#faf7f2',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e8e1d5',
-  },
-  modalScrollBody: {
-    paddingHorizontal: 22,
-    paddingTop: 18,
-    paddingBottom: 16,
-    gap: 16,
-  },
-  inputGroup: {
-    gap: 6,
-  },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#34293f',
-    letterSpacing: 0.2,
-  },
-  textInput: {
-    backgroundColor: '#faf7f2',
-    borderColor: '#ded6c7',
-    borderWidth: 1,
-    color: '#231c2b',
-    borderRadius: 12,
-    height: 46,
-    paddingHorizontal: 14,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  modalActionButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 22,
-    paddingTop: 14,
-    paddingBottom: 22,
-    borderTopWidth: 1,
-    borderTopColor: '#f0eae0',
-    backgroundColor: '#ffffff',
-  },
-  cancelActionBtn: {
-    flex: 1,
-    height: 48,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#dcd4c6',
-    backgroundColor: '#faf7f2',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cancelActionBtnText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#65576f',
-  },
-  saveActionBtn: {
-    flex: 2,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: '#9b6fba',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    shadowColor: '#9b6fba',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  saveActionBtnText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#ffffff',
+  navLinkDivider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginHorizontal: 14,
   },
 });

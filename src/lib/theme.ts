@@ -1,23 +1,24 @@
 import { DefaultTheme, type Theme } from 'expo-router';
+import { colors } from '@/theme/colors';
 
 export const THEME = {
   light: {
-    background: '#f4f0e8',
-    border: '#e6dfd3',
-    card: '#ffffff',
-    notification: '#d43f5e',
-    primary: '#9b6fba',
-    text: '#231c2b',
-    textSecondary: '#6e6277',
+    background: colors.background,
+    border: colors.border,
+    card: colors.card,
+    notification: colors.danger,
+    primary: colors.primary,
+    text: colors.text,
+    textSecondary: colors.textMuted,
   },
   dark: {
-    background: '#f4f0e8',
-    border: '#e6dfd3',
-    card: '#ffffff',
-    notification: '#d43f5e',
-    primary: '#9b6fba',
-    text: '#231c2b',
-    textSecondary: '#6e6277',
+    background: colors.background,
+    border: colors.border,
+    card: colors.card,
+    notification: colors.danger,
+    primary: colors.primary,
+    text: colors.text,
+    textSecondary: colors.textMuted,
   },
 };
 

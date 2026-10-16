@@ -4,46 +4,107 @@
 
 @layer base {
   :root {
-    --background: 40 32% 93%;
-    --foreground: 268 21% 14%;
+    /* Klyro Brand Guidelines - Directives Design & Charte Graphique */
+    /* Fond Écran #F8FAFC (Blanc Cassé) */
+    --background: 210 40% 98%;
+    --bg-canvas: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-surface-subtle: #F1F5F9;
+    --bg-surface-elevated: #FFFFFF;
+
+    /* Texte Bleu Nuit #0F172A & Gris Ardoise #64748B */
+    --foreground: 222 47% 11%;
+    --text-primary: #0F172A;
+    --text-secondary: #64748B;
+    --text-muted: #94A3B8;
+
+    /* Surface Carte #FFFFFF */
     --card: 0 0% 100%;
-    --card-foreground: 268 21% 14%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 268 21% 14%;
-    --primary: 275 35% 58%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primaire Bleu Nuit #0F172A */
+    --primary: 222 47% 11%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 275 35% 95%;
-    --secondary-foreground: 275 35% 45%;
-    --muted: 40 25% 96%;
-    --muted-foreground: 270 9% 43%;
-    --accent: 275 35% 95%;
-    --accent-foreground: 275 35% 45%;
-    --destructive: 348 64% 54%;
+    --primary-50: #F8FAFC;
+    --primary-100: #F1F5F9;
+    --primary-300: #CBD5E1;
+    --primary-500: #0F172A;
+    --primary-600: #0B1120;
+    --primary-700: #060B14;
+
+    /* Accent / Succès Émeraude Doux #10B981 */
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+    --accent-dark: #047857;
+
+    /* Accent Tertiaire Lavande #6366F1 */
+    --lavender: #6366F1;
+
+    /* Alerte / Dépense Saumon Doux #F87171 */
+    --destructive: 0 91% 71%;
     --destructive-foreground: 0 0% 100%;
-    --border: 40 24% 86%;
-    --input: 40 24% 86%;
-    --ring: 275 35% 58%;
+
+    /* Secondaire & Neutres */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Bordure Gris Neutre #E2E8F0 */
+    --border: 214 32% 91%;
+    --border-subtle: #F1F5F9;
+    --input: 214 32% 91%;
+
+    /* Focus Ring Émeraude */
+    --ring: 160 84% 39%;
   }
 
   .dark {
-    --background: 40 32% 93%;
-    --foreground: 268 21% 14%;
+    --background: 210 40% 98%;
+    --bg-canvas: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-surface-subtle: #F1F5F9;
+    --bg-surface-elevated: #FFFFFF;
+
+    --foreground: 222 47% 11%;
+    --text-primary: #0F172A;
+    --text-secondary: #64748B;
+    --text-muted: #94A3B8;
+
     --card: 0 0% 100%;
-    --card-foreground: 268 21% 14%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 268 21% 14%;
-    --primary: 275 35% 58%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 222 47% 11%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 275 35% 95%;
-    --secondary-foreground: 275 35% 45%;
-    --muted: 40 25% 96%;
-    --muted-foreground: 270 9% 43%;
-    --accent: 275 35% 95%;
-    --accent-foreground: 275 35% 45%;
-    --destructive: 348 64% 54%;
+    --primary-50: #F8FAFC;
+    --primary-100: #F1F5F9;
+    --primary-300: #CBD5E1;
+    --primary-500: #0F172A;
+    --primary-600: #0B1120;
+    --primary-700: #060B14;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+    --accent-dark: #047857;
+
+    --lavender: #6366F1;
+
+    --destructive: 0 91% 71%;
     --destructive-foreground: 0 0% 100%;
-    --border: 40 24% 86%;
-    --input: 40 24% 86%;
-    --ring: 275 35% 58%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --border: 214 32% 91%;
+    --border-subtle: #F1F5F9;
+    --input: 214 32% 91%;
+
+    --ring: 160 84% 39%;
   }
 }

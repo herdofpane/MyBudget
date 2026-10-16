@@ -1,5 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  ReactNode,
+} from 'react';
 
 import {
   BudgetData,
@@ -16,7 +23,8 @@ import {
   DEFAULT_EXPENSE_HISTORY,
 } from '@/data';
 
-import { STORAGE_KEY } from '@/constants';
+import { budgetStorageService } from '@/services/budget-storage.service';
+import { isChargeActiveInMonth } from '@/utils/fixed-expenses';
 
 // Re-export des types pour compatibilité descendante
 export * from '@/types';
@@ -31,173 +39,228 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
   const [expenseHistory, setExpenseHistory] = useState<ExpenseRecord[]>(DEFAULT_EXPENSE_HISTORY);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Charger les données sauvegardées depuis le stockage local
+  // Charger les données depuis le service de stockage dédié (Couche 3 SOLID)
   useEffect(() => {
-    async function loadData() {
+    async function initData() {
       try {
-        const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.budget) setBudget(parsed.budget);
-          if (parsed.fixedExpensesList) setFixedExpensesList(parsed.fixedExpensesList);
-          if (parsed.variableCategories) setVariableCategories(parsed.variableCategories);
-          if (parsed.expenseHistory) setExpenseHistory(parsed.expenseHistory);
-        }
+        const state = await budgetStorageService.loadState();
+        setBudget(state.budget);
+        setFixedExpensesList(state.fixedExpensesList);
+        setVariableCategories(state.variableCategories);
+        setExpenseHistory(state.expenseHistory);
       } catch (err) {
-        console.warn('Erreur chargement budget depuis AsyncStorage', err);
+        console.warn('[BudgetProvider] Erreur initialisation budget:', err);
       } finally {
         setIsLoading(false);
       }
     }
-    loadData();
+    initData();
   }, []);
 
-  // Sauvegarder dans AsyncStorage
-  const persistState = async (
-    newBudget: BudgetData,
-    newFixed: FixedExpenseItem[],
-    newVariable: VariableCategory[],
-    newHistory: ExpenseRecord[]
-  ) => {
-    try {
-      await AsyncStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          budget: newBudget,
-          fixedExpensesList: newFixed,
-          variableCategories: newVariable,
-          expenseHistory: newHistory,
-        })
+  // Déléguer la persistance au service sérialisé
+  const persist = useCallback(
+    async (
+      newBudget: BudgetData,
+      newFixed: FixedExpenseItem[],
+      newVariable: VariableCategory[],
+      newHistory: ExpenseRecord[]
+    ) => {
+      await budgetStorageService.saveState({
+        budget: newBudget,
+        fixedExpensesList: newFixed,
+        variableCategories: newVariable,
+        expenseHistory: newHistory,
+      });
+    },
+    []
+  );
+
+  const saveBudget = useCallback(
+    async (newBudget: BudgetData) => {
+      setBudget(newBudget);
+      await persist(newBudget, fixedExpensesList, variableCategories, expenseHistory);
+    },
+    [fixedExpensesList, variableCategories, expenseHistory, persist]
+  );
+
+  const updateItem = useCallback(
+    async (key: keyof BudgetData, value: number) => {
+      const updated = { ...budget, [key]: Math.max(0, value) };
+      await saveBudget(updated);
+    },
+    [budget, saveBudget]
+  );
+
+  // Gestion des charges fixes (exclut automatiquement les crédits arrivés à échéance)
+  const addFixedExpense = useCallback(
+    async (item: Omit<FixedExpenseItem, 'id'>) => {
+      const newItem: FixedExpenseItem = {
+        ...item,
+        id: budgetStorageService.generateId(),
+      };
+      const updatedList = [...fixedExpensesList, newItem];
+      const activeList = updatedList.filter((i) => isChargeActiveInMonth(i));
+      const totalFixed = Math.round(activeList.reduce((sum, i) => sum + i.amount, 0) * 100) / 100;
+      const updatedBudget = { ...budget, fixedExpenses: totalFixed };
+
+      setFixedExpensesList(updatedList);
+      setBudget(updatedBudget);
+      await persist(updatedBudget, updatedList, variableCategories, expenseHistory);
+    },
+    [fixedExpensesList, budget, variableCategories, expenseHistory, persist]
+  );
+
+  const updateFixedExpense = useCallback(
+    async (item: FixedExpenseItem) => {
+      const updatedList = fixedExpensesList.map((i) => (i.id === item.id ? item : i));
+      const activeList = updatedList.filter((i) => isChargeActiveInMonth(i));
+      const totalFixed = Math.round(activeList.reduce((sum, i) => sum + i.amount, 0) * 100) / 100;
+      const updatedBudget = { ...budget, fixedExpenses: totalFixed };
+
+      setFixedExpensesList(updatedList);
+      setBudget(updatedBudget);
+      await persist(updatedBudget, updatedList, variableCategories, expenseHistory);
+    },
+    [fixedExpensesList, budget, variableCategories, expenseHistory, persist]
+  );
+
+  const deleteFixedExpense = useCallback(
+    async (id: string) => {
+      const updatedList = fixedExpensesList.filter((i) => i.id !== id);
+      const activeList = updatedList.filter((i) => isChargeActiveInMonth(i));
+      const totalFixed = Math.round(activeList.reduce((sum, i) => sum + i.amount, 0) * 100) / 100;
+      const updatedBudget = { ...budget, fixedExpenses: totalFixed };
+
+      setFixedExpensesList(updatedList);
+      setBudget(updatedBudget);
+      await persist(updatedBudget, updatedList, variableCategories, expenseHistory);
+    },
+    [fixedExpensesList, budget, variableCategories, expenseHistory, persist]
+  );
+
+  const toggleFixedExpensePaid = useCallback(
+    async (id: string) => {
+      const updatedList = fixedExpensesList.map((i) =>
+        i.id === id ? { ...i, isPaid: !i.isPaid } : i
       );
-    } catch (err) {
-      console.warn('Erreur sauvegarde budget vers AsyncStorage', err);
-    }
-  };
+      setFixedExpensesList(updatedList);
+      await persist(budget, updatedList, variableCategories, expenseHistory);
+    },
+    [fixedExpensesList, budget, variableCategories, expenseHistory, persist]
+  );
 
-  const saveBudget = async (newBudget: BudgetData) => {
-    setBudget(newBudget);
-    await persistState(newBudget, fixedExpensesList, variableCategories, expenseHistory);
-  };
+  const advanceCreditMonth = useCallback(
+    async (id: string) => {
+      const updatedList = fixedExpensesList.map((i) => {
+        if (i.id !== id || !i.isCredit) return i;
+        const currentPaid = i.paidMonthsCount ?? 0;
+        const totalDuration = i.durationMonths ?? 12;
+        const newPaid = Math.min(totalDuration, currentPaid + 1);
+        return {
+          ...i,
+          paidMonthsCount: newPaid,
+          isPaid: true,
+        };
+      });
+      const activeList = updatedList.filter((i) => isChargeActiveInMonth(i));
+      const totalFixed = Math.round(activeList.reduce((sum, i) => sum + i.amount, 0) * 100) / 100;
+      const updatedBudget = { ...budget, fixedExpenses: totalFixed };
 
-  const updateItem = async (key: keyof BudgetData, value: number) => {
-    const updated = { ...budget, [key]: Math.max(0, value) };
-    await saveBudget(updated);
-  };
-
-  // Gestion des charges fixes
-  const addFixedExpense = async (item: Omit<FixedExpenseItem, 'id'>) => {
-    const newItem: FixedExpenseItem = {
-      ...item,
-      id: Date.now().toString(),
-    };
-    const updatedList = [...fixedExpensesList, newItem];
-    const totalFixed = updatedList.reduce((sum, i) => sum + i.amount, 0);
-    const updatedBudget = { ...budget, fixedExpenses: totalFixed };
-
-    setFixedExpensesList(updatedList);
-    setBudget(updatedBudget);
-    await persistState(updatedBudget, updatedList, variableCategories, expenseHistory);
-  };
-
-  const updateFixedExpense = async (item: FixedExpenseItem) => {
-    const updatedList = fixedExpensesList.map((i) => (i.id === item.id ? item : i));
-    const totalFixed = updatedList.reduce((sum, i) => sum + i.amount, 0);
-    const updatedBudget = { ...budget, fixedExpenses: totalFixed };
-
-    setFixedExpensesList(updatedList);
-    setBudget(updatedBudget);
-    await persistState(updatedBudget, updatedList, variableCategories, expenseHistory);
-  };
-
-  const deleteFixedExpense = async (id: string) => {
-    const updatedList = fixedExpensesList.filter((i) => i.id !== id);
-    const totalFixed = updatedList.reduce((sum, i) => sum + i.amount, 0);
-    const updatedBudget = { ...budget, fixedExpenses: totalFixed };
-
-    setFixedExpensesList(updatedList);
-    setBudget(updatedBudget);
-    await persistState(updatedBudget, updatedList, variableCategories, expenseHistory);
-  };
-
-  const toggleFixedExpensePaid = async (id: string) => {
-    const updatedList = fixedExpensesList.map((i) =>
-      i.id === id ? { ...i, isPaid: !i.isPaid } : i
-    );
-    setFixedExpensesList(updatedList);
-    await persistState(budget, updatedList, variableCategories, expenseHistory);
-  };
+      setFixedExpensesList(updatedList);
+      setBudget(updatedBudget);
+      await persist(updatedBudget, updatedList, variableCategories, expenseHistory);
+    },
+    [fixedExpensesList, budget, variableCategories, expenseHistory, persist]
+  );
 
   // Gestion des charges variables
-  const addVariableCategory = async (category: Omit<VariableCategory, 'id'>) => {
-    const duration = Math.max(0.01, category.durationMonths || 1);
-    const total = category.totalAmount !== undefined ? category.totalAmount : category.estimatedBudget;
-    const monthly = Math.round((total / duration) * 100) / 100;
+  const addVariableCategory = useCallback(
+    async (category: Omit<VariableCategory, 'id'>) => {
+      const duration = Math.max(0.01, category.durationMonths || 1);
+      const total = category.totalAmount !== undefined ? category.totalAmount : category.estimatedBudget;
+      const monthly = Math.round((total / duration) * 100) / 100;
 
-    const newCat: VariableCategory = {
-      ...category,
-      totalAmount: total,
-      durationMonths: duration,
-      estimatedBudget: monthly,
-      id: Date.now().toString(),
-    };
-    const updated = [...variableCategories, newCat];
-    setVariableCategories(updated);
-    await persistState(budget, fixedExpensesList, updated, expenseHistory);
-  };
+      const newCat: VariableCategory = {
+        ...category,
+        totalAmount: total,
+        durationMonths: duration,
+        estimatedBudget: monthly,
+        id: budgetStorageService.generateId(),
+      };
+      const updated = [...variableCategories, newCat];
+      setVariableCategories(updated);
+      await persist(budget, fixedExpensesList, updated, expenseHistory);
+    },
+    [variableCategories, budget, fixedExpensesList, expenseHistory, persist]
+  );
 
-  const updateVariableCategory = async (category: VariableCategory) => {
-    const duration = Math.max(0.01, category.durationMonths || 1);
-    const total = category.totalAmount !== undefined ? category.totalAmount : category.estimatedBudget;
-    const monthly = Math.round((total / duration) * 100) / 100;
+  const updateVariableCategory = useCallback(
+    async (category: VariableCategory) => {
+      const duration = Math.max(0.01, category.durationMonths || 1);
+      const total = category.totalAmount !== undefined ? category.totalAmount : category.estimatedBudget;
+      const monthly = Math.round((total / duration) * 100) / 100;
 
-    const updatedCat: VariableCategory = {
-      ...category,
-      totalAmount: total,
-      durationMonths: duration,
-      estimatedBudget: monthly,
-    };
+      const updatedCat: VariableCategory = {
+        ...category,
+        totalAmount: total,
+        durationMonths: duration,
+        estimatedBudget: monthly,
+      };
 
-    const updated = variableCategories.map((c) => (c.id === category.id ? updatedCat : c));
-    setVariableCategories(updated);
-    await persistState(budget, fixedExpensesList, updated, expenseHistory);
-  };
+      const updated = variableCategories.map((c) => (c.id === category.id ? updatedCat : c));
+      setVariableCategories(updated);
+      await persist(budget, fixedExpensesList, updated, expenseHistory);
+    },
+    [variableCategories, budget, fixedExpensesList, expenseHistory, persist]
+  );
 
-  const deleteVariableCategory = async (id: string) => {
-    const updated = variableCategories.filter((c) => c.id !== id);
-    setVariableCategories(updated);
-    await persistState(budget, fixedExpensesList, updated, expenseHistory);
-  };
+  const deleteVariableCategory = useCallback(
+    async (id: string) => {
+      const updated = variableCategories.filter((c) => c.id !== id);
+      setVariableCategories(updated);
+      await persist(budget, fixedExpensesList, updated, expenseHistory);
+    },
+    [variableCategories, budget, fixedExpensesList, expenseHistory, persist]
+  );
 
-  const addExpenseToCategory = async (categoryId: string, amount: number, label: string) => {
-    const newRecord: ExpenseRecord = {
-      id: Date.now().toString(),
-      categoryId,
-      label,
-      amount,
-      date: new Date().toISOString(),
-    };
-    const updatedHistory = [newRecord, ...expenseHistory];
-    const updatedCategories = variableCategories.map((c) =>
-      c.id === categoryId ? { ...c, spent: c.spent + amount } : c
-    );
+  const addExpenseToCategory = useCallback(
+    async (categoryId: string, amount: number, label: string) => {
+      if (isNaN(amount) || amount <= 0) return;
+      const newRecord: ExpenseRecord = {
+        id: budgetStorageService.generateId(),
+        categoryId,
+        label: label.trim(),
+        amount,
+        date: new Date().toISOString(),
+      };
+      const updatedHistory = [newRecord, ...expenseHistory];
+      const updatedCategories = variableCategories.map((c) =>
+        c.id === categoryId ? { ...c, spent: c.spent + amount } : c
+      );
 
-    setExpenseHistory(updatedHistory);
-    setVariableCategories(updatedCategories);
-    await persistState(budget, fixedExpensesList, updatedCategories, updatedHistory);
-  };
+      setExpenseHistory(updatedHistory);
+      setVariableCategories(updatedCategories);
+      await persist(budget, fixedExpensesList, updatedCategories, updatedHistory);
+    },
+    [expenseHistory, variableCategories, budget, fixedExpensesList, persist]
+  );
 
-  const resetMonthStatus = async () => {
+  const resetMonthStatus = useCallback(async () => {
     const resetFixed = fixedExpensesList.map((i) => ({ ...i, isPaid: false }));
     const resetVar = variableCategories.map((c) => ({ ...c, spent: 0 }));
     setFixedExpensesList(resetFixed);
     setVariableCategories(resetVar);
-    await persistState(budget, resetFixed, resetVar, []);
-  };
+    await persist(budget, resetFixed, resetVar, []);
+  }, [fixedExpensesList, variableCategories, budget, persist]);
 
-  // Métriques calculées dynamiques
+  // Métriques calculées dynamiques (filtrant automatiquement les charges inactives, différées ou soldées)
   const totalBalance = budget.checkingAccount + budget.savingsAccount;
-  const totalFixedExpenses = fixedExpensesList.reduce((acc, item) => acc + item.amount, 0);
-  const totalPaidFixedExpenses = fixedExpensesList
+  const activeFixedExpenses = fixedExpensesList.filter((item) => isChargeActiveInMonth(item));
+  const totalFixedExpenses =
+    fixedExpensesList.length > 0
+      ? Math.round(activeFixedExpenses.reduce((acc, item) => acc + item.amount, 0) * 100) / 100
+      : (budget.fixedExpenses || 61.73);
+  const totalPaidFixedExpenses = activeFixedExpenses
     .filter((item) => item.isPaid)
     .reduce((acc, item) => acc + item.amount, 0);
   const totalRemainingFixedExpenses = totalFixedExpenses - totalPaidFixedExpenses;
@@ -214,38 +277,73 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
   const variableExpenseRatio = budget.income > 0 ? (totalEstimatedVariable / budget.income) * 100 : 0;
   const savingsCapacityRatio = budget.income > 0 ? Math.max(0, (projectedSavings / budget.income) * 100) : 0;
 
+  const contextValue = useMemo<BudgetContextType>(
+    () => ({
+      budget: { ...budget, fixedExpenses: totalFixedExpenses },
+      fixedExpensesList,
+      variableCategories,
+      expenseHistory,
+      isLoading,
+      totalBalance,
+      totalFixedExpenses,
+      totalPaidFixedExpenses,
+      totalRemainingFixedExpenses,
+      remainingAllowance,
+      totalEstimatedVariable,
+      totalSpentVariable,
+      projectedSavings,
+      actualRemainingAllowance,
+      fixedExpenseRatio,
+      variableExpenseRatio,
+      savingsCapacityRatio,
+      saveBudget,
+      updateItem,
+      addFixedExpense,
+      updateFixedExpense,
+      deleteFixedExpense,
+      toggleFixedExpensePaid,
+      advanceCreditMonth,
+      addVariableCategory,
+      updateVariableCategory,
+      deleteVariableCategory,
+      addExpenseToCategory,
+      resetMonthStatus,
+    }),
+    [
+      budget,
+      totalFixedExpenses,
+      fixedExpensesList,
+      variableCategories,
+      expenseHistory,
+      isLoading,
+      totalBalance,
+      totalPaidFixedExpenses,
+      totalRemainingFixedExpenses,
+      remainingAllowance,
+      totalEstimatedVariable,
+      totalSpentVariable,
+      projectedSavings,
+      actualRemainingAllowance,
+      fixedExpenseRatio,
+      variableExpenseRatio,
+      savingsCapacityRatio,
+      saveBudget,
+      updateItem,
+      addFixedExpense,
+      updateFixedExpense,
+      deleteFixedExpense,
+      toggleFixedExpensePaid,
+      advanceCreditMonth,
+      addVariableCategory,
+      updateVariableCategory,
+      deleteVariableCategory,
+      addExpenseToCategory,
+      resetMonthStatus,
+    ]
+  );
+
   return (
-    <BudgetContext.Provider
-      value={{
-        budget: { ...budget, fixedExpenses: totalFixedExpenses },
-        fixedExpensesList,
-        variableCategories,
-        expenseHistory,
-        isLoading,
-        totalBalance,
-        totalFixedExpenses,
-        totalPaidFixedExpenses,
-        totalRemainingFixedExpenses,
-        remainingAllowance,
-        totalEstimatedVariable,
-        totalSpentVariable,
-        projectedSavings,
-        actualRemainingAllowance,
-        fixedExpenseRatio,
-        variableExpenseRatio,
-        savingsCapacityRatio,
-        saveBudget,
-        updateItem,
-        addFixedExpense,
-        updateFixedExpense,
-        deleteFixedExpense,
-        toggleFixedExpensePaid,
-        addVariableCategory,
-        updateVariableCategory,
-        deleteVariableCategory,
-        addExpenseToCategory,
-        resetMonthStatus,
-      }}>
+    <BudgetContext.Provider value={contextValue}>
       {children}
     </BudgetContext.Provider>
   );
