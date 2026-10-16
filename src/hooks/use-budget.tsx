@@ -129,8 +129,15 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
 
   // Gestion des charges variables
   const addVariableCategory = async (category: Omit<VariableCategory, 'id'>) => {
+    const duration = Math.max(0.01, category.durationMonths || 1);
+    const total = category.totalAmount !== undefined ? category.totalAmount : category.estimatedBudget;
+    const monthly = Math.round((total / duration) * 100) / 100;
+
     const newCat: VariableCategory = {
       ...category,
+      totalAmount: total,
+      durationMonths: duration,
+      estimatedBudget: monthly,
       id: Date.now().toString(),
     };
     const updated = [...variableCategories, newCat];
@@ -139,7 +146,18 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
   };
 
   const updateVariableCategory = async (category: VariableCategory) => {
-    const updated = variableCategories.map((c) => (c.id === category.id ? category : c));
+    const duration = Math.max(0.01, category.durationMonths || 1);
+    const total = category.totalAmount !== undefined ? category.totalAmount : category.estimatedBudget;
+    const monthly = Math.round((total / duration) * 100) / 100;
+
+    const updatedCat: VariableCategory = {
+      ...category,
+      totalAmount: total,
+      durationMonths: duration,
+      estimatedBudget: monthly,
+    };
+
+    const updated = variableCategories.map((c) => (c.id === category.id ? updatedCat : c));
     setVariableCategories(updated);
     await persistState(budget, fixedExpensesList, updated, expenseHistory);
   };

@@ -65,6 +65,8 @@
     {
       "id": "v1",
       "label": "Alimentation & Courses",
+      "totalAmount": 450,
+      "durationMonths": 1,
       "estimatedBudget": 450,
       "spent": 280,
       "icon": "cart-outline",
@@ -73,6 +75,8 @@
     {
       "id": "v2",
       "label": "Sorties & Restaurants",
+      "totalAmount": 220,
+      "durationMonths": 1,
       "estimatedBudget": 220,
       "spent": 165,
       "icon": "restaurant-outline",
@@ -81,6 +85,8 @@
     {
       "id": "v3",
       "label": "Shopping & Habillement",
+      "totalAmount": 150,
+      "durationMonths": 1,
       "estimatedBudget": 150,
       "spent": 65,
       "icon": "shirt-outline",
@@ -89,6 +95,8 @@
     {
       "id": "v4",
       "label": "Carburant & Déplacements",
+      "totalAmount": 90,
+      "durationMonths": 1,
       "estimatedBudget": 90,
       "spent": 50,
       "icon": "car-sport-outline",
@@ -97,6 +105,8 @@
     {
       "id": "v5",
       "label": "Santé, Beauté & Bien-être",
+      "totalAmount": 70,
+      "durationMonths": 1,
       "estimatedBudget": 70,
       "spent": 30,
       "icon": "medkit-outline",
@@ -105,6 +115,8 @@
     {
       "id": "v6",
       "label": "Loisirs, Sport & Vacances",
+      "totalAmount": 120,
+      "durationMonths": 1,
       "estimatedBudget": 120,
       "spent": 75,
       "icon": "football-outline",

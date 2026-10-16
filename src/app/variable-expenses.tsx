@@ -7,6 +7,7 @@ import {
   Pressable,
   StyleSheet,
   Platform,
+  Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,489 +20,502 @@ import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
 import { ConfirmDialog } from '@/components/confirm-dialog';
-import { router } from 'expo-router';
 
 import { useBudget } from '@/hooks/use-budget';
 import { VariableCategory } from '@/types';
 import { PRESET_ICONS, PRESET_COLORS } from '@/data';
-import { formatEuro, formatPercent } from '@/constants/formatters';
+import { formatEuro, formatEuroRound, formatPercent } from '@/constants/formatters';
+
+const DURATION_PRESETS = [1, 3, 6, 12, 24];
 
 export default function VariableExpensesScreen() {
   const {
     variableCategories,
     totalEstimatedVariable,
-    totalSpentVariable,
-    remainingAllowance,
-    projectedSavings,
+    variableExpenseRatio,
     addVariableCategory,
     updateVariableCategory,
     deleteVariableCategory,
-    addExpenseToCategory,
   } = useBudget();
 
   // État du modal de suppression
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
-  // Modal d'ajout de dépense rapide
-  const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
-  const [selectedCatForExpense, setSelectedCatForExpense] = useState<VariableCategory | null>(null);
-  const [expenseAmount, setExpenseAmount] = useState('');
-  const [expenseLabel, setExpenseLabel] = useState('');
-
-  // Modal d'enveloppe (création / modification)
-  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  // État du modal de création / modification
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingCategory, setEditingCategory] = useState<VariableCategory | null>(null);
-  const [catLabel, setCatLabel] = useState('');
-  const [catBudget, setCatBudget] = useState('');
-  const [catIcon, setCatIcon] = useState('cart-outline');
-  const [catColor, setCatColor] = useState('#9b6fba');
+  const [labelInput, setLabelInput] = useState('');
+  const [amountInput, setAmountInput] = useState('');
+  const [durationInput, setDurationInput] = useState('1');
+  const [iconInput, setIconInput] = useState('cart-outline');
+  const [colorInput, setColorInput] = useState('#9b6fba');
 
-  // Ouvrir modal ajout de dépense
-  const openAddExpenseModal = (category: VariableCategory) => {
-    setSelectedCatForExpense(category);
-    setExpenseAmount('');
-    setExpenseLabel('');
-    setIsExpenseModalVisible(true);
-  };
-
-  const handleSaveExpense = async () => {
-    const amount = parseFloat(expenseAmount);
-    if (!selectedCatForExpense || isNaN(amount) || amount <= 0) return;
-
-    await addExpenseToCategory(
-      selectedCatForExpense.id,
-      amount,
-      expenseLabel.trim() || selectedCatForExpense.label
-    );
-    setIsExpenseModalVisible(false);
-  };
-
-  // Ouvrir modal création / édition d'enveloppe
-  const openNewCategoryModal = () => {
+  // Ouvrir modal ajout
+  const openAddModal = () => {
     setEditingCategory(null);
-    setCatLabel('');
-    setCatBudget('');
-    setCatIcon('cart-outline');
-    setCatColor('#9b6fba');
-    setIsCategoryModalVisible(true);
+    setLabelInput('');
+    setAmountInput('');
+    setDurationInput('1');
+    setIconInput('cart-outline');
+    setColorInput('#9b6fba');
+    setIsModalVisible(true);
   };
 
-  const openEditCategoryModal = (cat: VariableCategory) => {
+  // Ouvrir modal modification
+  const openEditModal = (cat: VariableCategory) => {
     setEditingCategory(cat);
-    setCatLabel(cat.label);
-    setCatBudget(cat.estimatedBudget.toString());
-    setCatIcon(cat.icon);
-    setCatColor(cat.color);
-    setIsCategoryModalVisible(true);
+    setLabelInput(cat.label);
+    const total = cat.totalAmount !== undefined ? cat.totalAmount : cat.estimatedBudget;
+    const duration = cat.durationMonths || 1;
+    setAmountInput(total.toString());
+    setDurationInput(duration.toString());
+    setIconInput(cat.icon);
+    setColorInput(cat.color);
+    setIsModalVisible(true);
   };
 
-  const handleSaveCategory = async () => {
-    const budget = parseFloat(catBudget);
-    if (!catLabel.trim() || isNaN(budget) || budget < 0) return;
+  const handleSave = async () => {
+    const total = parseFloat(amountInput.replace(',', '.'));
+    const duration = Math.max(0.01, parseFloat(durationInput.replace(',', '.')) || 1);
+
+    if (!labelInput.trim() || isNaN(total) || total <= 0) {
+      if (Platform.OS === 'web') {
+        window.alert('Veuillez saisir un titre et un montant valide supérieur à 0.');
+      } else {
+        Alert.alert('Champs incomplets', 'Veuillez saisir un titre et un montant valide supérieur à 0.');
+      }
+      return;
+    }
+
+    const monthly = Math.round((total / duration) * 100) / 100;
 
     if (editingCategory) {
       await updateVariableCategory({
         ...editingCategory,
-        label: catLabel.trim(),
-        estimatedBudget: budget,
-        icon: catIcon,
-        color: catColor,
+        label: labelInput.trim(),
+        totalAmount: total,
+        durationMonths: duration,
+        estimatedBudget: monthly,
+        icon: iconInput,
+        color: colorInput,
       });
     } else {
       await addVariableCategory({
-        label: catLabel.trim(),
-        estimatedBudget: budget,
+        label: labelInput.trim(),
+        totalAmount: total,
+        durationMonths: duration,
+        estimatedBudget: monthly,
         spent: 0,
-        icon: catIcon,
-        color: catColor,
+        icon: iconInput,
+        color: colorInput,
       });
     }
-    setIsCategoryModalVisible(false);
+    setIsModalVisible(false);
   };
 
-  const handleDeleteCategory = (id: string, label: string) => {
+  const handleDelete = (id: string, label: string) => {
     setDeleteTarget({ id, label });
   };
 
-  const handleConfirmDeleteCategory = async () => {
+  const handleConfirmDelete = async () => {
     if (deleteTarget) {
       await deleteVariableCategory(deleteTarget.id);
       setDeleteTarget(null);
     }
   };
 
-  const remainingInEnvelopes = Math.max(0, totalEstimatedVariable - totalSpentVariable);
-  const globalConsumptionRatio =
-    totalEstimatedVariable > 0 ? (totalSpentVariable / totalEstimatedVariable) * 100 : 0;
+  const averageExpense =
+    variableCategories.length > 0 ? totalEstimatedVariable / variableCategories.length : 0;
+
+  // Calculs dynamiques pour le modal
+  const modalParsedAmount = parseFloat(amountInput.replace(',', '.')) || 0;
+  const modalParsedDuration = Math.max(0.01, parseFloat(durationInput.replace(',', '.')) || 1);
+  const modalMonthlyImpact = modalParsedAmount > 0 ? modalParsedAmount / modalParsedDuration : 0;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <StatusBar style="dark" />
 
-      {/* EN-TÊTE DE NAVIGATION AVEC PILLS */}
+      {/* EN-TÊTE PRINCIPAL ÉPURÉ */}
       <NavigationHeader
-        currentRoute="variable-expenses"
         title="Charges Variables"
-        subtitle="BUDGET & ENVELOPPES"
-        actionButton={
-          <Button variant="default" size="sm" onPress={openNewCategoryModal} style={styles.addButton}>
-            <Ionicons name="add" size={18} color="#ffffff" />
-            <Text style={styles.addButtonText}>Enveloppe</Text>
-          </Button>
-        }
+        subtitle="BUDGET COURANT"
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}>
-        {/* CARTE SYNTHÈSE GLOBALE */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}>
+        
+        {/* 1. CARTE DU TOTAL DES CHARGES VARIABLES (IMPACT MENSUEL LISSÉ) */}
         <Card style={styles.summaryCard}>
-          <View style={styles.summaryHeader}>
-            <Text style={styles.summaryTitle}>Estimation globale des variables</Text>
-            <Badge variant="secondary">
-              <Text style={styles.summaryBadgeText}>{variableCategories.length} catégories</Text>
-            </Badge>
+          <View style={styles.summaryTopRow}>
+            <View style={{ flex: 1 }}>
+              <View style={styles.summaryLabelRow}>
+                <Text style={styles.summaryLabel}>Total des charges variables (mensuel)</Text>
+                <Badge variant="outline" style={styles.unitBadge}>
+                  <Text style={styles.unitBadgeText}>Arrondi à l&apos;unité</Text>
+                </Badge>
+              </View>
+              <Text style={styles.summaryTotal}>{formatEuroRound(totalEstimatedVariable)}</Text>
+              <Text style={styles.summaryExact}>
+                Montant mensuel exact : {formatEuro(totalEstimatedVariable)}
+              </Text>
+            </View>
+
+            <View style={styles.countBadge}>
+              <Ionicons name="pie-chart-outline" size={16} color="#d9822b" />
+              <Text style={styles.countBadgeText}>
+                {variableCategories.length} charge{variableCategories.length > 1 ? 's' : ''}
+              </Text>
+            </View>
           </View>
 
-          <View style={styles.amountsRow}>
-            <View style={styles.amountCol}>
-              <Text style={styles.amountLabel}>Budget alloué</Text>
-              <Text style={styles.amountValueEstimated}>{formatEuro(totalEstimatedVariable)}</Text>
+          {/* RÉCAPITULATIF STATISTIQUE */}
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Moyenne mensuelle</Text>
+              <Text style={styles.statValue}>~{formatEuroRound(averageExpense)}</Text>
             </View>
-            <View style={styles.verticalSep} />
-            <View style={styles.amountCol}>
-              <Text style={styles.amountLabel}>Dépensé à ce jour</Text>
-              <Text style={styles.amountValueSpent}>{formatEuro(totalSpentVariable)}</Text>
-            </View>
-            <View style={styles.verticalSep} />
-            <View style={styles.amountCol}>
-              <Text style={styles.amountLabel}>Reste enveloppe</Text>
-              <Text style={styles.amountValueLeft}>{formatEuro(remainingInEnvelopes)}</Text>
-            </View>
-          </View>
-
-          {/* Jauge globale */}
-          <View style={styles.gaugeSection}>
-            <View style={styles.gaugeBackground}>
-              <View
-                style={[
-                  styles.gaugeFilled,
-                  {
-                    width: `${Math.min(100, Math.max(0, globalConsumptionRatio))}%`,
-                    backgroundColor:
-                      globalConsumptionRatio > 100
-                        ? '#d43f5e'
-                        : globalConsumptionRatio > 80
-                        ? '#d9822b'
-                        : '#9b6fba',
-                  },
-                ]}
-              />
-            </View>
-            <View style={styles.gaugeLegendRow}>
-              <Text style={styles.gaugeLegendText}>
-                {formatPercent(globalConsumptionRatio)} consommé
-              </Text>
-              <Text style={styles.gaugeLegendText}>
-                {globalConsumptionRatio > 100
-                  ? `Dépassement de ${formatEuro(totalSpentVariable - totalEstimatedVariable)}`
-                  : `${formatEuro(remainingInEnvelopes)} restant`}
-              </Text>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Part des revenus</Text>
+              <Text style={styles.statValue}>{formatPercent(variableExpenseRatio)}</Text>
             </View>
           </View>
         </Card>
 
-        {/* ENCART ÉPARGNE PRÉVISIONNELLE RÉSULTANTE */}
-        <Card style={styles.savingsImpactCard}>
-          <View style={styles.savingsImpactRow}>
-            <View style={styles.savingsIconWrapper}>
-              <Ionicons name="sparkles-outline" size={20} color="#1b9963" />
-            </View>
-            <View style={styles.savingsImpactTextGroup}>
-              <Text style={styles.savingsImpactLabel}>Épargne nette prévisionnelle ce mois</Text>
-              <Text style={styles.savingsImpactAmount}>{formatEuro(projectedSavings)}</Text>
-              <Text style={styles.savingsImpactSubtext}>
-                Reste disponible ({formatEuro(remainingAllowance)}) - Variables estimées ({formatEuro(totalEstimatedVariable)})
+        {/* 2. LE TABLEAU DES CHARGES VARIABLES : TITRE | MONTANT | DURÉE DE VIE SUR X MOIS */}
+        <View style={styles.tableCard}>
+          {/* EN-TÊTE DE LA CARTE TABLEAU */}
+          <View style={styles.tableTopHeader}>
+            <View>
+              <Text style={styles.tableTitle}>Tableau des charges variables</Text>
+              <Text style={styles.tableSubtitle}>
+                {variableCategories.length} poste{variableCategories.length > 1 ? 's' : ''} de dépense avec lissage mensuel
               </Text>
             </View>
+
+            <TouchableOpacity
+              onPress={openAddModal}
+              activeOpacity={0.7}
+              style={styles.addInlineBtn}>
+              <Ionicons name="add-circle" size={16} color="#d9822b" />
+              <Text style={styles.addInlineBtnText}>Nouvelle charge</Text>
+            </TouchableOpacity>
           </View>
-        </Card>
 
-        {/* LISTE DES ENVELOPPES BUDGÉTAIRES */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Enveloppes & estimations par poste</Text>
-        </View>
+          {variableCategories.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="folder-open-outline" size={42} color="#d9822b" />
+              <Text style={styles.emptyTitle}>Aucune charge variable enregistrée</Text>
+              <Text style={styles.emptyText}>
+                Ajoutez vos charges variables avec leur montant et leur durée de vie sur X mois pour calculer automatiquement l&apos;impact mensuel.
+              </Text>
+              <Button variant="default" size="sm" onPress={openAddModal} style={{ marginTop: 12 }}>
+                <Ionicons name="add" size={16} color="#ffffff" />
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#ffffff', marginLeft: 4 }}>
+                  Ajouter ma première charge variable
+                </Text>
+              </Button>
+            </View>
+          ) : (
+            <View style={styles.tableInner}>
+              {/* LIGNE DES COLONNES DU TABLEAU (CONFORME À L'IMAGE DEMANDÉE) */}
+              <View style={styles.tableHeaderRow}>
+                <Text style={[styles.tableColHeader, styles.colTitre]}>Titre</Text>
+                <Text style={[styles.tableColHeader, styles.colMontant]}>Montant</Text>
+                <Text style={[styles.tableColHeader, styles.colDuration]}>Durée de vie Sur x Mois</Text>
+                <Text style={[styles.tableColHeader, styles.colActions]}>Action</Text>
+              </View>
 
-        <View style={styles.cardsGrid}>
-          {variableCategories.map((cat) => {
-            const ratio = cat.estimatedBudget > 0 ? (cat.spent / cat.estimatedBudget) * 100 : 0;
-            const isOver = cat.spent > cat.estimatedBudget;
-            const remaining = cat.estimatedBudget - cat.spent;
+              {/* LIGNES DES CHARGES VARIABLES */}
+              {variableCategories.map((item, index) => {
+                const isEven = index % 2 === 0;
+                const total = item.totalAmount !== undefined ? item.totalAmount : item.estimatedBudget;
+                const duration = Math.max(0.01, item.durationMonths || 1);
+                const monthly = item.estimatedBudget || Math.round((total / duration) * 100) / 100;
+                const formattedDuration = Number.isInteger(duration)
+                  ? `${duration} mois`
+                  : `${duration.toString().replace('.', ',')} mois`;
 
-            return (
-              <Card key={cat.id} style={styles.catCard}>
-                <View style={styles.catCardTop}>
-                  <View style={styles.catCardHeaderLeft}>
-                    <View style={[styles.catIconBox, { backgroundColor: `${cat.color}15` }]}>
-                      <Ionicons name={cat.icon as any} size={20} color={cat.color} />
+                return (
+                  <View
+                    key={item.id}
+                    style={[
+                      styles.tableRow,
+                      isEven ? styles.tableRowEven : styles.tableRowOdd,
+                      index === variableCategories.length - 1 && styles.tableRowLast,
+                    ]}>
+                    {/* COLONNE 1 : TITRE */}
+                    <View style={styles.colTitre}>
+                      <View style={styles.tableChargeWrap}>
+                        <View style={[styles.tableCatIconSmall, { backgroundColor: `${item.color}15` }]}>
+                          <Ionicons name={item.icon as any} size={16} color={item.color} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.tableItemTitle} numberOfLines={1}>
+                            {item.label}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                    <View>
-                      <Text style={styles.catCardTitle}>{cat.label}</Text>
-                      <Text style={styles.catCardSubtitle}>
-                        Estimé : {formatEuro(cat.estimatedBudget)}
+
+                    {/* COLONNE 2 : MONTANT */}
+                    <View style={styles.colMontant}>
+                      <Text style={styles.tableAmountText}>
+                        -{formatEuro(total)}
+                      </Text>
+                      {duration !== 1 && (
+                        <Text style={styles.tableMonthlySubText}>
+                          soit {formatEuro(monthly)}/mois
+                        </Text>
+                      )}
+                    </View>
+
+                    {/* COLONNE 3 : DURÉE DE VIE SUR X MOIS */}
+                    <View style={styles.colDuration}>
+                      <View style={styles.durationBadge}>
+                        <Ionicons name="calendar-outline" size={13} color="#92400e" />
+                        <Text style={styles.durationBadgeText}>
+                          {formattedDuration}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* COLONNE 4 : ACTIONS (MODIFIER / SUPPRIMER) */}
+                    <View style={styles.colActions}>
+                      <TouchableOpacity
+                        onPress={() => openEditModal(item)}
+                        style={styles.tableActionBtn}
+                        accessibilityLabel={`Modifier ${item.label}`}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                        <Ionicons name="pencil-outline" size={16} color="#7c6f85" />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleDelete(item.id, item.label)}
+                        style={styles.tableActionBtn}
+                        accessibilityLabel={`Supprimer ${item.label}`}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                        <Ionicons name="trash-outline" size={16} color="#d43f5e" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                );
+              })}
+
+              {/* PIED DU TABLEAU : TOTAL MENSUEL LISSÉ */}
+              <View style={styles.tableTotalFooter}>
+                <View style={styles.tableTotalLeft}>
+                  <Text style={styles.tableTotalTitle}>TOTAL MENSUEL LISSÉ</Text>
+                  <Text style={styles.tableTotalSub}>
+                    Arrondi à l&apos;unité • {variableCategories.length} charges
+                  </Text>
+                </View>
+                <View style={styles.tableTotalRight}>
+                  <Text style={styles.tableTotalAmount}>
+                    {formatEuroRound(totalEstimatedVariable)}
+                  </Text>
+                  <Text style={styles.tableTotalExact}>
+                    Exact : {formatEuro(totalEstimatedVariable)} / mois
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* FORMULAIRE MODAL D'AJOUT / ÉDITION D'UNE CHARGE VARIABLE */}
+      <Modal visible={isModalVisible} animationType="fade" transparent>
+        <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
+          <Pressable style={styles.modalCard} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.modalHeader}>
+              <View style={styles.modalHeaderTitleGroup}>
+                <View style={styles.modalIconWrap}>
+                  <Ionicons
+                    name={editingCategory ? 'create-outline' : 'add-circle-outline'}
+                    size={20}
+                    color="#d9822b"
+                  />
+                </View>
+                <View>
+                  <Text style={styles.modalTitle}>
+                    {editingCategory ? 'Modifier la charge variable' : 'Nouvelle charge variable'}
+                  </Text>
+                  <Text style={styles.modalSubtitle}>
+                    Lissage automatique : Montant ÷ Durée en mois
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => setIsModalVisible(false)}
+                style={styles.closeBtn}
+                accessibilityLabel="Fermer la boîte de dialogue">
+                <Ionicons name="close" size={20} color="#7c6f85" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.modalScrollBody}
+              bounces={false}>
+              
+              {/* CHAMP 1 : TITRE */}
+              <View style={styles.formGroup}>
+                <Text style={styles.inputLabel}>Titre</Text>
+                <Input
+                  value={labelInput}
+                  onChangeText={setLabelInput}
+                  placeholder="Ex: Entretien voiture, Vacances, Alimentation..."
+                  placeholderTextColor="#95899e"
+                  style={styles.input}
+                  autoFocus={!editingCategory}
+                />
+              </View>
+
+              {/* CHAMP 2 : MONTANT */}
+              <View style={styles.formGroup}>
+                <Text style={styles.inputLabel}>Montant (€)</Text>
+                <Input
+                  value={amountInput}
+                  onChangeText={setAmountInput}
+                  keyboardType="decimal-pad"
+                  placeholder="Ex: 600.00"
+                  placeholderTextColor="#95899e"
+                  style={styles.input}
+                />
+              </View>
+
+              {/* CHAMP 3 : DURÉE DE VIE SUR X MOIS */}
+              <View style={styles.formGroup}>
+                <View style={styles.durationHeaderRow}>
+                  <Text style={styles.inputLabel}>Durée de vie Sur x Mois</Text>
+                  <Text style={styles.durationHint}>Nombre de mois pour le lissage</Text>
+                </View>
+
+                <View style={styles.durationInputRow}>
+                  <Input
+                    value={durationInput}
+                    onChangeText={(val) => {
+                      // Autorise les chiffres, la virgule et le point décimal
+                      const sanitized = val.replace(/[^0-9.,]/g, '');
+                      setDurationInput(sanitized);
+                    }}
+                    keyboardType="decimal-pad"
+                    placeholder="1"
+                    placeholderTextColor="#95899e"
+                    style={[styles.input, styles.durationNumericInput]}
+                  />
+                  <Text style={styles.durationUnitText}>mois</Text>
+
+                  {/* BOUTONS PRÉRÉGLAGES RAPIDES */}
+                  <View style={styles.durationPillsWrap}>
+                    {DURATION_PRESETS.map((m) => (
+                      <TouchableOpacity
+                        key={m}
+                        onPress={() => setDurationInput(m.toString())}
+                        activeOpacity={0.7}
+                        style={[
+                          styles.durationPill,
+                          durationInput === m.toString() && styles.durationPillActive,
+                        ]}>
+                        <Text
+                          style={[
+                            styles.durationPillText,
+                            durationInput === m.toString() && styles.durationPillTextActive,
+                          ]}>
+                          {m}m
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                {/* ENCART EN DIRECT DU CALCUL DE LISSAGE */}
+                {modalParsedAmount > 0 && (
+                  <View style={styles.monthlySmoothingBox}>
+                    <Ionicons name="calculator-outline" size={18} color="#d9822b" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.monthlySmoothingText}>
+                        Impact mensuel calculé :{' '}
+                        <Text style={styles.monthlySmoothingHighlight}>
+                          {formatEuro(modalMonthlyImpact)} / mois
+                        </Text>
+                      </Text>
+                      <Text style={styles.monthlySmoothingSub}>
+                        {formatEuro(modalParsedAmount)} lissés sur {modalParsedDuration.toString().replace('.', ',')} mois
                       </Text>
                     </View>
                   </View>
-
-                  <View style={styles.catActions}>
-                    <TouchableOpacity
-                      onPress={() => openEditCategoryModal(cat)}
-                      style={styles.iconBtn}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                      <Ionicons name="pencil-outline" size={15} color="#7c6f85" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => handleDeleteCategory(cat.id, cat.label)}
-                      style={styles.iconBtn}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                      <Ionicons name="trash-outline" size={15} color="#d43f5e" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                {/* MONTANTS & PROGRESSION */}
-                <View style={styles.catAmountsRow}>
-                  <View>
-                    <Text style={styles.catSpentLabel}>Dépensé</Text>
-                    <Text style={[styles.catSpentAmount, isOver && styles.catSpentAmountOver]}>
-                      {formatEuro(cat.spent)}
-                    </Text>
-                  </View>
-                  <View style={styles.alignRight}>
-                    <Text style={styles.catRemainingLabel}>
-                      {isOver ? 'Dépassement' : 'Disponible'}
-                    </Text>
-                    <Text style={[styles.catRemainingAmount, isOver && styles.catSpentAmountOver]}>
-                      {isOver ? `+${formatEuro(Math.abs(remaining))}` : formatEuro(remaining)}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* BARRE DE PROGRESSION CATÉGORIE */}
-                <View style={styles.catProgressBarBg}>
-                  <View
-                    style={[
-                      styles.catProgressBarFill,
-                      {
-                        width: `${Math.min(100, Math.max(0, ratio))}%`,
-                        backgroundColor: isOver ? '#d43f5e' : ratio > 80 ? '#d9822b' : cat.color,
-                      },
-                    ]}
-                  />
-                </View>
-
-                <View style={styles.catCardBottomRow}>
-                  <Badge variant={isOver ? 'destructive' : 'secondary'} style={styles.badgeSmall}>
-                    <Text style={styles.badgeSmallText}>{formatPercent(ratio)} utilisé</Text>
-                  </Badge>
-
-                  <TouchableOpacity
-                    style={styles.addExpenseBtn}
-                    onPress={() => openAddExpenseModal(cat)}
-                    activeOpacity={0.7}>
-                    <Ionicons name="add-circle" size={16} color="#9b6fba" />
-                    <Text style={styles.addExpenseBtnText}>+ Saisir dépense</Text>
-                  </TouchableOpacity>
-                </View>
-              </Card>
-            );
-          })}
-        </View>
-
-        {/* BANNIÈRE NAVIGATION SUIVANTE : CALCUL ET DÉTAIL */}
-        <TouchableOpacity
-          onPress={() => router.push('/details')}
-          activeOpacity={0.85}
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 18,
-            padding: 16,
-            borderWidth: 1,
-            borderColor: '#e6dfd3',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 4,
-            shadowColor: '#231c2b',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.04,
-            shadowRadius: 6,
-            elevation: 2,
-          }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <View
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 19,
-                backgroundColor: 'rgba(27, 153, 99, 0.12)',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <Ionicons name="calculator-outline" size={19} color="#1b9963" />
-            </View>
-            <View>
-              <Text style={{ fontSize: 13, fontWeight: '700', color: '#231c2b' }}>
-                Étape suivante : Bilan & Calcul 50/30/20
-              </Text>
-              <Text style={{ fontSize: 11, color: '#7c6f85' }}>
-                Consultez l&apos;analyse budgétaire et le simulateur d&apos;épargne
-              </Text>
-            </View>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color="#9b6fba" />
-        </TouchableOpacity>
-      </ScrollView>
-
-      {/* MODAL 1 : SAISIR UNE DÉPENSE */}
-      <Modal visible={isExpenseModalVisible} animationType="slide" transparent>
-        <Pressable style={styles.modalOverlay} onPress={() => setIsExpenseModalVisible(false)}>
-          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-            <View style={styles.modalHeader}>
-              <View>
-                <Text style={styles.modalTitle}>Ajouter une dépense</Text>
-                {selectedCatForExpense && (
-                  <Text style={styles.modalSubtitle}>Enveloppe : {selectedCatForExpense.label}</Text>
                 )}
               </View>
-              <TouchableOpacity onPress={() => setIsExpenseModalVisible(false)}>
-                <Ionicons name="close" size={22} color="#7c6f85" />
-              </TouchableOpacity>
-            </View>
 
-            <View style={styles.formGroup}>
-              <Text style={styles.inputLabel}>Montant dépensé (€)</Text>
-              <Input
-                value={expenseAmount}
-                onChangeText={setExpenseAmount}
-                keyboardType="numeric"
-                placeholder="Ex: 35.50"
-                placeholderTextColor="#95899e"
-                style={styles.input}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.inputLabel}>Description (optionnelle)</Text>
-              <Input
-                value={expenseLabel}
-                onChangeText={setExpenseLabel}
-                placeholder="Ex: Supermarché du samedi"
-                placeholderTextColor="#95899e"
-                style={styles.input}
-              />
-            </View>
-
-            <View style={styles.modalButtons}>
-              <Button
-                variant="outline"
-                onPress={() => setIsExpenseModalVisible(false)}
-                style={styles.cancelBtn}>
-                <Text style={styles.cancelBtnText}>Annuler</Text>
-              </Button>
-              <Button variant="default" onPress={handleSaveExpense} style={styles.saveBtn}>
-                <Text style={styles.saveBtnText}>Valider la dépense</Text>
-              </Button>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {/* MODAL 2 : CRÉER / MODIFIER ENVELOPPE */}
-      <Modal visible={isCategoryModalVisible} animationType="slide" transparent>
-        <Pressable style={styles.modalOverlay} onPress={() => setIsCategoryModalVisible(false)}>
-          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {editingCategory ? "Modifier l'enveloppe" : 'Nouvelle enveloppe variable'}
-              </Text>
-              <TouchableOpacity onPress={() => setIsCategoryModalVisible(false)}>
-                <Ionicons name="close" size={22} color="#7c6f85" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* CHAMP 4 : ICÔNE */}
               <View style={styles.formGroup}>
-                <Text style={styles.inputLabel}>{"Nom de l'enveloppe"}</Text>
-                <Input
-                  value={catLabel}
-                  onChangeText={setCatLabel}
-                  placeholder="Ex: Sorties & Loisirs"
-                  placeholderTextColor="#95899e"
-                  style={styles.input}
-                />
-              </View>
-
-              <View style={styles.formGroup}>
-                <Text style={styles.inputLabel}>Budget mensuel estimé (€)</Text>
-                <Input
-                  value={catBudget}
-                  onChangeText={setCatBudget}
-                  keyboardType="numeric"
-                  placeholder="Ex: 250"
-                  placeholderTextColor="#95899e"
-                  style={styles.input}
-                />
-              </View>
-
-              <View style={styles.formGroup}>
-                <Text style={styles.inputLabel}>Icône</Text>
-                <View style={styles.iconPickerRow}>
+                <Text style={styles.inputLabel}>Icône illustrative</Text>
+                <View style={styles.presetIconsRow}>
                   {PRESET_ICONS.map((item) => (
                     <TouchableOpacity
                       key={item.icon}
-                      onPress={() => setCatIcon(item.icon)}
+                      onPress={() => setIconInput(item.icon)}
+                      activeOpacity={0.7}
                       style={[
-                        styles.iconPickerItem,
-                        catIcon === item.icon && styles.iconPickerItemActive,
+                        styles.iconPresetBtn,
+                        iconInput === item.icon && styles.iconPresetBtnSelected,
                       ]}>
                       <Ionicons
                         name={item.icon as any}
                         size={18}
-                        color={catIcon === item.icon ? '#9b6fba' : '#7c6f85'}
+                        color={iconInput === item.icon ? '#d9822b' : '#7c6f85'}
                       />
                     </TouchableOpacity>
                   ))}
                 </View>
               </View>
 
+              {/* CHAMP 5 : COULEUR */}
               <View style={styles.formGroup}>
-                <Text style={styles.inputLabel}>Couleur</Text>
-                <View style={styles.colorPickerRow}>
-                  {PRESET_COLORS.map((c) => (
+                <Text style={styles.inputLabel}>Couleur distinctive</Text>
+                <View style={styles.presetColorsRow}>
+                  {PRESET_COLORS.map((color) => (
                     <TouchableOpacity
-                      key={c}
-                      onPress={() => setCatColor(c)}
+                      key={color}
+                      onPress={() => setColorInput(color)}
+                      activeOpacity={0.7}
                       style={[
-                        styles.colorPickerCircle,
-                        { backgroundColor: c },
-                        catColor === c && styles.colorPickerCircleActive,
-                      ]}
-                    />
+                        styles.colorPresetBtn,
+                        { backgroundColor: color },
+                        colorInput === color && styles.colorPresetBtnSelected,
+                      ]}>
+                      {colorInput === color && (
+                        <Ionicons name="checkmark" size={14} color="#ffffff" />
+                      )}
+                    </TouchableOpacity>
                   ))}
                 </View>
               </View>
-
-              <View style={styles.modalButtons}>
-                <Button
-                  variant="outline"
-                  onPress={() => setIsCategoryModalVisible(false)}
-                  style={styles.cancelBtn}>
-                  <Text style={styles.cancelBtnText}>Annuler</Text>
-                </Button>
-                <Button variant="default" onPress={handleSaveCategory} style={styles.saveBtn}>
-                  <Text style={styles.saveBtnText}>Enregistrer</Text>
-                </Button>
-              </View>
             </ScrollView>
+
+            {/* BOUTONS D'ACTION FIXÉS EN BAS AVEC RESPIRATION */}
+            <View style={styles.modalActionButtons}>
+              <TouchableOpacity
+                onPress={() => setIsModalVisible(false)}
+                activeOpacity={0.7}
+                style={styles.cancelActionBtn}>
+                <Text style={styles.cancelActionBtnText}>Annuler</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleSave}
+                activeOpacity={0.85}
+                style={styles.saveActionBtn}>
+                <Ionicons name="checkmark" size={18} color="#ffffff" />
+                <Text style={styles.saveActionBtnText}>
+                  {editingCategory ? 'Enregistrer' : 'Ajouter la charge'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </Pressable>
         </Pressable>
       </Modal>
@@ -509,13 +523,13 @@ export default function VariableExpensesScreen() {
       {/* POPUP DE CONFIRMATION DE SUPPRESSION */}
       <ConfirmDialog
         visible={!!deleteTarget}
-        title="Supprimer l'enveloppe"
-        message="Êtes-vous sûr de vouloir supprimer l'enveloppe"
+        title="Supprimer la charge variable"
+        message="Êtes-vous sûr de vouloir supprimer la charge"
         highlightText={deleteTarget?.label}
         confirmLabel="Supprimer"
         cancelLabel="Annuler"
         isDestructive
-        onConfirm={handleConfirmDeleteCategory}
+        onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />
     </SafeAreaView>
@@ -527,31 +541,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f4f0e8',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 12 : 8,
-    paddingBottom: 16,
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#7c6f85',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#231c2b',
-    marginTop: 2,
-  },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#9b6fba',
+    backgroundColor: '#d9822b',
     paddingHorizontal: 14,
     borderRadius: 20,
     gap: 4,
@@ -569,320 +562,506 @@ const styles = StyleSheet.create({
     maxWidth: 860,
     alignSelf: 'center',
   },
+
+  /* CARTE DU TOTAL */
   summaryCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 20,
-    padding: 18,
+    borderRadius: 22,
+    padding: 20,
     borderWidth: 1,
     borderColor: '#e6dfd3',
     shadowColor: '#231c2b',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  summaryHeader: {
+  summaryTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 14,
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    gap: 12,
   },
-  summaryTitle: {
+  summaryLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  summaryLabel: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#7c6f85',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
-  summaryBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#6e6277',
+  unitBadge: {
+    backgroundColor: 'rgba(217, 130, 43, 0.12)',
+    borderColor: 'rgba(217, 130, 43, 0.3)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
   },
-  amountsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  amountCol: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  amountLabel: {
-    fontSize: 11,
-    color: '#7c6f85',
-    marginBottom: 4,
-  },
-  amountValueEstimated: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#9b6fba',
-  },
-  amountValueSpent: {
-    fontSize: 18,
+  unitBadgeText: {
+    fontSize: 10,
     fontWeight: '800',
     color: '#d9822b',
+    letterSpacing: 0.3,
   },
-  amountValueLeft: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#1b9963',
-  },
-  verticalSep: {
-    width: 1,
-    height: 34,
-    backgroundColor: '#f0eae0',
-  },
-  gaugeSection: {
-    marginTop: 18,
-    gap: 6,
-  },
-  gaugeBackground: {
-    height: 8,
-    backgroundColor: '#f0eae0',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  gaugeFilled: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  gaugeLegendRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  gaugeLegendText: {
-    fontSize: 11,
-    color: '#7c6f85',
-  },
-  savingsImpactCard: {
-    backgroundColor: 'rgba(27, 153, 99, 0.08)',
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(27, 153, 99, 0.25)',
-  },
-  savingsImpactRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  savingsIconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(27, 153, 99, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  savingsImpactTextGroup: {
-    flex: 1,
-  },
-  savingsImpactLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#1b9963',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  savingsImpactAmount: {
-    fontSize: 22,
+  summaryTotal: {
+    fontSize: 34,
     fontWeight: '900',
-    color: '#231c2b',
-    marginVertical: 2,
+    color: '#d9822b',
+    marginTop: 4,
+    letterSpacing: -0.5,
   },
-  savingsImpactSubtext: {
-    fontSize: 11,
-    color: '#6e6277',
-  },
-  sectionHeaderRow: {
+  summaryExact: {
+    fontSize: 13,
+    color: '#7c6f85',
+    fontWeight: '600',
     marginTop: 4,
   },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '800',
+  countBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(217, 130, 43, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(217, 130, 43, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    gap: 6,
+  },
+  countBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#d9822b',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#faf7f2',
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginTop: 16,
+  },
+  statItem: {
+    flex: 1,
+  },
+  statLabel: {
+    fontSize: 10,
+    fontWeight: '700',
     color: '#7c6f85',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
-  cardsGrid: {
-    gap: 14,
+  statValue: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#231c2b',
+    marginTop: 2,
   },
-  catCard: {
+  statDivider: {
+    width: 1,
+    height: 26,
+    backgroundColor: '#e6dfd3',
+    marginHorizontal: 14,
+  },
+
+  /* CARTE DU TABLEAU */
+  tableCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 18,
-    padding: 16,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#e6dfd3',
+    overflow: 'hidden',
     shadowColor: '#231c2b',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 5,
-    elevation: 2,
-    gap: 12,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  catCardTop: {
+  tableTopHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0eae0',
+    backgroundColor: '#ffffff',
   },
-  catCardHeaderLeft: {
+  tableTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#231c2b',
+    letterSpacing: 0.2,
+  },
+  tableSubtitle: {
+    fontSize: 11,
+    color: '#7c6f85',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  addInlineBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(217, 130, 43, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(217, 130, 43, 0.25)',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+  },
+  addInlineBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#d9822b',
+  },
+  emptyContainer: {
+    padding: 36,
+    alignItems: 'center',
+    gap: 8,
+  },
+  emptyTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#231c2b',
+    marginTop: 4,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: '#7c6f85',
+    textAlign: 'center',
+    maxWidth: 340,
+    lineHeight: 18,
+  },
+
+  /* STRUCTURE DU TABLEAU ET COLONNES */
+  tableInner: {
+    width: '100%',
+  },
+  tableHeaderRow: {
+    flexDirection: 'row',
+    backgroundColor: '#fcd9b8', // Couleur beige/orangée douce conforme à l'image
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0c69d',
+    alignItems: 'center',
+  },
+  tableColHeader: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#0e2646', // Texte sombre bien lisible
+    letterSpacing: 0.2,
+  },
+  colTitre: {
+    flex: 1.2,
+  },
+  colMontant: {
+    width: 120,
+    alignItems: 'flex-end',
+    textAlign: 'right',
+  },
+  colDuration: {
+    width: 140,
+    alignItems: 'center',
+    textAlign: 'center',
+  },
+  colActions: {
+    width: 64,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 6,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2ede4',
+  },
+  tableRowEven: {
+    backgroundColor: '#ffffff',
+  },
+  tableRowOdd: {
+    backgroundColor: '#fbf9f6',
+  },
+  tableRowLast: {
+    borderBottomWidth: 0,
+  },
+  tableChargeWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  catIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+  tableCatIconSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  catCardTitle: {
-    fontSize: 15,
+  tableItemTitle: {
+    fontSize: 13,
     fontWeight: '700',
     color: '#231c2b',
   },
-  catCardSubtitle: {
-    fontSize: 11,
+  tableAmountText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#d9822b',
+  },
+  tableMonthlySubText: {
+    fontSize: 10,
+    fontWeight: '600',
     color: '#7c6f85',
     marginTop: 2,
   },
-  catActions: {
+  durationBadge: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    backgroundColor: 'rgba(217, 130, 43, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(217, 130, 43, 0.25)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    gap: 4,
   },
-  iconBtn: {
+  durationBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#92400e',
+  },
+  tableActionBtn: {
     padding: 4,
+    borderRadius: 6,
   },
-  catAmountsRow: {
+  tableTotalFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#fdf6ee',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderTopWidth: 2,
+    borderTopColor: '#f5e3d0',
   },
-  catSpentLabel: {
-    fontSize: 11,
-    color: '#7c6f85',
+  tableTotalLeft: {
+    flex: 1,
   },
-  catSpentAmount: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#231c2b',
-  },
-  catSpentAmountOver: {
-    color: '#d43f5e',
-  },
-  alignRight: {
+  tableTotalRight: {
     alignItems: 'flex-end',
   },
-  catRemainingLabel: {
+  tableTotalTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#b06518',
+    letterSpacing: 0.5,
+  },
+  tableTotalSub: {
+    fontSize: 10,
+    color: '#7c6f85',
+    marginTop: 2,
+  },
+  tableTotalAmount: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#b06518',
+  },
+  tableTotalExact: {
     fontSize: 11,
     color: '#7c6f85',
+    marginTop: 1,
   },
-  catRemainingAmount: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#1b9963',
-  },
-  catProgressBarBg: {
-    height: 6,
-    backgroundColor: '#f0eae0',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  catProgressBarFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  catCardBottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  badgeSmall: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    backgroundColor: '#faf7f2',
-    borderColor: '#e6dfd3',
-  },
-  badgeSmallText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#6e6277',
-  },
-  addExpenseBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(155, 111, 186, 0.12)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-  },
-  addExpenseBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#9b6fba',
-  },
+
+  /* MODAL */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(35, 28, 43, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(27, 20, 36, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
   },
-  modalContent: {
+  modalCard: {
     backgroundColor: '#ffffff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    maxHeight: '85%',
+    borderRadius: 24,
+    width: '100%',
+    maxWidth: 520,
+    maxHeight: '90%',
     borderWidth: 1,
     borderColor: '#e6dfd3',
-    shadowColor: '#231c2b',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 10,
+    shadowColor: '#1b1424',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 12,
+    overflow: 'hidden',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    paddingHorizontal: 22,
+    paddingTop: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0eae0',
+    backgroundColor: '#ffffff',
+  },
+  modalHeaderTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  modalIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(217, 130, 43, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
     color: '#231c2b',
   },
   modalSubtitle: {
-    fontSize: 12,
-    color: '#9b6fba',
-    marginTop: 2,
-    fontWeight: '600',
+    fontSize: 11,
+    color: '#7c6f85',
+    marginTop: 1,
+  },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#faf7f2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+  },
+  modalScrollBody: {
+    paddingHorizontal: 22,
+    paddingTop: 18,
+    paddingBottom: 16,
+    gap: 16,
   },
   formGroup: {
-    marginBottom: 16,
+    gap: 6,
   },
   inputLabel: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#231c2b',
-    marginBottom: 6,
+    fontWeight: '800',
+    color: '#34293f',
+    letterSpacing: 0.2,
   },
   input: {
     backgroundColor: '#faf7f2',
-    borderColor: '#e6dfd3',
+    borderColor: '#ded6c7',
+    borderWidth: 1,
     color: '#231c2b',
     borderRadius: 12,
+    height: 46,
+    paddingHorizontal: 14,
+    fontSize: 14,
   },
-  iconPickerRow: {
+  durationHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  durationHint: {
+    fontSize: 11,
+    color: '#7c6f85',
+    fontWeight: '600',
+  },
+  durationInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  durationNumericInput: {
+    width: 85,
+    textAlign: 'center',
+  },
+  durationUnitText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#65576f',
+    marginRight: 6,
+  },
+  durationPillsWrap: {
+    flexDirection: 'row',
+    gap: 6,
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  durationPill: {
+    paddingHorizontal: 9,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: '#faf7f2',
+    borderWidth: 1,
+    borderColor: '#ded6c7',
+  },
+  durationPillActive: {
+    backgroundColor: 'rgba(217, 130, 43, 0.15)',
+    borderColor: '#d9822b',
+  },
+  durationPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7c6f85',
+  },
+  durationPillTextActive: {
+    color: '#d9822b',
+  },
+  monthlySmoothingBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(217, 130, 43, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(217, 130, 43, 0.25)',
+    borderRadius: 12,
+    padding: 12,
+    gap: 10,
+    marginTop: 6,
+  },
+  monthlySmoothingText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#34293f',
+  },
+  monthlySmoothingHighlight: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#d9822b',
+  },
+  monthlySmoothingSub: {
+    fontSize: 11,
+    color: '#7c6f85',
+    marginTop: 2,
+  },
+  presetIconsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
+    marginTop: 2,
   },
-  iconPickerItem: {
-    width: 40,
-    height: 40,
+  iconPresetBtn: {
+    width: 38,
+    height: 38,
     borderRadius: 10,
     backgroundColor: '#faf7f2',
     borderWidth: 1,
@@ -890,44 +1069,76 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  iconPickerItemActive: {
-    borderColor: '#9b6fba',
-    backgroundColor: 'rgba(155, 111, 186, 0.14)',
+  iconPresetBtnSelected: {
+    borderColor: '#d9822b',
+    backgroundColor: 'rgba(217, 130, 43, 0.15)',
   },
-  colorPickerRow: {
+  presetColorsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  colorPresetBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  colorPresetBtnSelected: {
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  modalActionButtons: {
     flexDirection: 'row',
     gap: 12,
+    paddingHorizontal: 22,
+    paddingTop: 14,
+    paddingBottom: 22,
+    borderTopWidth: 1,
+    borderTopColor: '#f0eae0',
+    backgroundColor: '#ffffff',
   },
-  colorPickerCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  colorPickerCircleActive: {
-    borderWidth: 3,
-    borderColor: '#231c2b',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 12,
-    marginBottom: 16,
-  },
-  cancelBtn: {
+  cancelActionBtn: {
     flex: 1,
-    borderColor: '#e6dfd3',
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#dcd4c6',
     backgroundColor: '#faf7f2',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  cancelBtnText: {
-    color: '#7c6f85',
-    fontWeight: '600',
-  },
-  saveBtn: {
-    flex: 1,
-    backgroundColor: '#9b6fba',
-  },
-  saveBtnText: {
-    color: '#ffffff',
+  cancelActionBtnText: {
+    fontSize: 14,
     fontWeight: '700',
+    color: '#65576f',
+  },
+  saveActionBtn: {
+    flex: 2,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#d9822b',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    shadowColor: '#d9822b',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  saveActionBtnText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#ffffff',
   },
 });

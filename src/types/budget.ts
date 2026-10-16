@@ -28,7 +28,9 @@ export interface FixedExpenseItem {
 export interface VariableCategory {
   id: string;
   label: string;
-  estimatedBudget: number; // Budget estimé prévisionnel
+  totalAmount?: number;    // Montant total du poste de charge
+  durationMonths?: number; // Durée de vie sur X mois (ex : 1, 3, 6, 12)
+  estimatedBudget: number; // Impact mensuel lissé = totalAmount / durationMonths
   spent: number;           // Montant réel dépensé ce mois
   icon: string;
   color: string;

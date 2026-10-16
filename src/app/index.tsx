@@ -6,6 +6,7 @@ import {
   Modal,
   Pressable,
   TextInput,
+  StyleSheet,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,51 +19,27 @@ import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
 
 import { useBudget } from '@/hooks/use-budget';
-import { formatEuro, formatPercent } from '@/constants/formatters';
-import { homeStyles as styles } from '@/styles/home.styles';
+import { formatEuro } from '@/constants/formatters';
 
 export default function HomeScreen() {
   const {
     budget,
     fixedExpensesList,
-    variableCategories,
-    expenseHistory,
-    totalBalance,
     totalFixedExpenses,
-    totalPaidFixedExpenses,
-    totalSpentVariable,
-    totalEstimatedVariable,
-    actualRemainingAllowance,
-    projectedSavings,
-    fixedExpenseRatio,
-    variableExpenseRatio,
-    savingsCapacityRatio,
+    remainingAllowance,
     saveBudget,
-    toggleFixedExpensePaid,
-    addExpenseToCategory,
   } = useBudget();
 
-  // Mode privé (masquer les soldes)
+  // Mode privé (masquer les soldes si besoin)
   const [isPrivate, setIsPrivate] = useState(false);
 
-  // Vue carte principale : 'global' (patrimoine) ou 'allowance' (reste à vivre)
-  const [heroView, setHeroView] = useState<'global' | 'allowance'>('global');
-
-  // Modal d'ajustement global
+  // Modal d'ajustement des finances (revenus, compte courant, épargne)
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [formValues, setFormValues] = useState({
     income: budget.income.toString(),
     checkingAccount: budget.checkingAccount.toString(),
     savingsAccount: budget.savingsAccount.toString(),
   });
-
-  // Modal d'ajout rapide de dépense
-  const [isAddExpenseVisible, setIsAddExpenseVisible] = useState(false);
-  const [selectedCatId, setSelectedCatId] = useState<string>(
-    variableCategories[0]?.id || ''
-  );
-  const [quickAmount, setQuickAmount] = useState('');
-  const [quickLabel, setQuickLabel] = useState('');
 
   const openEditModal = () => {
     setFormValues({
@@ -75,25 +52,12 @@ export default function HomeScreen() {
 
   const handleSaveBudget = () => {
     saveBudget({
-      income: parseFloat(formValues.income) || 0,
+      income: parseFloat(formValues.income.replace(',', '.')) || 0,
       fixedExpenses: totalFixedExpenses,
-      checkingAccount: parseFloat(formValues.checkingAccount) || 0,
-      savingsAccount: parseFloat(formValues.savingsAccount) || 0,
+      checkingAccount: parseFloat(formValues.checkingAccount.replace(',', '.')) || 0,
+      savingsAccount: parseFloat(formValues.savingsAccount.replace(',', '.')) || 0,
     });
     setIsEditModalVisible(false);
-  };
-
-  const handleQuickAddExpense = () => {
-    const parsedAmount = parseFloat(quickAmount.replace(',', '.'));
-    if (!parsedAmount || parsedAmount <= 0) return;
-
-    const targetCat = variableCategories.find((c) => c.id === selectedCatId);
-    const label = quickLabel.trim() || targetCat?.label || 'Dépense';
-
-    addExpenseToCategory(selectedCatId, parsedAmount, label);
-    setQuickAmount('');
-    setQuickLabel('');
-    setIsAddExpenseVisible(false);
   };
 
   // Formattage avec prise en compte du mode privé
@@ -102,7 +66,7 @@ export default function HomeScreen() {
     return `${prefix}${formatEuro(amount)}`;
   };
 
-  // Date actuelle et jours restants
+  // Date et rythme indicatif
   const now = new Date();
   const currentMonthName = now.toLocaleDateString('fr-FR', {
     month: 'long',
@@ -117,29 +81,16 @@ export default function HomeScreen() {
     0
   ).getDate();
   const daysRemaining = Math.max(1, totalDaysInMonth - now.getDate() + 1);
-  const dailyAllowance = Math.max(0, actualRemainingAllowance / daysRemaining);
-
-  // Tri des charges fixes
-  const sortedFixedExpenses = [...fixedExpensesList].sort((a, b) => {
-    if (a.isPaid !== b.isPaid) return a.isPaid ? 1 : -1;
-    return (a.dueDay ?? 0) - (b.dueDay ?? 0);
-  });
-
-  // Calcul pour la barre de répartition
-  const totalRatio = fixedExpenseRatio + variableExpenseRatio + savingsCapacityRatio;
-  const safeFixedPercent = totalRatio > 0 ? (fixedExpenseRatio / totalRatio) * 100 : 33;
-  const safeVarPercent = totalRatio > 0 ? (variableExpenseRatio / totalRatio) * 100 : 33;
-  const safeSavingsPercent = totalRatio > 0 ? (savingsCapacityRatio / totalRatio) * 100 : 34;
+  const dailyAllowance = Math.max(0, remainingAllowance / daysRemaining);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <StatusBar style="dark" />
 
-      {/* EN-TÊTE DE NAVIGATION AVEC PILLS */}
+      {/* EN-TÊTE PRINCIPAL */}
       <NavigationHeader
-        currentRoute="index"
         title="Mon Budget"
-        subtitle={`TABLEAU DE BORD • ${formattedMonth.toUpperCase()}`}
+        subtitle={`VUE D'ENSEMBLE • ${formattedMonth.toUpperCase()}`}
         actionButton={
           <View style={styles.headerActions}>
             <TouchableOpacity
@@ -157,9 +108,9 @@ export default function HomeScreen() {
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={openEditModal}
-              style={styles.iconHeaderButton}
-              accessibilityLabel="Ajuster mes paramètres financiers">
-              <Ionicons name="options-outline" size={18} color="#9b6fba" />
+              style={[styles.iconHeaderButton, styles.editHeaderBtn]}
+              accessibilityLabel="Modifier mes montants">
+              <Ionicons name="pencil-outline" size={17} color="#ffffff" />
             </TouchableOpacity>
           </View>
         }
@@ -168,595 +119,225 @@ export default function HomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}>
-
-        {/* 1. CARTE HERO LUXE (PATRIMOINE OU DISPONIBLE CE MOIS) */}
-        <View style={styles.heroCard}>
-          <View style={styles.heroHeaderRow}>
+        
+        {/* 1. CARTE HERO : LE RESTE À VIVRE (MONTANT CENTRAL) */}
+        <Card style={styles.heroCard}>
+          <View style={styles.heroTopRow}>
             <View style={styles.heroBadge}>
               <View style={styles.heroBadgeDot} />
-              <Text style={styles.heroBadgeText}>
-                {heroView === 'global' ? 'Patrimoine Net' : 'Reste à vivre'}
-              </Text>
+              <Text style={styles.heroBadgeText}>Reste à vivre mensuel</Text>
             </View>
 
-            {/* Switch Global / Reste à vivre */}
-            <View style={styles.heroTabs}>
-              <TouchableOpacity
-                onPress={() => setHeroView('global')}
-                style={[
-                  styles.heroTab,
-                  heroView === 'global' && styles.heroTabActive,
-                ]}>
-                <Text
-                  style={[
-                    styles.heroTabText,
-                    heroView === 'global' && styles.heroTabTextActive,
-                  ]}>
-                  Global
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setHeroView('allowance')}
-                style={[
-                  styles.heroTab,
-                  heroView === 'allowance' && styles.heroTabActive,
-                ]}>
-                <Text
-                  style={[
-                    styles.heroTabText,
-                    heroView === 'allowance' && styles.heroTabTextActive,
-                  ]}>
-                  Ce mois
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.heroAmountRow}>
-            <Text style={styles.heroMainAmount}>
-              {heroView === 'global'
-                ? renderMoney(totalBalance)
-                : renderMoney(actualRemainingAllowance)}
-            </Text>
-          </View>
-          <Text style={styles.heroSubLabel}>
-            {heroView === 'global'
-              ? 'Cumul compte courant et épargne bancaire'
-              : `Budget libre après charges et dépenses réelles (${daysRemaining}j restants)`}
-          </Text>
-
-          <View style={styles.heroDivider} />
-
-          {/* DÉCOMPOSITION : COMPTE COURANT & ÉPARGNE */}
-          <View style={styles.heroAccountsRow}>
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={openEditModal}
-              style={styles.heroAccountCol}>
-              <View style={styles.heroAccountIconBg}>
-                <Ionicons name="card-outline" size={18} color="#d8b4fe" />
-              </View>
-              <View>
-                <Text style={styles.heroAccountLabel}>Compte courant</Text>
-                <Text style={styles.heroAccountValue}>
-                  {renderMoney(budget.checkingAccount)}
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <View style={styles.heroVerticalSep} />
-
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={openEditModal}
-              style={styles.heroAccountCol}>
-              <View style={[styles.heroAccountIconBg, styles.heroSavingsIconBg]}>
-                <MaterialCommunityIcons
-                  name="piggy-bank-outline"
-                  size={19}
-                  color="#34d399"
-                />
-              </View>
-              <View>
-                <Text style={styles.heroAccountLabel}>Épargne sécurisée</Text>
-                <Text style={[styles.heroAccountValue, styles.heroSavingsValue]}>
-                  {renderMoney(budget.savingsAccount)}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-
-          {/* PILULE DE SANTÉ FINANCIÈRE */}
-          <View style={styles.heroSavingsPill}>
-            <Text style={styles.heroSavingsPillText}>
-              {"Capacité d'épargne mensuelle"}
-            </Text>
-            <Text style={styles.heroSavingsPillValue}>
-              {formatPercent(savingsCapacityRatio)} ({renderMoney(projectedSavings, '+')})
-            </Text>
-          </View>
-        </View>
-
-        {/* 2. DOCK D'ACTIONS RAPIDES */}
-        <View style={styles.quickActionsDock}>
-          {/* Action 1 : + Dépense rapide */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setIsAddExpenseVisible(true)}
-            style={styles.quickActionItem}>
-            <View style={[styles.quickActionCircle, styles.quickActionPrimaryCircle]}>
-              <Ionicons name="add" size={26} color="#ffffff" />
-            </View>
-            <Text style={styles.quickActionLabel}>+ Dépense</Text>
-          </TouchableOpacity>
-
-          {/* Action 2 : Charges Fixes */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => router.push('/fixed-expenses')}
-            style={styles.quickActionItem}>
-            <View style={styles.quickActionCircle}>
-              <Ionicons name="calendar-outline" size={22} color="#9b6fba" />
-            </View>
-            <Text style={styles.quickActionLabel}>Charges</Text>
-          </TouchableOpacity>
-
-          {/* Action 3 : Enveloppes Variables */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => router.push('/variable-expenses')}
-            style={styles.quickActionItem}>
-            <View style={styles.quickActionCircle}>
-              <Ionicons name="pie-chart-outline" size={22} color="#f59e0b" />
-            </View>
-            <Text style={styles.quickActionLabel}>Enveloppes</Text>
-          </TouchableOpacity>
-
-          {/* Action 4 : Calcul & Détails */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => router.push('/details')}
-            style={styles.quickActionItem}>
-            <View style={styles.quickActionCircle}>
-              <Ionicons name="calculator-outline" size={22} color="#10b981" />
-            </View>
-            <Text style={styles.quickActionLabel}>Détails</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 3. FLUX MENSUEL : ENTRÉES & SORTIES PRÉVUES */}
-        <View style={styles.cashflowRow}>
-          {/* CARTE REVENUS */}
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={openEditModal}
-            style={[styles.cashflowCard, styles.incomeCardBorder]}>
-            <View style={styles.cashflowTop}>
-              <View style={[styles.cashflowIconWrap, styles.incomeIconWrap]}>
-                <Ionicons name="arrow-up" size={16} color="#059669" />
-              </View>
-              <Text style={[styles.cashflowTag, styles.incomeTag]}>Entrées</Text>
-            </View>
-            <Text style={styles.cashflowLabel}>Revenu mensuel</Text>
-            <Text style={styles.incomeValue}>
-              {renderMoney(budget.income, '+')}
-            </Text>
-            <Text style={styles.cashflowHint}>Salaires & rentrées</Text>
-          </TouchableOpacity>
-
-          {/* CARTE SORTIES TOTALES */}
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={() => router.push('/details')}
-            style={[styles.cashflowCard, styles.expenseCardBorder]}>
-            <View style={styles.cashflowTop}>
-              <View style={[styles.cashflowIconWrap, styles.expenseIconWrap]}>
-                <Ionicons name="arrow-down" size={16} color="#e11d48" />
-              </View>
-              <Text style={[styles.cashflowTag, styles.expenseTag]}>Sorties</Text>
-            </View>
-            <Text style={styles.cashflowLabel}>Charges fixes</Text>
-            <Text style={styles.expenseValue}>
-              {renderMoney(totalFixedExpenses, '-')}
-            </Text>
-            <Text style={styles.cashflowHint}>
-              {renderMoney(totalPaidFixedExpenses)} réglés
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 4. RÉPARTITION DU BUDGET DU MOIS (JAUGE MULTI-SEGMENT) */}
-        <Card style={styles.sectionCard}>
-          <View style={styles.sectionCardHeader}>
-            <View style={styles.sectionTitleRow}>
-              <Ionicons name="analytics-outline" size={18} color="#9b6fba" />
-              <Text style={styles.sectionTitle}>Allocation du mois</Text>
-            </View>
-            <Badge variant="outline">
-              <Text style={styles.sectionBadge}>
-                {formatPercent(100 - fixedExpenseRatio)} disponible
-              </Text>
+            <Badge variant="outline" style={styles.daysBadge}>
+              <Text style={styles.daysBadgeText}>{daysRemaining} jours restants</Text>
             </Badge>
           </View>
 
-          {/* BARRE MULTI-SEGMENTS MODERNE */}
-          <View style={styles.multiBarTrack}>
-            <View style={[styles.barFixed, { width: `${safeFixedPercent}%` }]} />
-            <View style={[styles.barVariable, { width: `${safeVarPercent}%` }]} />
-            <View style={[styles.barSavings, { width: `${safeSavingsPercent}%` }]} />
-          </View>
+          {/* MONTANT GÉANT DU RESTE À VIVRE */}
+          <Text style={styles.heroAmount}>{renderMoney(remainingAllowance)}</Text>
 
-          {/* LÉGENDE 3 COLONNES */}
-          <View style={styles.matrixRow}>
-            {/* Colonne 1 : Charges fixes */}
-            <View style={styles.matrixCol}>
-              <View style={styles.matrixDotRow}>
-                <View style={[styles.matrixDot, { backgroundColor: '#9b6fba' }]} />
-                <Text style={styles.matrixLabel}>Fixes</Text>
-              </View>
-              <Text style={styles.matrixValue}>{renderMoney(totalFixedExpenses)}</Text>
-              <Text style={styles.matrixSubtext}>{formatPercent(fixedExpenseRatio)}</Text>
-            </View>
-
-            {/* Colonne 2 : Variables */}
-            <View style={[styles.matrixCol, styles.matrixColCenter]}>
-              <View style={styles.matrixDotRow}>
-                <View style={[styles.matrixDot, { backgroundColor: '#f59e0b' }]} />
-                <Text style={styles.matrixLabel}>Variables</Text>
-              </View>
-              <Text style={styles.matrixValue}>{renderMoney(totalEstimatedVariable)}</Text>
-              <Text style={styles.matrixSubtext}>
-                {renderMoney(totalSpentVariable)} dépensé
-              </Text>
-            </View>
-
-            {/* Colonne 3 : Épargne */}
-            <View style={[styles.matrixCol, styles.matrixColRight]}>
-              <View style={styles.matrixDotRow}>
-                <View style={[styles.matrixDot, { backgroundColor: '#10b981' }]} />
-                <Text style={styles.matrixLabel}>Épargne</Text>
-              </View>
-              <Text style={[styles.matrixValue, { color: '#059669' }]}>
-                {renderMoney(projectedSavings, '+')}
-              </Text>
-              <Text style={styles.matrixSubtext}>
-                {formatPercent(savingsCapacityRatio)}
-              </Text>
-            </View>
-          </View>
-
-          {/* RYTHME CONSEILLÉ JOURNALIER */}
-          <View style={styles.burnRateBanner}>
-            <Text style={styles.burnRateText}>
-              Rythme conseillé :{' '}
-              <Text style={styles.burnRateBold}>
-                ~{renderMoney(dailyAllowance)} / jour
-              </Text>
+          {/* FORMULE EXPLICITE DU RESTE À VIVRE */}
+          <View style={styles.formulaRow}>
+            <Ionicons name="calculator-outline" size={15} color="#d9822b" />
+            <Text style={styles.formulaText}>
+              Calcul : <Text style={styles.formulaHighlight}>{renderMoney(budget.income)}</Text> (Revenus) −{' '}
+              <Text style={styles.formulaHighlight}>{renderMoney(totalFixedExpenses)}</Text> (Charges fixes)
             </Text>
-            <TouchableOpacity onPress={() => router.push('/details')}>
-              <Ionicons name="chevron-forward" size={16} color="#9b6fba" />
+          </View>
+
+          {/* ESTIMATION JOURNALIÈRE DU RESTE À VIVRE */}
+          <View style={styles.heroFooter}>
+            <View style={styles.dailyItem}>
+              <Text style={styles.dailyLabel}>Rythme quotidien conseillé</Text>
+              <Text style={styles.dailyAmount}>~{renderMoney(dailyAllowance)} / jour</Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push('/details')}
+              style={styles.heroDetailBtn}>
+              <Text style={styles.heroDetailBtnText}>Voir le calcul complet</Text>
+              <Ionicons name="chevron-forward" size={14} color="#d9822b" />
             </TouchableOpacity>
           </View>
         </Card>
 
-        {/* 5. CHARGES FIXES : ÉCHÉANCES & VALIDATION EN 1 TAP */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionHeading}>Prélèvements du mois</Text>
-          <TouchableOpacity
-            style={styles.sectionLink}
-            onPress={() => router.push('/fixed-expenses')}>
-            <Text style={styles.sectionLinkText}>
-              Voir tout ({fixedExpensesList.length})
-            </Text>
-            <Ionicons name="chevron-forward" size={14} color="#9b6fba" />
-          </TouchableOpacity>
-        </View>
+        {/* 2. LES 4 MONTANTS CLÉS DU BUDGET (GRILLE RESPONSIVE 2x2) */}
+        <View style={styles.gridSection}>
+          <View style={styles.sectionTitleRow}>
+            <Text style={styles.sectionTitle}>Mes 4 montants clés</Text>
+            <TouchableOpacity onPress={openEditModal} activeOpacity={0.7}>
+              <Text style={styles.sectionEditLink}>Ajuster</Text>
+            </TouchableOpacity>
+          </View>
 
-        <View style={styles.fixedItemsList}>
-          {sortedFixedExpenses.slice(0, 4).map((item, index) => (
-            <View
-              key={item.id}
-              style={[
-                styles.fixedItemRow,
-                index === Math.min(3, sortedFixedExpenses.length - 1) &&
-                  styles.noBorderBottom,
-              ]}>
-              <View style={styles.fixedItemLeft}>
-                <View style={styles.fixedItemIcon}>
-                  <Ionicons name={item.icon as any} size={18} color="#65576f" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.fixedItemLabel} numberOfLines={1}>
-                    {item.label}
-                  </Text>
-                  <Text style={styles.fixedItemDue}>
-                    {item.isPaid
-                      ? '✓ Prélèvement validé'
-                      : item.dueDay
-                      ? `Échéance le ${item.dueDay} du mois`
-                      : 'Charge fixe mensuelle'}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.fixedItemRight}>
-                <Text
-                  style={[
-                    styles.fixedItemAmount,
-                    item.isPaid && styles.fixedItemAmountPaid,
-                  ]}>
-                  {renderMoney(item.amount, '-')}
-                </Text>
-
-                {/* BOUTON CHECKMARK INTERACTIF 1-TAP */}
-                <TouchableOpacity
-                  activeOpacity={0.6}
-                  onPress={() => toggleFixedExpensePaid(item.id)}
-                  style={styles.fixedCheckBtn}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Ionicons
-                    name={
-                      item.isPaid
-                        ? 'checkmark-circle'
-                        : 'ellipse-outline'
-                    }
-                    size={22}
-                    color={item.isPaid ? '#10b981' : '#b8adc2'}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* 6. SUIVI DES ENVELOPPES (TOP CATÉGORIES VARIABLES) */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionHeading}>Enveloppes de dépenses</Text>
-          <TouchableOpacity
-            style={styles.sectionLink}
-            onPress={() => router.push('/variable-expenses')}>
-            <Text style={styles.sectionLinkText}>Gérer</Text>
-            <Ionicons name="chevron-forward" size={14} color="#9b6fba" />
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => router.push('/variable-expenses')}
-          style={styles.envelopeCard}>
-          {variableCategories.slice(0, 3).map((cat, idx) => {
-            const ratio = cat.estimatedBudget > 0
-              ? Math.min(100, Math.round((cat.spent / cat.estimatedBudget) * 100))
-              : 0;
-
-            return (
-              <View
-                key={cat.id}
-                style={[
-                  styles.envelopeItem,
-                  idx === 2 && styles.envelopeItemLast,
-                ]}>
-                <View style={styles.envelopeTopRow}>
-                  <View style={styles.envelopeNameRow}>
-                    <View
-                      style={[
-                        styles.envelopeIconBg,
-                        { backgroundColor: `${cat.color}20` },
-                      ]}>
-                      <Ionicons
-                        name={cat.icon as any}
-                        size={15}
-                        color={cat.color}
-                      />
-                    </View>
-                    <Text style={styles.envelopeName}>{cat.label}</Text>
-                  </View>
-                  <Text style={styles.envelopeAmounts}>
-                    {renderMoney(cat.spent)} / {renderMoney(cat.estimatedBudget)}
-                  </Text>
-                </View>
-
-                <View style={styles.envelopeTrack}>
-                  <View
-                    style={[
-                      styles.envelopeFill,
-                      {
-                        width: `${ratio}%`,
-                        backgroundColor: cat.color || '#9b6fba',
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-            );
-          })}
-        </TouchableOpacity>
-
-        {/* 7. DERNIÈRES DÉPENSES DU MOIS */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionHeading}>Dernières dépenses</Text>
-          <TouchableOpacity
-            style={styles.sectionLink}
-            onPress={() => setIsAddExpenseVisible(true)}>
-            <Text style={styles.sectionLinkText}>+ Ajouter</Text>
-            <Ionicons name="add-circle-outline" size={15} color="#9b6fba" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.recentTxContainer}>
-          {expenseHistory && expenseHistory.length > 0 ? (
-            expenseHistory.slice(0, 3).map((tx, index) => {
-              const cat = variableCategories.find((c) => c.id === tx.categoryId);
-              return (
-                <View
-                  key={tx.id || index}
-                  style={[
-                    styles.recentTxItem,
-                    index === Math.min(2, expenseHistory.length - 1) &&
-                      styles.noBorderBottom,
-                  ]}>
-                  <View style={styles.recentTxLeft}>
-                    <View
-                      style={[
-                        styles.recentTxIcon,
-                        cat && { backgroundColor: `${cat.color}15` },
-                      ]}>
-                      <Ionicons
-                        name={(cat?.icon || 'receipt-outline') as any}
-                        size={16}
-                        color={cat?.color || '#9b6fba'}
-                      />
-                    </View>
-                    <View>
-                      <Text style={styles.recentTxLabel}>{tx.label}</Text>
-                      <Text style={styles.recentTxDate}>
-                        {cat?.label || 'Dépense'} • {new Date(tx.date).toLocaleDateString('fr-FR')}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={styles.recentTxAmount}>
-                    {renderMoney(tx.amount, '-')}
-                  </Text>
-                </View>
-              );
-            })
-          ) : (
+          <View style={styles.kpiGrid}>
+            {/* 1. MONTANT DES REVENUS */}
             <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setIsAddExpenseVisible(true)}
-              style={styles.emptyTxBox}>
-              <Ionicons name="sparkles-outline" size={24} color="#9b6fba" />
-              <Text style={styles.emptyTxText}>
-                Aucune dépense récente enregistrée
+              activeOpacity={0.85}
+              onPress={openEditModal}
+              style={[styles.kpiCard, styles.incomeCard]}>
+              <View style={styles.kpiHeaderRow}>
+                <View style={[styles.kpiIconWrap, styles.incomeIconBg]}>
+                  <Ionicons name="trending-up-outline" size={18} color="#059669" />
+                </View>
+                <Badge variant="outline" style={styles.kpiBadge}>
+                  <Text style={[styles.kpiBadgeText, { color: '#059669' }]}>Entrées</Text>
+                </Badge>
+              </View>
+
+              <Text style={styles.kpiLabel}>Mes revenus</Text>
+              <Text style={[styles.kpiAmount, { color: '#059669' }]}>
+                {renderMoney(budget.income, '+')}
               </Text>
-              <Text style={[styles.sectionLinkText, { marginTop: 2 }]}>
-                Toucher ici pour enregistrer un achat rapide →
+              <Text style={styles.kpiSubtitle}>Revenu mensuel net</Text>
+            </TouchableOpacity>
+
+            {/* 2. MONTANT DES CHARGES FIXES */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => router.push('/fixed-expenses')}
+              style={[styles.kpiCard, styles.fixedCard]}>
+              <View style={styles.kpiHeaderRow}>
+                <View style={[styles.kpiIconWrap, styles.fixedIconBg]}>
+                  <Ionicons name="repeat-outline" size={18} color="#9b6fba" />
+                </View>
+                <Badge variant="outline" style={styles.kpiBadge}>
+                  <Text style={[styles.kpiBadgeText, { color: '#9b6fba' }]}>Prélèvements</Text>
+                </Badge>
+              </View>
+
+              <Text style={styles.kpiLabel}>Charges fixes</Text>
+              <Text style={[styles.kpiAmount, { color: '#dc2626' }]}>
+                -{renderMoney(totalFixedExpenses)}
+              </Text>
+              <Text style={styles.kpiSubtitle}>
+                {fixedExpensesList.length} charges récurrentes
               </Text>
             </TouchableOpacity>
-          )}
+
+            {/* 3. MONTANT DU COMPTE COURANT */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={openEditModal}
+              style={[styles.kpiCard, styles.checkingCard]}>
+              <View style={styles.kpiHeaderRow}>
+                <View style={[styles.kpiIconWrap, styles.checkingIconBg]}>
+                  <Ionicons name="card-outline" size={18} color="#2563eb" />
+                </View>
+                <Badge variant="outline" style={styles.kpiBadge}>
+                  <Text style={[styles.kpiBadgeText, { color: '#2563eb' }]}>Disponible</Text>
+                </Badge>
+              </View>
+
+              <Text style={styles.kpiLabel}>Compte courant</Text>
+              <Text style={[styles.kpiAmount, { color: '#231c2b' }]}>
+                {renderMoney(budget.checkingAccount)}
+              </Text>
+              <Text style={styles.kpiSubtitle}>Solde bancaire actuel</Text>
+            </TouchableOpacity>
+
+            {/* 4. MONTANT DE L'ÉPARGNE */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={openEditModal}
+              style={[styles.kpiCard, styles.savingsCard]}>
+              <View style={styles.kpiHeaderRow}>
+                <View style={[styles.kpiIconWrap, styles.savingsIconBg]}>
+                  <MaterialCommunityIcons name="piggy-bank-outline" size={19} color="#0d9488" />
+                </View>
+                <Badge variant="outline" style={styles.kpiBadge}>
+                  <Text style={[styles.kpiBadgeText, { color: '#0d9488' }]}>Réserves</Text>
+                </Badge>
+              </View>
+
+              <Text style={styles.kpiLabel}>Mon épargne</Text>
+              <Text style={[styles.kpiAmount, { color: '#0d9488' }]}>
+                {renderMoney(budget.savingsAccount)}
+              </Text>
+              <Text style={styles.kpiSubtitle}>Total épargne sécurisée</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* 3. RACCOURCIS RAPIDES VERS LES TABLEAUX ET CALCULS */}
+        <View style={styles.shortcutsCard}>
+          <Text style={styles.shortcutsTitle}>Accès direct aux rubriques</Text>
+          <View style={styles.shortcutsRow}>
+            {/* Raccourci 1 : Charges Fixes */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push('/fixed-expenses')}
+              style={styles.shortcutBtn}>
+              <View style={[styles.shortcutIconBg, { backgroundColor: 'rgba(155, 111, 186, 0.12)' }]}>
+                <Ionicons name="calendar-outline" size={20} color="#9b6fba" />
+              </View>
+              <Text style={styles.shortcutLabel}>Charges Fixes</Text>
+              <Text style={styles.shortcutSub}>{fixedExpensesList.length} charges</Text>
+            </TouchableOpacity>
+
+            {/* Raccourci 2 : Charges Variables */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push('/variable-expenses')}
+              style={styles.shortcutBtn}>
+              <View style={[styles.shortcutIconBg, { backgroundColor: 'rgba(217, 130, 43, 0.12)' }]}>
+                <Ionicons name="pie-chart-outline" size={20} color="#d9822b" />
+              </View>
+              <Text style={styles.shortcutLabel}>Charges Variables</Text>
+              <Text style={styles.shortcutSub}>Lissage mensuel</Text>
+            </TouchableOpacity>
+
+            {/* Raccourci 3 : Calcul & Détails */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push('/details')}
+              style={styles.shortcutBtn}>
+              <View style={[styles.shortcutIconBg, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
+                <Ionicons name="calculator-outline" size={20} color="#10b981" />
+              </View>
+              <Text style={styles.shortcutLabel}>Calcul & Épargne</Text>
+              <Text style={styles.shortcutSub}>Bilan complet</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
 
-      {/* MODAL 1 : AJOUT RAPIDE D'UNE DÉPENSE */}
-      <Modal
-        visible={isAddExpenseVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsAddExpenseVisible(false)}>
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setIsAddExpenseVisible(false)}>
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Ajouter une dépense</Text>
-              <TouchableOpacity
-                onPress={() => setIsAddExpenseVisible(false)}
-                style={styles.modalCloseBtn}>
-                <Ionicons name="close" size={20} color="#65576f" />
-              </TouchableOpacity>
-            </View>
-
-            {/* CHOIX DE LA CATÉGORIE / ENVELOPPE */}
-            <Text style={styles.inputLabel}>{"Choisir l'enveloppe"}</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryChipScroll}>
-              {variableCategories.map((cat) => {
-                const isSelected = selectedCatId === cat.id;
-                return (
-                  <TouchableOpacity
-                    key={cat.id}
-                    onPress={() => setSelectedCatId(cat.id)}
-                    style={[
-                      styles.categoryChip,
-                      isSelected && styles.categoryChipSelected,
-                    ]}>
-                    <Ionicons
-                      name={cat.icon as any}
-                      size={15}
-                      color={isSelected ? '#ffffff' : cat.color}
-                    />
-                    <Text
-                      style={[
-                        styles.categoryChipText,
-                        isSelected && styles.categoryChipTextSelected,
-                      ]}>
-                      {cat.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-
-            {/* CHAMP MONTANT */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Montant (€)</Text>
-              <TextInput
-                value={quickAmount}
-                onChangeText={setQuickAmount}
-                keyboardType="decimal-pad"
-                placeholder="Ex: 42.50"
-                placeholderTextColor="#95899e"
-                style={styles.textInput}
-                autoFocus
-              />
-            </View>
-
-            {/* CHAMP INTITULÉ */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Description / Lieu (optionnel)</Text>
-              <TextInput
-                value={quickLabel}
-                onChangeText={setQuickLabel}
-                placeholder="Ex: Courses Carrefour, Restaurant..."
-                placeholderTextColor="#95899e"
-                style={styles.textInput}
-              />
-            </View>
-
-            {/* ACTIONS */}
-            <View style={styles.modalActionRow}>
-              <TouchableOpacity
-                onPress={() => setIsAddExpenseVisible(false)}
-                style={styles.modalCancelBtn}>
-                <Text style={styles.modalCancelText}>Annuler</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleQuickAddExpense}
-                style={styles.modalConfirmBtn}>
-                <Text style={styles.modalConfirmText}>Valider la dépense</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {/* MODAL 2 : AJUSTER REVENUS & COMPTES */}
+      {/* MODAL : MODIFIER MES REVENUS, COMPTE COURANT ET ÉPARGNE */}
       <Modal
         visible={isEditModalVisible}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setIsEditModalVisible(false)}>
         <Pressable
           style={styles.modalOverlay}
           onPress={() => setIsEditModalVisible(false)}>
           <Pressable
-            style={styles.modalContent}
+            style={styles.modalCard}
             onPress={(e) => e.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Ajuster mes finances</Text>
+              <View style={styles.modalHeaderTitleGroup}>
+                <View style={styles.modalHeaderIconWrap}>
+                  <Ionicons name="wallet-outline" size={20} color="#9b6fba" />
+                </View>
+                <View>
+                  <Text style={styles.modalTitle}>Ajuster mes montants</Text>
+                  <Text style={styles.modalSubtitle}>Revenus, compte courant et épargne</Text>
+                </View>
+              </View>
+
               <TouchableOpacity
                 onPress={() => setIsEditModalVisible(false)}
-                style={styles.modalCloseBtn}>
-                <Ionicons name="close" size={20} color="#65576f" />
+                style={styles.modalCloseBtn}
+                accessibilityLabel="Fermer la boîte de dialogue">
+                <Ionicons name="close" size={20} color="#7c6f85" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {/* REVENU NET */}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.modalScrollBody}
+              bounces={false}>
+              {/* CHAMP 1 : REVENU NET */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Revenu mensuel net (€)</Text>
                 <TextInput
@@ -764,14 +345,15 @@ export default function HomeScreen() {
                   onChangeText={(val) =>
                     setFormValues((prev) => ({ ...prev, income: val }))
                   }
-                  keyboardType="numeric"
+                  keyboardType="decimal-pad"
                   placeholder="Ex: 2850"
                   placeholderTextColor="#95899e"
                   style={styles.textInput}
+                  autoFocus
                 />
               </View>
 
-              {/* COMPTE COURANT */}
+              {/* CHAMP 2 : COMPTE COURANT */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Solde Compte Courant (€)</Text>
                 <TextInput
@@ -779,22 +361,22 @@ export default function HomeScreen() {
                   onChangeText={(val) =>
                     setFormValues((prev) => ({ ...prev, checkingAccount: val }))
                   }
-                  keyboardType="numeric"
+                  keyboardType="decimal-pad"
                   placeholder="Ex: 2430.50"
                   placeholderTextColor="#95899e"
                   style={styles.textInput}
                 />
               </View>
 
-              {/* ÉPARGNE */}
+              {/* CHAMP 3 : ÉPARGNE */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Montant Épargne (€)</Text>
+                <Text style={styles.inputLabel}>Montant Épargne totale (€)</Text>
                 <TextInput
                   value={formValues.savingsAccount}
                   onChangeText={(val) =>
                     setFormValues((prev) => ({ ...prev, savingsAccount: val }))
                   }
-                  keyboardType="numeric"
+                  keyboardType="decimal-pad"
                   placeholder="Ex: 12500"
                   placeholderTextColor="#95899e"
                   style={styles.textInput}
@@ -802,16 +384,20 @@ export default function HomeScreen() {
               </View>
             </ScrollView>
 
-            <View style={styles.modalActionRow}>
+            <View style={styles.modalActionButtons}>
               <TouchableOpacity
                 onPress={() => setIsEditModalVisible(false)}
-                style={styles.modalCancelBtn}>
-                <Text style={styles.modalCancelText}>Annuler</Text>
+                activeOpacity={0.7}
+                style={styles.cancelActionBtn}>
+                <Text style={styles.cancelActionBtnText}>Annuler</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 onPress={handleSaveBudget}
-                style={styles.modalConfirmBtn}>
-                <Text style={styles.modalConfirmText}>Enregistrer</Text>
+                activeOpacity={0.85}
+                style={styles.saveActionBtn}>
+                <Ionicons name="checkmark" size={18} color="#ffffff" />
+                <Text style={styles.saveActionBtnText}>Enregistrer</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -820,3 +406,465 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f6f3ed',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconHeaderButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  editHeaderBtn: {
+    backgroundColor: '#9b6fba',
+    borderColor: '#8557a5',
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    gap: 16,
+    width: '100%',
+    maxWidth: 860,
+    alignSelf: 'center',
+  },
+
+  /* CARTE DU RESTE À VIVRE (HERO) */
+  heroCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 22,
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    elevation: 4,
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  heroBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(217, 130, 43, 0.1)',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+  heroBadgeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#d9822b',
+  },
+  heroBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#b46314',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  daysBadge: {
+    backgroundColor: '#faf7f2',
+    borderColor: '#e8e1d5',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  daysBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#7c6f85',
+  },
+  heroAmount: {
+    fontSize: 38,
+    fontWeight: '900',
+    color: '#d9822b',
+    marginTop: 10,
+    letterSpacing: -1,
+  },
+  formulaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#fbf9f6',
+    borderWidth: 1,
+    borderColor: '#f0eae0',
+    borderRadius: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    marginTop: 12,
+  },
+  formulaText: {
+    fontSize: 12,
+    color: '#65576f',
+    fontWeight: '600',
+    flex: 1,
+  },
+  formulaHighlight: {
+    fontWeight: '800',
+    color: '#231c2b',
+  },
+  heroFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#f0eae0',
+    paddingTop: 14,
+    marginTop: 14,
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  dailyItem: {
+    flex: 1,
+  },
+  dailyLabel: {
+    fontSize: 11,
+    color: '#7c6f85',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  dailyAmount: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#231c2b',
+    marginTop: 2,
+  },
+  heroDetailBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(217, 130, 43, 0.08)',
+    borderRadius: 10,
+  },
+  heroDetailBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#d9822b',
+  },
+
+  /* GRILLE DES 4 MONTANTS CLÉS */
+  gridSection: {
+    gap: 12,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#231c2b',
+    letterSpacing: 0.2,
+  },
+  sectionEditLink: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#9b6fba',
+  },
+  kpiGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  kpiCard: {
+    flex: 1,
+    minWidth: 155,
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  incomeCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#059669',
+  },
+  fixedCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#9b6fba',
+  },
+  checkingCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#2563eb',
+  },
+  savingsCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#0d9488',
+  },
+  kpiHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  kpiIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  incomeIconBg: {
+    backgroundColor: 'rgba(5, 150, 105, 0.12)',
+  },
+  fixedIconBg: {
+    backgroundColor: 'rgba(155, 111, 186, 0.12)',
+  },
+  checkingIconBg: {
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+  },
+  savingsIconBg: {
+    backgroundColor: 'rgba(13, 148, 136, 0.12)',
+  },
+  kpiBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  kpiBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  kpiLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7c6f85',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  kpiAmount: {
+    fontSize: 22,
+    fontWeight: '900',
+    marginTop: 4,
+    letterSpacing: -0.5,
+  },
+  kpiSubtitle: {
+    fontSize: 11,
+    color: '#95899e',
+    fontWeight: '600',
+    marginTop: 4,
+  },
+
+  /* RACCOURCIS DE GESTION RAPIDE */
+  shortcutsCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    gap: 12,
+  },
+  shortcutsTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#231c2b',
+    letterSpacing: 0.2,
+  },
+  shortcutsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  shortcutBtn: {
+    flex: 1,
+    backgroundColor: '#faf7f2',
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    borderRadius: 14,
+    padding: 12,
+    alignItems: 'center',
+    gap: 4,
+  },
+  shortcutIconBg: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  shortcutLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#231c2b',
+    textAlign: 'center',
+  },
+  shortcutSub: {
+    fontSize: 10,
+    color: '#7c6f85',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+
+  /* MODAL D'AJUSTEMENT DU BUDGET */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(27, 20, 36, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  modalCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    width: '100%',
+    maxWidth: 480,
+    maxHeight: '90%',
+    borderWidth: 1,
+    borderColor: '#e6dfd3',
+    shadowColor: '#1b1424',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 12,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 22,
+    paddingTop: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0eae0',
+    backgroundColor: '#ffffff',
+  },
+  modalHeaderTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  modalHeaderIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(155, 111, 186, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#231c2b',
+  },
+  modalSubtitle: {
+    fontSize: 11,
+    color: '#7c6f85',
+    marginTop: 1,
+  },
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#faf7f2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+  },
+  modalScrollBody: {
+    paddingHorizontal: 22,
+    paddingTop: 18,
+    paddingBottom: 16,
+    gap: 16,
+  },
+  inputGroup: {
+    gap: 6,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#34293f',
+    letterSpacing: 0.2,
+  },
+  textInput: {
+    backgroundColor: '#faf7f2',
+    borderColor: '#ded6c7',
+    borderWidth: 1,
+    color: '#231c2b',
+    borderRadius: 12,
+    height: 46,
+    paddingHorizontal: 14,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  modalActionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 22,
+    paddingTop: 14,
+    paddingBottom: 22,
+    borderTopWidth: 1,
+    borderTopColor: '#f0eae0',
+    backgroundColor: '#ffffff',
+  },
+  cancelActionBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#dcd4c6',
+    backgroundColor: '#faf7f2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cancelActionBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#65576f',
+  },
+  saveActionBtn: {
+    flex: 2,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#9b6fba',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    shadowColor: '#9b6fba',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  saveActionBtnText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#ffffff',
+  },
+});

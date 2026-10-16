@@ -125,7 +125,7 @@ export default function DetailsScreen() {
                 </View>
                 <View>
                   <Text style={styles.formulaLabel}>Charges variables estimées</Text>
-                  <Text style={styles.formulaSub}>{variableCategories.length} enveloppes prévues</Text>
+                  <Text style={styles.formulaSub}>{variableCategories.length} charges variables prévues</Text>
                 </View>
               </View>
               <Text style={styles.formulaNegative}>-{formatEuro(totalEstimatedVariable)}</Text>
@@ -355,7 +355,7 @@ export default function DetailsScreen() {
             {/* Ligne Charges variables */}
             <View style={styles.tableRow}>
               <View>
-                <Text style={styles.tableItemName}>Charges variables ({variableCategories.length} enveloppes)</Text>
+                <Text style={styles.tableItemName}>Charges variables ({variableCategories.length} postes)</Text>
                 <Text style={styles.tableItemType}>Budget estimé</Text>
               </View>
               <View style={styles.alignRight}>
