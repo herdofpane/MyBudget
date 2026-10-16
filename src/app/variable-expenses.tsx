@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
-  StyleSheet,
   Platform,
   KeyboardAvoidingView,
   ActivityIndicator,
@@ -27,7 +26,6 @@ import { useBudget } from '@/hooks/use-budget';
 import { VariableCategory } from '@/types';
 import { PRESET_ICONS, PRESET_COLORS } from '@/data';
 import { formatEuro, formatEuroRound, formatPercent } from '@/constants/formatters';
-import { colors } from '@/theme/colors';
 
 const DURATION_PRESETS = [1, 3, 6, 12, 24];
 
@@ -171,7 +169,7 @@ export default function VariableExpensesScreen() {
   const modalMonthlyImpact = modalParsedAmount > 0 ? modalParsedAmount / modalParsedDuration : 0;
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
       <StatusBar style="dark" />
 
       {/* EN-TÊTE PRINCIPAL ÉPURÉ */}
@@ -185,191 +183,216 @@ export default function VariableExpensesScreen() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}>
-        
-        {/* 1. CARTE DU TOTAL DES CHARGES VARIABLES (IMPACT MENSUEL LISSÉ) */}
-        <Card style={styles.summaryCard}>
-          <View style={styles.summaryTopRow}>
-            <View style={{ flex: 1 }}>
-              <View style={styles.summaryLabelRow}>
-                <Text style={styles.summaryLabel}>Total des charges variables (mensuel)</Text>
-                <Badge variant="outline" style={styles.unitBadge}>
-                  <Text style={styles.unitBadgeText}>Arrondi à l&apos;unité</Text>
-                </Badge>
+          contentContainerClassName="px-4 pt-2.5 pb-[110px] gap-4 w-full max-w-[860px] self-center">
+
+          {/* 1. CARTE DU TOTAL DES CHARGES VARIABLES (IMPACT MENSUEL LISSÉ) */}
+          <Card className="bg-card rounded-3xl p-5 border border-border shadow-xs gap-4">
+            <View className="flex-row justify-between items-start">
+              <View className="flex-1">
+                <View className="flex-row items-center gap-2 mb-1">
+                  <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                    Total des charges variables (mensuel)
+                  </Text>
+                  <Badge variant="outline" className="border-border bg-muted/30 px-2 py-0.5 rounded-full">
+                    <Text className="text-[10px] text-muted-foreground font-semibold">
+                      Arrondi à l&apos;unité
+                    </Text>
+                  </Badge>
+                </View>
+                <Text className="text-3xl font-black text-foreground tracking-tight">
+                  {formatEuroRound(totalEstimatedVariable)}
+                </Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">
+                  Montant mensuel exact : {formatEuro(totalEstimatedVariable)}
+                </Text>
               </View>
-              <Text style={styles.summaryTotal}>{formatEuroRound(totalEstimatedVariable)}</Text>
-              <Text style={styles.summaryExact}>
-                Montant mensuel exact : {formatEuro(totalEstimatedVariable)}
-              </Text>
+
+              <Badge variant="outline" className="bg-amber-50 border-amber-200 px-2.5 py-1 rounded-full flex-row items-center gap-1.5">
+                <Ionicons name="pie-chart-outline" size={14} color="#D97706" />
+                <Text className="text-xs font-bold text-amber-800">
+                  {variableCategories.length} charge{variableCategories.length > 1 ? 's' : ''}
+                </Text>
+              </Badge>
             </View>
 
-            <View style={styles.countBadge}>
-              <Ionicons name="pie-chart-outline" size={16} color="#d9822b" />
-              <Text style={styles.countBadgeText}>
-                {variableCategories.length} charge{variableCategories.length > 1 ? 's' : ''}
-              </Text>
-            </View>
-          </View>
-
-          {/* RÉCAPITULATIF STATISTIQUE */}
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Moyenne mensuelle</Text>
-              <Text style={styles.statValue}>~{formatEuroRound(averageExpense)}</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Part des revenus</Text>
-              <Text style={styles.statValue}>{formatPercent(variableExpenseRatio)}</Text>
-            </View>
-          </View>
-        </Card>
-
-        {/* 2. LE TABLEAU DES CHARGES VARIABLES : TITRE | MONTANT | DURÉE DE VIE SUR X MOIS */}
-        <View style={styles.tableCard}>
-          {/* EN-TÊTE DE LA CARTE TABLEAU */}
-          <View style={styles.tableTopHeader}>
-            <View style={styles.tableTitleGroup}>
-              <View style={styles.tableTitleIconWrap}>
-                <Ionicons name="pie-chart-outline" size={18} color="#d9822b" />
+            {/* RÉCAPITULATIF STATISTIQUE */}
+            <View className="flex-row items-center bg-muted/30 rounded-2xl p-3 border border-border">
+              <View className="flex-1 items-center">
+                <Text className="text-[11px] text-muted-foreground font-medium">Moyenne mensuelle</Text>
+                <Text className="text-sm font-bold text-foreground mt-0.5">
+                  ~{formatEuroRound(averageExpense)}
+                </Text>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.tableTitle}>Charges variables & amortissements</Text>
-                <Text style={styles.tableSubtitle}>
-                  {variableCategories.length} poste{variableCategories.length > 1 ? 's' : ''} lissé{variableCategories.length > 1 ? 's' : ''} sur la durée
+              <View className="w-px h-8 bg-border" />
+              <View className="flex-1 items-center">
+                <Text className="text-[11px] text-muted-foreground font-medium">Part des revenus</Text>
+                <Text className="text-sm font-bold text-foreground mt-0.5">
+                  {formatPercent(variableExpenseRatio)}
                 </Text>
               </View>
             </View>
+          </Card>
 
-            <TouchableOpacity
-              onPress={openAddModal}
-              activeOpacity={0.7}
-              style={styles.addInlineBtn}>
-              <Ionicons name="add-circle" size={16} color="#d9822b" />
-              <Text style={styles.addInlineBtnText}>Nouvelle charge</Text>
-            </TouchableOpacity>
-          </View>
+          {/* 2. LE TABLEAU DES CHARGES VARIABLES */}
+          <Card className="bg-card rounded-3xl border border-border shadow-xs overflow-hidden">
+            {/* EN-TÊTE DE LA CARTE TABLEAU */}
+            <View className="flex-row justify-between items-center p-5 border-b border-border">
+              <View className="flex-row items-center gap-3 flex-1 pr-2">
+                <View className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 justify-center items-center">
+                  <Ionicons name="pie-chart-outline" size={18} color="#D97706" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-bold text-foreground">
+                    Charges variables & amortissements
+                  </Text>
+                  <Text className="text-xs text-muted-foreground mt-0.5">
+                    {variableCategories.length} poste{variableCategories.length > 1 ? 's' : ''} lissé{variableCategories.length > 1 ? 's' : ''} sur la durée
+                  </Text>
+                </View>
+              </View>
 
-          {variableCategories.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="folder-open-outline" size={42} color="#d9822b" />
-              <Text style={styles.emptyTitle}>Aucune charge variable enregistrée</Text>
-              <Text style={styles.emptyText}>
-                Ajoutez vos charges variables avec leur montant et leur durée de vie sur X mois pour calculer automatiquement l&apos;impact mensuel.
-              </Text>
-              <Button variant="default" size="sm" onPress={openAddModal} style={{ marginTop: 12 }}>
-                <Ionicons name="add" size={16} color="#ffffff" />
-                <Text style={{ fontSize: 13, fontWeight: '700', color: '#ffffff', marginLeft: 4 }}>
-                  Ajouter ma première charge variable
-                </Text>
+              <Button
+                variant="outline"
+                size="sm"
+                onPress={openAddModal}
+                className="border-amber-300 bg-amber-50 gap-1.5 rounded-xl h-9 px-3">
+                <Ionicons name="add-circle" size={16} color="#D97706" />
+                <Text className="text-xs font-bold text-amber-800">Nouvelle charge</Text>
               </Button>
             </View>
-          ) : (
-            <View style={styles.tableInner}>
-              {/* LIGNE DES COLONNES DU TABLEAU */}
-              <View style={styles.tableHeaderRow}>
-                <Text style={[styles.tableColHeader, styles.colTitre]}>POSTE DE CHARGE</Text>
-                <Text style={[styles.tableColHeader, styles.colMontant]}>MONTANT TOTAL</Text>
-                <Text style={[styles.tableColHeader, styles.colDuration]}>DURÉE / LISSAGE</Text>
-                <Text style={[styles.tableColHeader, styles.colActions]}>ACTIONS</Text>
+
+            {variableCategories.length === 0 ? (
+              <View className="p-8 items-center justify-center gap-3">
+                <Ionicons name="folder-open-outline" size={42} color="#D97706" />
+                <Text className="text-base font-bold text-foreground text-center">
+                  Aucune charge variable enregistrée
+                </Text>
+                <Text className="text-xs text-muted-foreground text-center max-w-[420px]">
+                  Ajoutez vos charges variables avec leur montant et leur durée de vie sur X mois pour calculer automatiquement l&apos;impact mensuel.
+                </Text>
+                <Button
+                  onPress={openAddModal}
+                  className="bg-primary rounded-xl px-4 py-2 mt-2 gap-1.5 h-auto">
+                  <Ionicons name="add" size={16} color="#ffffff" />
+                  <Text className="text-xs font-bold text-white">
+                    Ajouter ma première charge variable
+                  </Text>
+                </Button>
               </View>
+            ) : (
+              <View>
+                {/* LIGNE DES COLONNES DU TABLEAU */}
+                <View className="flex-row items-center px-4 py-3 bg-muted/40 border-b border-border">
+                  <Text className="flex-[2] text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                    POSTE DE CHARGE
+                  </Text>
+                  <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right">
+                    MONTANT TOTAL
+                  </Text>
+                  <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">
+                    DURÉE / LISSAGE
+                  </Text>
+                  <Text className="w-16 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right">
+                    ACTIONS
+                  </Text>
+                </View>
 
-              {/* LIGNES DES CHARGES VARIABLES */}
-              {variableCategories.map((item, index) => {
-                const isEven = index % 2 === 0;
-                const total = item.totalAmount !== undefined ? item.totalAmount : item.estimatedBudget;
-                const duration = Math.max(0.01, item.durationMonths || 1);
-                const monthly = item.estimatedBudget || Math.round((total / duration) * 100) / 100;
-                const formattedDuration = Number.isInteger(duration)
-                  ? `${duration} mois`
-                  : `${duration.toString().replace('.', ',')} mois`;
+                {/* LIGNES DES CHARGES VARIABLES */}
+                {variableCategories.map((item, index) => {
+                  const isEven = index % 2 === 0;
+                  const total = item.totalAmount !== undefined ? item.totalAmount : item.estimatedBudget;
+                  const duration = Math.max(0.01, item.durationMonths || 1);
+                  const monthly = item.estimatedBudget || Math.round((total / duration) * 100) / 100;
+                  const formattedDuration = Number.isInteger(duration)
+                    ? `${duration} mois`
+                    : `${duration.toString().replace('.', ',')} mois`;
 
-                return (
-                  <View
-                    key={item.id}
-                    style={[
-                      styles.tableRow,
-                      isEven ? styles.tableRowEven : styles.tableRowOdd,
-                      index === variableCategories.length - 1 && styles.tableRowLast,
-                    ]}>
-                    {/* COLONNE 1 : TITRE */}
-                    <View style={styles.colTitre}>
-                      <View style={styles.tableChargeWrap}>
-                        <View style={[styles.tableCatIconSmall, { backgroundColor: `${item.color}15` }]}>
+                  return (
+                    <View
+                      key={item.id}
+                      className={`flex-row items-center px-4 py-3.5 border-b border-border/60 ${
+                        isEven ? 'bg-card' : 'bg-muted/10'
+                      }`}>
+                      {/* COLONNE 1 : TITRE */}
+                      <View className="flex-[2] flex-row items-center gap-2.5 pr-2">
+                        <View
+                          className="w-8 h-8 rounded-lg justify-center items-center"
+                          style={{ backgroundColor: `${item.color}15` }}>
                           <Ionicons name={item.icon as any} size={16} color={item.color} />
                         </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.tableItemTitle} numberOfLines={1}>
-                            {item.label}
+                        <Text className="text-sm font-bold text-foreground flex-1" numberOfLines={1}>
+                          {item.label}
+                        </Text>
+                      </View>
+
+                      {/* COLONNE 2 : MONTANT */}
+                      <View className="flex-1 items-end">
+                        <Text className="text-sm font-black text-foreground">
+                          -{formatEuro(total)}
+                        </Text>
+                        {duration !== 1 && (
+                          <Text className="text-[11px] text-muted-foreground">
+                            soit {formatEuro(monthly)}/mois
                           </Text>
-                        </View>
+                        )}
+                      </View>
+
+                      {/* COLONNE 3 : DURÉE DE VIE SUR X MOIS */}
+                      <View className="flex-1 items-center">
+                        <Badge variant="outline" className="border-amber-200 bg-amber-50 gap-1 px-2 py-0.5 rounded-full">
+                          <Ionicons name="calendar-outline" size={12} color="#D97706" />
+                          <Text className="text-[11px] font-semibold text-amber-800">
+                            {formattedDuration}
+                          </Text>
+                        </Badge>
+                      </View>
+
+                      {/* COLONNE 4 : ACTIONS (MODIFIER / SUPPRIMER) */}
+                      <View className="w-16 flex-row items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onPress={() => openEditModal(item)}
+                          className="w-7 h-7 rounded-lg"
+                          accessibilityLabel={`Modifier ${item.label}`}>
+                          <Ionicons name="pencil-outline" size={15} color="#64748B" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onPress={() => handleDelete(item.id, item.label)}
+                          className="w-7 h-7 rounded-lg"
+                          accessibilityLabel={`Supprimer ${item.label}`}>
+                          <Ionicons name="trash-outline" size={15} color="#F87171" />
+                        </Button>
                       </View>
                     </View>
+                  );
+                })}
 
-                    {/* COLONNE 2 : MONTANT */}
-                    <View style={styles.colMontant}>
-                      <Text style={styles.tableAmountText}>
-                        -{formatEuro(total)}
-                      </Text>
-                      {duration !== 1 && (
-                        <Text style={styles.tableMonthlySubText}>
-                          soit {formatEuro(monthly)}/mois
-                        </Text>
-                      )}
-                    </View>
-
-                    {/* COLONNE 3 : DURÉE DE VIE SUR X MOIS */}
-                    <View style={styles.colDuration}>
-                      <View style={styles.durationBadge}>
-                        <Ionicons name="calendar-outline" size={13} color="#92400e" />
-                        <Text style={styles.durationBadgeText}>
-                          {formattedDuration}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* COLONNE 4 : ACTIONS (MODIFIER / SUPPRIMER) */}
-                    <View style={styles.colActions}>
-                      <TouchableOpacity
-                        onPress={() => openEditModal(item)}
-                        style={styles.tableActionBtn}
-                        accessibilityLabel={`Modifier ${item.label}`}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                        <Ionicons name="pencil-outline" size={16} color="#5C5264" />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => handleDelete(item.id, item.label)}
-                        style={styles.tableActionBtn}
-                        accessibilityLabel={`Supprimer ${item.label}`}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                        <Ionicons name="trash-outline" size={16} color="#d43f5e" />
-                      </TouchableOpacity>
-                    </View>
+                {/* PIED DU TABLEAU : TOTAL MENSUEL LISSÉ */}
+                <View className="flex-row justify-between items-center px-5 py-4 bg-muted/30 border-t border-border">
+                  <View>
+                    <Text className="text-xs font-black text-foreground uppercase tracking-wider">
+                      TOTAL MENSUEL LISSÉ
+                    </Text>
+                    <Text className="text-[11px] text-muted-foreground">
+                      Arrondi à l&apos;unité • {variableCategories.length} charges
+                    </Text>
                   </View>
-                );
-              })}
-
-              {/* PIED DU TABLEAU : TOTAL MENSUEL LISSÉ */}
-              <View style={styles.tableTotalFooter}>
-                <View style={styles.tableTotalLeft}>
-                  <Text style={styles.tableTotalTitle}>TOTAL MENSUEL LISSÉ</Text>
-                  <Text style={styles.tableTotalSub}>
-                    Arrondi à l&apos;unité • {variableCategories.length} charges
-                  </Text>
-                </View>
-                <View style={styles.tableTotalRight}>
-                  <Text style={styles.tableTotalAmount}>
-                    {formatEuroRound(totalEstimatedVariable)}
-                  </Text>
-                  <Text style={styles.tableTotalExact}>
-                    Exact : {formatEuro(totalEstimatedVariable)} / mois
-                  </Text>
+                  <View className="items-end">
+                    <Text className="text-xl font-black text-foreground">
+                      {formatEuroRound(totalEstimatedVariable)}
+                    </Text>
+                    <Text className="text-[11px] text-muted-foreground">
+                      Exact : {formatEuro(totalEstimatedVariable)} / mois
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
-        </View>
-      </ScrollView>
+            )}
+          </Card>
+        </ScrollView>
       )}
 
       {/* FORMULAIRE MODAL D'AJOUT / ÉDITION D'UNE CHARGE VARIABLE */}
@@ -378,862 +401,245 @@ export default function VariableExpensesScreen() {
         animationType="fade"
         transparent
         onRequestClose={() => setIsModalVisible(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center p-4"
+          onPress={() => setIsModalVisible(false)}>
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={styles.modalKeyboardWrap}>
-            <Pressable style={styles.modalCard} onPress={(e) => e.stopPropagation()}>
-            <View style={styles.modalHeader}>
-              <View style={styles.modalHeaderTitleGroup}>
-                <View style={styles.modalIconWrap}>
-                  <Ionicons
-                    name={editingCategory ? 'create-outline' : 'add-circle-outline'}
-                    size={20}
-                    color="#d9822b"
-                  />
-                </View>
-                <View>
-                  <Text style={styles.modalTitle}>
-                    {editingCategory ? 'Modifier la charge variable' : 'Nouvelle charge variable'}
-                  </Text>
-                  <Text style={styles.modalSubtitle}>
-                    Lissage automatique : Montant ÷ Durée en mois
-                  </Text>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => setIsModalVisible(false)}
-                style={styles.closeBtn}
-                accessibilityLabel="Fermer la boîte de dialogue">
-                <Ionicons name="close" size={20} color="#5C5264" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.modalScrollBody}
-              bounces={false}>
+            className="w-full max-w-[500px]">
+            <Pressable
+              className="bg-card rounded-3xl p-6 border border-border shadow-lg w-full gap-4 max-h-[90vh]"
+              onPress={(e) => e.stopPropagation()}>
               
-              {/* CHAMP 1 : TITRE */}
-              <View style={styles.formGroup}>
-                <Text style={styles.inputLabel}>Titre</Text>
-                <Input
-                  value={labelInput}
-                  onChangeText={setLabelInput}
-                  placeholder="Ex: Entretien voiture, Vacances, Alimentation..."
-                  placeholderTextColor="#8E8296"
-                  style={styles.input}
-                  autoFocus={!editingCategory}
-                />
-              </View>
-
-              {/* CHAMP 2 : MONTANT */}
-              <View style={styles.formGroup}>
-                <Text style={styles.inputLabel}>Montant (€)</Text>
-                <Input
-                  value={amountInput}
-                  onChangeText={setAmountInput}
-                  keyboardType="decimal-pad"
-                  placeholder="Ex: 600.00"
-                  placeholderTextColor="#8E8296"
-                  style={styles.input}
-                />
-              </View>
-
-              {/* CHAMP 3 : DURÉE DE VIE SUR X MOIS */}
-              <View style={styles.formGroup}>
-                <View style={styles.durationHeaderRow}>
-                  <Text style={styles.inputLabel}>Durée de vie Sur x Mois</Text>
-                  <Text style={styles.durationHint}>Nombre de mois pour le lissage</Text>
+              {/* EN-TÊTE MODAL */}
+              <View className="flex-row justify-between items-center">
+                <View className="flex-row items-center gap-3 flex-1 pr-2">
+                  <View className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 justify-center items-center">
+                    <Ionicons
+                      name={editingCategory ? 'create-outline' : 'add-circle-outline'}
+                      size={20}
+                      color="#D97706"
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-lg font-black text-foreground">
+                      {editingCategory ? 'Modifier la charge variable' : 'Nouvelle charge variable'}
+                    </Text>
+                    <Text className="text-xs text-muted-foreground">
+                      Lissage automatique : Montant ÷ Durée en mois
+                    </Text>
+                  </View>
                 </View>
 
-                <View style={styles.durationInputRow}>
-                  <Input
-                    value={durationInput}
-                    onChangeText={(val) => {
-                      // Autorise les chiffres, la virgule et le point décimal
-                      const sanitized = val.replace(/[^0-9.,]/g, '');
-                      setDurationInput(sanitized);
-                    }}
-                    keyboardType="decimal-pad"
-                    placeholder="1"
-                    placeholderTextColor="#8E8296"
-                    style={[styles.input, styles.durationNumericInput]}
-                  />
-                  <Text style={styles.durationUnitText}>mois</Text>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onPress={() => setIsModalVisible(false)}
+                  className="w-8 h-8 rounded-full"
+                  accessibilityLabel="Fermer la boîte de dialogue">
+                  <Ionicons name="close" size={20} color="#64748B" />
+                </Button>
+              </View>
 
-                  {/* BOUTONS PRÉRÉGLAGES RAPIDES */}
-                  <View style={styles.durationPillsWrap}>
-                    {DURATION_PRESETS.map((m) => (
-                      <TouchableOpacity
-                        key={m}
-                        onPress={() => setDurationInput(m.toString())}
-                        activeOpacity={0.7}
-                        style={[
-                          styles.durationPill,
-                          durationInput === m.toString() && styles.durationPillActive,
-                        ]}>
-                        <Text
-                          style={[
-                            styles.durationPillText,
-                            durationInput === m.toString() && styles.durationPillTextActive,
-                          ]}>
-                          {m}m
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerClassName="gap-4 pb-2"
+                bounces={false}>
+                
+                {/* CHAMP 1 : TITRE */}
+                <View className="gap-1.5">
+                  <Text className="text-xs font-bold text-foreground">Titre</Text>
+                  <Input
+                    value={labelInput}
+                    onChangeText={setLabelInput}
+                    placeholder="Ex: Entretien voiture, Vacances, Alimentation..."
+                    placeholderTextColor="#64748B"
+                    className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-sm font-medium text-foreground h-11"
+                    autoFocus={!editingCategory}
+                  />
+                </View>
+
+                {/* CHAMP 2 : MONTANT */}
+                <View className="gap-1.5">
+                  <Text className="text-xs font-bold text-foreground">Montant (€)</Text>
+                  <Input
+                    value={amountInput}
+                    onChangeText={setAmountInput}
+                    keyboardType="decimal-pad"
+                    placeholder="Ex: 600.00"
+                    placeholderTextColor="#64748B"
+                    className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-sm font-medium text-foreground h-11"
+                  />
+                </View>
+
+                {/* CHAMP 3 : DURÉE DE VIE SUR X MOIS */}
+                <View className="gap-1.5">
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-xs font-bold text-foreground">Durée de vie Sur x Mois</Text>
+                    <Text className="text-[11px] text-muted-foreground">Nombre de mois pour le lissage</Text>
+                  </View>
+
+                  <View className="flex-row items-center gap-2">
+                    <Input
+                      value={durationInput}
+                      onChangeText={(val) => {
+                        const sanitized = val.replace(/[^0-9.,]/g, '');
+                        setDurationInput(sanitized);
+                      }}
+                      keyboardType="decimal-pad"
+                      placeholder="1"
+                      placeholderTextColor="#64748B"
+                      className="w-20 bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-bold text-foreground h-11 text-center"
+                    />
+                    <Text className="text-xs font-bold text-muted-foreground">mois</Text>
+
+                    {/* BOUTONS PRÉRÉGLAGES RAPIDES */}
+                    <View className="flex-row gap-1.5 flex-1 justify-end flex-wrap">
+                      {DURATION_PRESETS.map((m) => {
+                        const isActive = durationInput === m.toString();
+                        return (
+                          <Button
+                            key={m}
+                            variant={isActive ? 'default' : 'outline'}
+                            size="sm"
+                            onPress={() => setDurationInput(m.toString())}
+                            className={`px-2.5 py-1 rounded-lg h-9 ${
+                              isActive ? 'bg-primary' : 'border-border bg-muted/30'
+                            }`}>
+                            <Text
+                              className={`text-xs font-bold ${
+                                isActive ? 'text-white' : 'text-muted-foreground'
+                              }`}>
+                              {m}m
+                            </Text>
+                          </Button>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  {/* ENCART EN DIRECT DU CALCUL DE LISSAGE */}
+                  {modalParsedAmount > 0 && (
+                    <View className="flex-row items-center bg-amber-50 p-3 rounded-xl border border-amber-200 gap-2.5 mt-2">
+                      <Ionicons name="calculator-outline" size={18} color="#D97706" />
+                      <View className="flex-1">
+                        <Text className="text-xs font-bold text-foreground">
+                          Impact mensuel calculé :{' '}
+                          <Text className="text-amber-800 font-extrabold">
+                            {formatEuro(modalMonthlyImpact)} / mois
+                          </Text>
                         </Text>
+                        <Text className="text-[11px] text-muted-foreground">
+                          {formatEuro(modalParsedAmount)} lissés sur {modalParsedDuration.toString().replace('.', ',')} mois
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </View>
+
+                {/* CHAMP 4 : ICÔNE */}
+                <View className="gap-1.5">
+                  <Text className="text-xs font-bold text-foreground">Icône illustrative</Text>
+                  <View className="flex-row gap-2 flex-wrap">
+                    {PRESET_ICONS.map((item) => {
+                      const isSelected = iconInput === item.icon;
+                      return (
+                        <Button
+                          key={item.icon}
+                          variant="outline"
+                          size="icon"
+                          onPress={() => setIconInput(item.icon)}
+                          className={`w-10 h-10 rounded-xl ${
+                            isSelected ? 'border-amber-500 bg-amber-50' : 'border-border bg-muted/30'
+                          }`}>
+                          <Ionicons
+                            name={item.icon as any}
+                            size={18}
+                            color={isSelected ? '#D97706' : '#64748B'}
+                          />
+                        </Button>
+                      );
+                    })}
+                  </View>
+                </View>
+
+                {/* CHAMP 5 : COULEUR */}
+                <View className="gap-1.5">
+                  <Text className="text-xs font-bold text-foreground">Couleur distinctive</Text>
+                  <View className="flex-row gap-2 flex-wrap">
+                    {PRESET_COLORS.map((color) => (
+                      <TouchableOpacity
+                        key={color}
+                        onPress={() => setColorInput(color)}
+                        activeOpacity={0.7}
+                        className={`w-9 h-9 rounded-full justify-center items-center ${
+                          colorInput === color ? 'border-2 border-foreground' : ''
+                        }`}
+                        style={{ backgroundColor: color }}>
+                        {colorInput === color && (
+                          <Ionicons name="checkmark" size={16} color="#ffffff" />
+                        )}
                       </TouchableOpacity>
                     ))}
                   </View>
                 </View>
+              </ScrollView>
 
-                {/* ENCART EN DIRECT DU CALCUL DE LISSAGE */}
-                {modalParsedAmount > 0 && (
-                  <View style={styles.monthlySmoothingBox}>
-                    <Ionicons name="calculator-outline" size={18} color="#d9822b" />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.monthlySmoothingText}>
-                        Impact mensuel calculé :{' '}
-                        <Text style={styles.monthlySmoothingHighlight}>
-                          {formatEuro(modalMonthlyImpact)} / mois
-                        </Text>
-                      </Text>
-                      <Text style={styles.monthlySmoothingSub}>
-                        {formatEuro(modalParsedAmount)} lissés sur {modalParsedDuration.toString().replace('.', ',')} mois
-                      </Text>
-                    </View>
-                  </View>
-                )}
+              {/* BOUTONS D'ACTION DU MODAL */}
+              <View className="flex-row justify-end gap-2 pt-2 border-t border-border">
+                <Button
+                  variant="outline"
+                  onPress={() => setIsModalVisible(false)}
+                  className="rounded-xl px-4 py-2.5 h-auto">
+                  <Text className="text-xs font-bold text-foreground">Annuler</Text>
+                </Button>
+
+                <Button
+                  onPress={handleSave}
+                  disabled={isSaving}
+                  className={`bg-primary rounded-xl px-4 py-2.5 gap-1.5 h-auto ${
+                    isSaving ? 'opacity-80' : ''
+                  }`}>
+                  {isSaving ? (
+                    <ActivityIndicator size="small" color="#ffffff" className="mr-1.5" />
+                  ) : (
+                    <Ionicons name="checkmark" size={18} color="#ffffff" />
+                  )}
+                  <Text className="text-xs font-bold text-white">
+                    {isSaving ? 'Enregistrement...' : editingCategory ? 'Enregistrer' : 'Ajouter la charge'}
+                  </Text>
+                </Button>
               </View>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
+      </Modal>
 
-              {/* CHAMP 4 : ICÔNE */}
-              <View style={styles.formGroup}>
-                <Text style={styles.inputLabel}>Icône illustrative</Text>
-                <View style={styles.presetIconsRow}>
-                  {PRESET_ICONS.map((item) => (
-                    <TouchableOpacity
-                      key={item.icon}
-                      onPress={() => setIconInput(item.icon)}
-                      activeOpacity={0.7}
-                      style={[
-                        styles.iconPresetBtn,
-                        iconInput === item.icon && styles.iconPresetBtnSelected,
-                      ]}>
-                      <Ionicons
-                        name={item.icon as any}
-                        size={18}
-                        color={iconInput === item.icon ? '#d9822b' : '#7c6f85'}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              {/* CHAMP 5 : COULEUR */}
-              <View style={styles.formGroup}>
-                <Text style={styles.inputLabel}>Couleur distinctive</Text>
-                <View style={styles.presetColorsRow}>
-                  {PRESET_COLORS.map((color) => (
-                    <TouchableOpacity
-                      key={color}
-                      onPress={() => setColorInput(color)}
-                      activeOpacity={0.7}
-                      style={[
-                        styles.colorPresetBtn,
-                        { backgroundColor: color },
-                        colorInput === color && styles.colorPresetBtnSelected,
-                      ]}>
-                      {colorInput === color && (
-                        <Ionicons name="checkmark" size={14} color="#ffffff" />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </ScrollView>
-
-            {/* BOUTONS D'ACTION FIXÉS EN BAS AVEC RESPIRATION */}
-            <View style={styles.modalActionButtons}>
-              <TouchableOpacity
-                onPress={() => setIsModalVisible(false)}
-                activeOpacity={0.7}
-                style={styles.cancelActionBtn}>
-                <Text style={styles.cancelActionBtnText}>Annuler</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleSave}
-                disabled={isSaving}
-                activeOpacity={0.85}
-                style={[styles.saveActionBtn, isSaving && { opacity: 0.8 }]}>
-                {isSaving ? (
-                  <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 6 }} />
-                ) : (
-                  <Ionicons name="checkmark" size={18} color="#ffffff" />
-                )}
-                <Text style={styles.saveActionBtnText}>
-                  {isSaving ? 'Enregistrement...' : editingCategory ? 'Enregistrer' : 'Ajouter la charge'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </KeyboardAvoidingView>
-      </Pressable>
-    </Modal>
-
-    {/* POPUP DE CONFIRMATION DE SUPPRESSION */}
-    <ConfirmDialog
-      visible={!!deleteTarget}
-      title="Supprimer la charge variable"
-      message="Êtes-vous sûr de vouloir supprimer la charge"
-      highlightText={deleteTarget?.label}
-      confirmLabel="Supprimer"
-      cancelLabel="Annuler"
-      isDestructive
-      isLoading={isDeleting}
-      onConfirm={handleConfirmDelete}
-      onCancel={() => setDeleteTarget(null)}
-    />
-
-    {/* POPUP DE VALIDATION ET D'ERREUR */}
-    {feedbackDialog && (
-      <AppDialog
-        visible={feedbackDialog.visible}
-        type={feedbackDialog.type}
-        title={feedbackDialog.title}
-        message={feedbackDialog.message}
-        confirmLabel="Compris"
-        onConfirm={() => setFeedbackDialog(null)}
+      {/* POPUP DE CONFIRMATION DE SUPPRESSION */}
+      <ConfirmDialog
+        visible={!!deleteTarget}
+        title="Supprimer la charge variable"
+        message="Êtes-vous sûr de vouloir supprimer la charge"
+        highlightText={deleteTarget?.label}
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        isDestructive
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
       />
-    )}
-  </SafeAreaView>
-);
+
+      {/* POPUP DE VALIDATION ET D'ERREUR */}
+      {feedbackDialog && (
+        <AppDialog
+          visible={feedbackDialog.visible}
+          type={feedbackDialog.type}
+          title={feedbackDialog.title}
+          message={feedbackDialog.message}
+          confirmLabel="Compris"
+          onConfirm={() => setFeedbackDialog(null)}
+        />
+      )}
+    </SafeAreaView>
+  );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.accent,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    gap: 4,
-  },
-  addButtonText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 30,
-    gap: 16,
-    width: '100%',
-    maxWidth: 860,
-    alignSelf: 'center',
-  },
-
-  /* CARTE DU TOTAL */
-  summaryCard: {
-    backgroundColor: colors.card,
-    borderRadius: 22,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  summaryTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  summaryLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  summaryLabel: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#5C5264',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  unitBadge: {
-    backgroundColor: 'rgba(217, 130, 43, 0.12)',
-    borderColor: 'rgba(217, 130, 43, 0.3)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  unitBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#d9822b',
-    letterSpacing: 0.3,
-  },
-  summaryTotal: {
-    fontSize: 34,
-    fontWeight: '900',
-    color: '#d9822b',
-    marginTop: 4,
-    letterSpacing: -0.5,
-  },
-  summaryExact: {
-    fontSize: 13,
-    color: '#5C5264',
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  countBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(217, 130, 43, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(217, 130, 43, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-    gap: 6,
-  },
-  countBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#d9822b',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FAF7F2',
-    borderWidth: 1,
-    borderColor: '#DFD8CA',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginTop: 16,
-  },
-  statItem: {
-    flex: 1,
-  },
-  statLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#8E8296',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  statValue: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#241E28',
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: 26,
-    backgroundColor: '#DFD8CA',
-    marginHorizontal: 14,
-  },
-
-  /* CARTE DU TABLEAU */
-  tableCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#DFD8CA',
-    overflow: 'hidden',
-    shadowColor: '#241E28',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  tableTopHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingTop: 16,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  tableTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-  },
-  tableTitleIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(217, 130, 43, 0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(217, 130, 43, 0.20)',
-  },
-  tableTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: colors.primary,
-    letterSpacing: -0.2,
-  },
-  tableSubtitle: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  addInlineBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(217, 130, 43, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(217, 130, 43, 0.25)',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-  },
-  addInlineBtnText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#d9822b',
-  },
-  emptyContainer: {
-    padding: 36,
-    alignItems: 'center',
-    gap: 8,
-  },
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: colors.primary,
-    marginTop: 4,
-  },
-  emptyText: {
-    fontSize: 13,
-    color: colors.textMuted,
-    textAlign: 'center',
-    maxWidth: 340,
-    lineHeight: 18,
-  },
-
-  /* STRUCTURE DU TABLEAU ET COLONNES */
-  tableInner: {
-    width: '100%',
-  },
-  tableHeaderRow: {
-    flexDirection: 'row',
-    backgroundColor: colors.background,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    alignItems: 'center',
-  },
-  tableColHeader: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.7,
-  },
-  colTitre: {
-    flex: 1.2,
-  },
-  colMontant: {
-    width: 110,
-    alignItems: 'flex-end',
-    textAlign: 'right',
-  },
-  colDuration: {
-    width: 110,
-    alignItems: 'center',
-    textAlign: 'center',
-  },
-  colActions: {
-    width: 64,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    textAlign: 'right',
-    paddingRight: 4,
-    gap: 6,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EAE4D8',
-  },
-  tableRowEven: {
-    backgroundColor: '#ffffff',
-  },
-  tableRowOdd: {
-    backgroundColor: '#FAF7F2',
-  },
-  tableRowLast: {
-    borderBottomWidth: 0,
-  },
-  tableChargeWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  tableCatIconSmall: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tableItemTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#241E28',
-  },
-  tableAmountText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#d9822b',
-  },
-  tableMonthlySubText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#5C5264',
-    marginTop: 2,
-  },
-  durationBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(217, 130, 43, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(217, 130, 43, 0.25)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    gap: 4,
-  },
-  durationBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#92400e',
-  },
-  tableActionBtn: {
-    padding: 4,
-    borderRadius: 6,
-  },
-  tableTotalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFBEB',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderTopWidth: 2,
-    borderTopColor: '#FDE68A',
-  },
-  tableTotalLeft: {
-    flex: 1,
-  },
-  tableTotalRight: {
-    alignItems: 'flex-end',
-  },
-  tableTotalTitle: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#92400e',
-    letterSpacing: 0.5,
-  },
-  tableTotalSub: {
-    fontSize: 10,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  tableTotalAmount: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#b06518',
-  },
-  tableTotalExact: {
-    fontSize: 11,
-    color: '#5C5264',
-    marginTop: 1,
-  },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(36, 30, 40, 0.60)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  modalKeyboardWrap: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  modalCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    width: '100%',
-    maxWidth: 520,
-    maxHeight: '90%',
-    borderWidth: 1,
-    borderColor: '#DFD8CA',
-    shadowColor: '#241E28',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 12,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 22,
-    paddingTop: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DFD8CA',
-    backgroundColor: '#ffffff',
-  },
-  modalHeaderTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  modalIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(217, 130, 43, 0.12)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#241E28',
-  },
-  modalSubtitle: {
-    fontSize: 11,
-    color: '#5C5264',
-    marginTop: 1,
-  },
-  closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FAF7F2',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#DFD8CA',
-  },
-  modalScrollBody: {
-    paddingHorizontal: 22,
-    paddingTop: 18,
-    paddingBottom: 16,
-    gap: 16,
-  },
-  formGroup: {
-    gap: 6,
-  },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#241E28',
-    letterSpacing: 0.2,
-  },
-  input: {
-    backgroundColor: '#FAF7F2',
-    borderColor: '#DFD8CA',
-    borderWidth: 1,
-    color: '#241E28',
-    borderRadius: 12,
-    height: 46,
-    paddingHorizontal: 14,
-    fontSize: 14,
-  },
-  durationHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  durationHint: {
-    fontSize: 11,
-    color: '#5C5264',
-    fontWeight: '600',
-  },
-  durationInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  durationNumericInput: {
-    width: 85,
-    textAlign: 'center',
-  },
-  durationUnitText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#5C5264',
-    marginRight: 6,
-  },
-  durationPillsWrap: {
-    flexDirection: 'row',
-    gap: 6,
-    flex: 1,
-    flexWrap: 'wrap',
-  },
-  durationPill: {
-    paddingHorizontal: 9,
-    paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: '#FAF7F2',
-    borderWidth: 1,
-    borderColor: '#DFD8CA',
-  },
-  durationPillActive: {
-    backgroundColor: 'rgba(217, 130, 43, 0.15)',
-    borderColor: '#d9822b',
-  },
-  durationPillText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#5C5264',
-  },
-  durationPillTextActive: {
-    color: '#d9822b',
-  },
-  monthlySmoothingBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(217, 130, 43, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(217, 130, 43, 0.25)',
-    borderRadius: 12,
-    padding: 12,
-    gap: 10,
-    marginTop: 6,
-  },
-  monthlySmoothingText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#241E28',
-  },
-  monthlySmoothingHighlight: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#d9822b',
-  },
-  monthlySmoothingSub: {
-    fontSize: 11,
-    color: '#5C5264',
-    marginTop: 2,
-  },
-  presetIconsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 2,
-  },
-  iconPresetBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: '#FAF7F2',
-    borderWidth: 1,
-    borderColor: '#DFD8CA',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconPresetBtnSelected: {
-    borderColor: '#d9822b',
-    backgroundColor: 'rgba(217, 130, 43, 0.15)',
-  },
-  presetColorsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  colorPresetBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  colorPresetBtnSelected: {
-    borderWidth: 2,
-    borderColor: '#ffffff',
-    shadowColor: '#241E28',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  modalActionButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 22,
-    paddingTop: 14,
-    paddingBottom: 22,
-    borderTopWidth: 1,
-    borderTopColor: '#DFD8CA',
-    backgroundColor: '#ffffff',
-  },
-  cancelActionBtn: {
-    flex: 1,
-    height: 48,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#DFD8CA',
-    backgroundColor: '#FAF7F2',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cancelActionBtnText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#5C5264',
-  },
-  saveActionBtn: {
-    flex: 2,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: '#d9822b',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    shadowColor: '#d9822b',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  saveActionBtnText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#ffffff',
-  },
-});

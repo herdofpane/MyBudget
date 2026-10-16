@@ -35,6 +35,15 @@ module.exports = {
         accent: {
           DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))',
+          dark: '#047857',
+        },
+        lavender: {
+          DEFAULT: '#6366F1',
+          foreground: '#FFFFFF',
+        },
+        danger: {
+          DEFAULT: '#F87171',
+          foreground: '#FFFFFF',
         },
         popover: {
           DEFAULT: 'hsl(var(--popover))',

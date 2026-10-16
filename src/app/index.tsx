@@ -3,8 +3,6 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  TextInput,
-  StyleSheet,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,11 +11,13 @@ import { router } from 'expo-router';
 
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { NavigationHeader } from '@/components/navigation-header';
 import { AppDialog } from '@/components/confirm-dialog';
 import { HomeSkeleton } from '@/components/ui/loading-state';
 import { useHomeSummary } from '@/hooks/use-home-summary';
-import { colors } from '@/theme/colors';
 
 export default function HomeScreen() {
   const {
@@ -48,7 +48,7 @@ export default function HomeScreen() {
     currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
       <StatusBar style="dark" />
 
       {/* EN-TÊTE PRINCIPAL ÉPURÉ — KLYRO */}
@@ -56,17 +56,18 @@ export default function HomeScreen() {
         title="Klyro"
         subtitle={`VUE D'ENSEMBLE • ${formattedMonth.toUpperCase()}`}
         actionButton={
-          <TouchableOpacity
-            activeOpacity={0.7}
+          <Button
+            variant="outline"
+            size="icon"
             onPress={togglePrivate}
-            style={styles.iconHeaderButton}
+            className="w-[38px] h-[38px] rounded-full bg-card border-border shadow-none"
             accessibilityLabel="Masquer ou afficher les montants">
             <Ionicons
               name={isPrivate ? 'eye-off-outline' : 'eye-outline'}
               size={18}
-              color={colors.textMuted}
+              color="#64748B"
             />
-          </TouchableOpacity>
+          </Button>
         }
       />
 
@@ -75,27 +76,31 @@ export default function HomeScreen() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}>
+          contentContainerClassName="px-4 pt-2.5 pb-[110px] gap-4 w-full max-w-[860px] self-center">
 
           {/* 1. CARTE HERO : RESTE À VIVRE */}
-          <Card style={styles.heroCard}>
-            <View style={styles.heroTopRow}>
-              <View style={styles.heroBadge}>
-                <View style={styles.heroBadgeDot} />
-                <Text style={styles.heroBadgeText}>Reste à Vivre</Text>
-              </View>
-              <Text style={styles.heroFormulaHint}>Revenu - Charges Fixes</Text>
+          <Card className="bg-primary rounded-3xl p-6 shadow-sm border border-slate-800">
+            <View className="flex-row justify-between items-center mb-4">
+              <Badge variant="outline" className="border-white/20 bg-white/10 gap-1.5 px-2.5 py-1 rounded-full">
+                <View className="w-2 h-2 rounded-full bg-accent" />
+                <Text className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+                  Reste à Vivre
+                </Text>
+              </Badge>
+              <Text className="text-xs font-medium text-slate-400">
+                Revenu - Charges Fixes
+              </Text>
             </View>
 
-            <View style={styles.heroAmountRow}>
-              <Text style={styles.heroAmount}>
+            <View className="flex-row items-baseline gap-3 mb-4 flex-wrap">
+              <Text className="text-4xl font-black text-white tracking-tight">
                 {renderMoney(resteAVivre)}
               </Text>
-              <View style={styles.heroRoundBadge}>
-                <Text style={styles.heroRoundBadgeText}>
+              <Badge variant="secondary" className="bg-white/10 border-0 px-2 py-0.5 rounded-md">
+                <Text className="text-xs font-semibold text-slate-300">
                   ≈ {renderMoneyRound(resteAVivre)}
                 </Text>
-              </View>
+              </Badge>
             </View>
 
             {/* Formule explicative cliquable */}
@@ -117,41 +122,47 @@ export default function HomeScreen() {
                     '.',
                 })
               }
-              style={styles.formulaRow}>
-              <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
-              <Text style={styles.formulaText}>
+              className="flex-row items-center pt-3 border-t border-white/10 gap-2">
+              <Ionicons name="information-circle-outline" size={16} color="#10B981" />
+              <Text className="text-xs text-slate-300 flex-1 font-medium">
                 Disponible pour épargner & vivre après charges
               </Text>
-              <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+              <Ionicons name="chevron-forward" size={14} color="#94A3B8" />
             </TouchableOpacity>
           </Card>
 
           {/* 2. REVENU MENSUEL (MODIFIABLE DIRECTEMENT) */}
-          <Card style={styles.inputCard}>
-            <View style={styles.inputCardHeader}>
-              <View style={[styles.iconWrap, styles.iconGreen]}>
-                <Ionicons name="wallet-outline" size={20} color={colors.accent} />
+          <Card className="bg-card rounded-2xl p-5 border border-border shadow-xs">
+            <View className="flex-row items-center gap-3 mb-3">
+              <View className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 justify-center items-center">
+                <Ionicons name="wallet-outline" size={20} color="#10B981" />
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.inputCardLabel}>Revenu Mensuel</Text>
-                <Text style={styles.inputCardSub}>
+              <View className="flex-1">
+                <Text className="text-base font-bold text-foreground">Revenu Mensuel</Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">
                   Base salaires, primes ou aides nettes
                 </Text>
               </View>
-              <Text style={styles.directInputBadge}>MODIFIABLE</Text>
+              <Badge variant="secondary" className="bg-emerald-50 border-0 px-2 py-0.5 rounded-md">
+                <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                  MODIFIABLE
+                </Text>
+              </Badge>
             </View>
 
-            <View style={styles.directInputRow}>
-              <TextInput
+            <View className="flex-row items-baseline bg-muted/40 rounded-xl px-4 py-1.5 border border-border">
+              <Input
                 value={incomeInput}
                 onChangeText={setLocalIncome}
                 onBlur={handleBlurIncome}
                 keyboardType="decimal-pad"
                 placeholder="0"
-                placeholderTextColor={colors.textMuted}
-                style={styles.directTextInput}
+                placeholderTextColor="#64748B"
+                className="flex-1 text-2xl font-black text-foreground border-0 bg-transparent shadow-none px-0 py-1 h-auto sm:h-auto"
               />
-              <Text style={styles.euroUnitText}>€ / mois</Text>
+              <Text className="text-sm font-semibold text-muted-foreground ml-2">
+                € / mois
+              </Text>
             </View>
           </Card>
 
@@ -159,37 +170,39 @@ export default function HomeScreen() {
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => router.push('/fixed-expenses')}>
-            <Card style={styles.fixedExpenseCard}>
-              <View style={styles.fixedCardLeft}>
-                <View style={[styles.iconWrap, styles.iconPurple]}>
-                  <Ionicons name="calendar-outline" size={20} color={colors.lavender} />
+            <Card className="bg-card rounded-2xl p-5 border border-border shadow-xs flex-row items-center justify-between">
+              <View className="flex-row items-center gap-3 flex-1 pr-3">
+                <View className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
+                  <Ionicons name="calendar-outline" size={20} color="#6366F1" />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.fixedLabel}>Charges Fixes</Text>
-                  <Text style={styles.fixedSub}>
+                <View className="flex-1">
+                  <Text className="text-base font-bold text-foreground">Charges Fixes</Text>
+                  <Text className="text-xs text-muted-foreground mt-0.5">
                     Loyer, abonnements, assurances, crédits...
                   </Text>
                 </View>
               </View>
-              <View style={styles.fixedCardRight}>
-                <Text style={styles.fixedAmount}>
+              <View className="items-end">
+                <Text className="text-lg font-black text-foreground">
                   - {renderMoney(totalFixedExpenses)}
                 </Text>
-                <View style={styles.fixedLinkRow}>
-                  <Text style={styles.fixedLinkText}>Gérer le détail</Text>
-                  <Ionicons name="chevron-forward" size={12} color={colors.lavender} />
+                <View className="flex-row items-center gap-1 mt-1">
+                  <Text className="text-xs font-bold text-lavender">Gérer le détail</Text>
+                  <Ionicons name="chevron-forward" size={12} color="#6366F1" />
                 </View>
               </View>
             </Card>
           </TouchableOpacity>
 
           {/* 4. COMPTE COURANT & ÉPARGNE */}
-          <View style={styles.accountsRow}>
+          <View className="flex-row gap-3">
             {/* COMPTE COURANT (NÉCESSAIRE + FACULTATIF) */}
-            <Card style={[styles.accountCard, styles.checkingCard]}>
-              <View style={styles.accountHeader}>
-                <Ionicons name="card-outline" size={18} color={colors.accent} />
-                <Text style={styles.accountLabel}>Compte Courant</Text>
+            <Card className="flex-1 bg-card rounded-2xl p-4 border border-border border-l-4 border-l-accent shadow-xs">
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center gap-1.5">
+                  <Ionicons name="card-outline" size={18} color="#10B981" />
+                  <Text className="text-xs font-bold text-foreground">Compte Courant</Text>
+                </View>
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() =>
@@ -208,32 +221,34 @@ export default function HomeScreen() {
                         '.',
                     })
                   }>
-                  <Ionicons name="help-circle-outline" size={16} color={colors.textMuted} />
+                  <Ionicons name="help-circle-outline" size={16} color="#64748B" />
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.accountDisplayRow}>
-                <Text style={styles.accountDisplayAmount}>
+              <View className="flex-row items-baseline gap-2 mb-2 flex-wrap">
+                <Text className="text-lg font-black text-foreground">
                   {renderMoney(checkingAmount)}
                 </Text>
-                <View style={styles.inlineRoundBadge}>
-                  <Text style={styles.inlineRoundBadgeText}>
+                <Badge variant="outline" className="bg-emerald-50 border-emerald-200 px-1.5 py-0.5 rounded">
+                  <Text className="text-[11px] font-semibold text-accentDark">
                     ≈ {renderMoneyRound(checkingAmount)}
                   </Text>
-                </View>
+                </Badge>
               </View>
 
-              <Text style={styles.accountFormulaTitle}>Dépenses courantes</Text>
-              <Text style={styles.accountFormulaDetail}>
+              <Text className="text-xs font-bold text-foreground">Dépenses courantes</Text>
+              <Text className="text-[11px] text-muted-foreground mt-0.5">
                 Reste à vivre − Épargne
               </Text>
             </Card>
 
             {/* COMPTE ÉPARGNE (FORMULE RACINE CARRÉE) */}
-            <Card style={[styles.accountCard, styles.savingsCard]}>
-              <View style={styles.accountHeader}>
-                <Ionicons name="trending-up" size={18} color={colors.lavender} />
-                <Text style={styles.accountLabel}>Pour Épargne</Text>
+            <Card className="flex-1 bg-card rounded-2xl p-4 border border-border border-l-4 border-l-lavender shadow-xs">
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center gap-1.5">
+                  <Ionicons name="trending-up" size={18} color="#6366F1" />
+                  <Text className="text-xs font-bold text-foreground">Pour Épargne</Text>
+                </View>
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() =>
@@ -250,64 +265,64 @@ export default function HomeScreen() {
                         '.',
                     })
                   }>
-                  <Ionicons name="help-circle-outline" size={16} color={colors.textMuted} />
+                  <Ionicons name="help-circle-outline" size={16} color="#64748B" />
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.accountDisplayRow}>
-                <Text style={styles.accountDisplayAmount}>
+              <View className="flex-row items-baseline gap-2 mb-2 flex-wrap">
+                <Text className="text-lg font-black text-foreground">
                   {renderMoney(epargneAmount)}
                 </Text>
-                <View style={styles.inlineRoundBadge}>
-                  <Text style={styles.inlineRoundBadgeText}>
+                <Badge variant="outline" className="bg-indigo-50 border-indigo-200 px-1.5 py-0.5 rounded">
+                  <Text className="text-[11px] font-semibold text-lavender">
                     ≈ {renderMoneyRound(epargneAmount)}
                   </Text>
-                </View>
+                </Badge>
               </View>
 
-              <Text style={styles.accountFormulaTitle}>Épargne optimisée</Text>
-              <Text style={styles.accountFormulaDetail}>
+              <Text className="text-xs font-bold text-foreground">Épargne optimisée</Text>
+              <Text className="text-[11px] text-muted-foreground mt-0.5">
                 B4 − √(B4 × Nécessaire)
               </Text>
             </Card>
           </View>
 
           {/* 5. LIENS DE GESTION DIRECTS */}
-          <View style={styles.navLinksCard}>
+          <Card className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
             <TouchableOpacity
               onPress={() => router.push('/variable-expenses')}
               activeOpacity={0.8}
-              style={styles.navLinkItem}>
-              <View style={[styles.navLinkIcon, { backgroundColor: '#ECFDF5' }]}>
-                <Ionicons name="pie-chart-outline" size={20} color={colors.accent} />
+              className="flex-row items-center p-4 gap-3">
+              <View className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 justify-center items-center">
+                <Ionicons name="pie-chart-outline" size={20} color="#10B981" />
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.navLinkTitle}>Charges Variables & Lissage</Text>
-                <Text style={styles.navLinkSub}>
+              <View className="flex-1">
+                <Text className="text-sm font-bold text-foreground">Charges Variables & Lissage</Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">
                   Courses, shopping, santé et impact mensuel
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+              <Ionicons name="chevron-forward" size={16} color="#64748B" />
             </TouchableOpacity>
 
-            <View style={styles.navLinkDivider} />
+            <View className="h-px bg-border mx-4" />
 
             <TouchableOpacity
               onPress={() => router.push('/details')}
               activeOpacity={0.8}
-              style={styles.navLinkItem}>
-              <View style={[styles.navLinkIcon, { backgroundColor: '#EEF2FF' }]}>
-                <MaterialCommunityIcons name="calculator-variant-outline" size={20} color={colors.lavender} />
+              className="flex-row items-center p-4 gap-3">
+              <View className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
+                <MaterialCommunityIcons name="calculator-variant-outline" size={20} color="#6366F1" />
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.navLinkTitle}>Simulation & Calculs Avancés</Text>
-                <Text style={styles.navLinkSub}>
+              <View className="flex-1">
+                <Text className="text-sm font-bold text-foreground">Simulation & Calculs Avancés</Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">
                   Ventilation 49/37/14 et revenus ponctuels
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+              <Ionicons name="chevron-forward" size={16} color="#64748B" />
             </TouchableOpacity>
-          </View>
+          </Card>
         </ScrollView>
       )}
 
@@ -326,379 +341,3 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    gap: 16,
-    width: '100%',
-    maxWidth: 860,
-    alignSelf: 'center',
-  },
-  iconHeaderButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: colors.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-
-  /* 1. CARTE HERO : RESTE À VIVRE */
-  heroCard: {
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    padding: 22,
-    borderWidth: 1,
-    borderColor: colors.border,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  heroTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  heroBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#ECFDF5',
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-  },
-  heroBadgeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.accent,
-  },
-  heroBadgeText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: colors.accentDark,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  heroFormulaHint: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '700',
-  },
-  heroAmountRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 10,
-    flexWrap: 'wrap',
-    marginTop: 10,
-  },
-  heroAmount: {
-    fontSize: 38,
-    fontWeight: '900',
-    color: colors.primary,
-    letterSpacing: -1,
-  },
-  heroRoundBadge: {
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  heroRoundBadgeText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: colors.accentDark,
-  },
-  formulaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#F1F5F9',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginTop: 14,
-  },
-  formulaText: {
-    fontSize: 12,
-    color: colors.textMuted,
-    fontWeight: '600',
-    flex: 1,
-  },
-
-  /* 2. REVENUE (INPUT DIRECT) */
-  inputCard: {
-    backgroundColor: colors.card,
-    borderRadius: 22,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderLeftWidth: 5,
-    borderLeftColor: colors.accent,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-    gap: 12,
-  },
-  inputCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconGreen: {
-    backgroundColor: '#ECFDF5',
-  },
-  iconPurple: {
-    backgroundColor: '#EEF2FF',
-  },
-  inputCardLabel: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: colors.text,
-  },
-  inputCardSub: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '500',
-    marginTop: 1,
-  },
-  directInputBadge: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: colors.accentDark,
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    letterSpacing: 0.3,
-  },
-  directInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    height: 52,
-    gap: 8,
-  },
-  directTextInput: {
-    flex: 1,
-    fontSize: 22,
-    fontWeight: '900',
-    color: colors.accentDark,
-    height: '100%',
-  },
-  euroUnitText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: colors.textMuted,
-  },
-
-  /* 3. CHARGE FIXE */
-  fixedExpenseCard: {
-    backgroundColor: colors.card,
-    borderRadius: 22,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderLeftWidth: 5,
-    borderLeftColor: colors.lavender,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-    gap: 10,
-  },
-  fixedCardLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  fixedLabel: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: colors.text,
-  },
-  fixedSub: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '500',
-    marginTop: 1,
-  },
-  fixedCardRight: {
-    alignItems: 'flex-end',
-  },
-  fixedAmount: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: colors.danger,
-  },
-  fixedLinkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    marginTop: 2,
-  },
-  fixedLinkText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.lavender,
-  },
-
-  /* 4. COMPTE COURANT & ÉPARGNE */
-  accountsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    flexWrap: 'wrap',
-  },
-  accountCard: {
-    flex: 1,
-    minWidth: 150,
-    backgroundColor: colors.card,
-    borderRadius: 22,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 8,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  checkingCard: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.accent,
-  },
-  savingsCard: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.lavender,
-  },
-  accountHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  accountLabel: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: colors.text,
-    flex: 1,
-  },
-  accountDisplayRow: {
-    paddingVertical: 6,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  accountDisplayAmount: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: colors.text,
-    letterSpacing: -0.5,
-  },
-  inlineRoundBadge: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  inlineRoundBadgeText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: colors.textMuted,
-  },
-  accountFormulaTitle: {
-    fontSize: 11,
-    color: colors.text,
-    fontWeight: '700',
-  },
-  accountFormulaDetail: {
-    fontSize: 10,
-    color: colors.textMuted,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-
-  /* 5. NAVIGATION DIRECTE */
-  navLinksCard: {
-    backgroundColor: colors.card,
-    borderRadius: 22,
-    padding: 6,
-    borderWidth: 1,
-    borderColor: colors.border,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  navLinkItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    gap: 14,
-  },
-  navLinkIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  navLinkTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  navLinkSub: {
-    fontSize: 11,
-    color: colors.textMuted,
-    marginTop: 1,
-  },
-  navLinkDivider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginHorizontal: 14,
-  },
-});
