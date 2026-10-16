@@ -1,0 +1,123 @@
+{
+  "budget": {
+    "income": 2850,
+    "fixedExpenses": 1119.99,
+    "checkingAccount": 2430.50,
+    "savingsAccount": 12500.00
+  },
+  "fixedExpenses": [
+    {
+      "id": "1",
+      "label": "Loyer / Emprunt immo",
+      "amount": 780,
+      "category": "logement",
+      "icon": "home-outline",
+      "dueDay": 5,
+      "isPaid": true
+    },
+    {
+      "id": "2",
+      "label": "Électricité & Gaz",
+      "amount": 95,
+      "category": "energie",
+      "icon": "flash-outline",
+      "dueDay": 12,
+      "isPaid": true
+    },
+    {
+      "id": "3",
+      "label": "Assurance habitation & auto",
+      "amount": 85,
+      "category": "assurance",
+      "icon": "shield-checkmark-outline",
+      "dueDay": 10,
+      "isPaid": true
+    },
+    {
+      "id": "4",
+      "label": "Internet & Téléphonie",
+      "amount": 49.99,
+      "category": "abonnements",
+      "icon": "wifi-outline",
+      "dueDay": 18,
+      "isPaid": false
+    },
+    {
+      "id": "5",
+      "label": "Abonnements (Streaming, Musique)",
+      "amount": 35,
+      "category": "abonnements",
+      "icon": "play-circle-outline",
+      "dueDay": 22,
+      "isPaid": false
+    },
+    {
+      "id": "6",
+      "label": "Pass Transport / Carburant",
+      "amount": 75,
+      "category": "transport",
+      "icon": "car-outline",
+      "dueDay": 1,
+      "isPaid": true
+    }
+  ],
+  "variableCategories": [
+    {
+      "id": "v1",
+      "label": "Alimentation & Courses",
+      "estimatedBudget": 450,
+      "spent": 280,
+      "icon": "cart-outline",
+      "color": "#9b6fba"
+    },
+    {
+      "id": "v2",
+      "label": "Sorties & Restaurants",
+      "estimatedBudget": 220,
+      "spent": 165,
+      "icon": "restaurant-outline",
+      "color": "#d9822b"
+    },
+    {
+      "id": "v3",
+      "label": "Shopping & Habillement",
+      "estimatedBudget": 150,
+      "spent": 65,
+      "icon": "shirt-outline",
+      "color": "#8557a5"
+    },
+    {
+      "id": "v4",
+      "label": "Carburant & Déplacements",
+      "estimatedBudget": 90,
+      "spent": 50,
+      "icon": "car-sport-outline",
+      "color": "#2563eb"
+    },
+    {
+      "id": "v5",
+      "label": "Santé, Beauté & Bien-être",
+      "estimatedBudget": 70,
+      "spent": 30,
+      "icon": "medkit-outline",
+      "color": "#1b9963"
+    },
+    {
+      "id": "v6",
+      "label": "Loisirs, Sport & Vacances",
+      "estimatedBudget": 120,
+      "spent": 75,
+      "icon": "football-outline",
+      "color": "#c0568c"
+    },
+    {
+      "id": "v7",
+      "label": "Imprévus & Divers",
+      "estimatedBudget": 100,
+      "spent": 25,
+      "icon": "alert-circle-outline",
+      "color": "#d43f5e"
+    }
+  ],
+  "expenseHistory": []
+}

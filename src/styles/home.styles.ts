@@ -3,491 +3,794 @@ import { StyleSheet, Platform } from 'react-native';
 export const homeStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#090d16',
+    backgroundColor: '#f6f3ed',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 12 : 8,
-    paddingBottom: 16,
+    paddingTop: Platform.OS === 'android' ? 14 : 10,
+    paddingBottom: 8,
   },
-  headerSubtitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748b',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#f8fafc',
-    marginTop: 2,
-  },
-  editHeaderButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1e293b',
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#334155',
-    gap: 6,
-  },
-  editHeaderText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#38bdf8',
-  },
-  scrollContent: {
-    paddingHorizontal: 18,
-    paddingBottom: 30,
-    gap: 20,
-  },
-
-  /* 1. CARTE PATRIMOINE */
-  patrimonyCard: {
-    backgroundColor: '#111827',
-    borderRadius: 24,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#1f2937',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 8,
-  },
-  patrimonyHeader: {
+  headerTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
   },
-  badgeRow: {
+  greetingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
-  activeDot: {
+  greetingDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#10b981',
   },
-  badgeText: {
+  greetingText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#94a3b8',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  patrimonyAmount: {
-    fontSize: 34,
-    fontWeight: '900',
-    color: '#ffffff',
-    letterSpacing: -0.5,
-    marginVertical: 4,
-  },
-  patrimonyDivider: {
-    height: 1,
-    backgroundColor: '#1f2937',
-    marginVertical: 16,
-  },
-  accountsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  accountItem: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  accountItemLeft: {
-    paddingRight: 8,
-  },
-  accountItemRight: {
-    paddingLeft: 8,
-  },
-  accountIconWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: 'rgba(56, 189, 248, 0.12)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  savingsIconWrapper: {
-    backgroundColor: 'rgba(52, 211, 153, 0.12)',
-  },
-  accountInfo: {
-    flex: 1,
-  },
-  accountLabel: {
-    fontSize: 12,
-    color: '#94a3b8',
-    fontWeight: '500',
-  },
-  accountAmount: {
-    fontSize: 16,
     fontWeight: '700',
-    color: '#f1f5f9',
+    color: '#7c6f85',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#1e1628',
+    letterSpacing: -0.5,
     marginTop: 2,
   },
-  savingsAmountText: {
-    color: '#34d399',
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  verticalSeparator: {
-    width: 1,
+  iconHeaderButton: {
+    width: 38,
     height: 38,
-    backgroundColor: '#1f2937',
+    borderRadius: 19,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    gap: 16,
+    width: '100%',
+    maxWidth: 860,
+    alignSelf: 'center',
   },
 
-  /* 2. SECTION FLUX */
-  sectionHeaderRow: {
+  /* 1. LUXE HERO CARD */
+  heroCard: {
+    backgroundColor: '#1b1424',
+    borderRadius: 26,
+    padding: 22,
+    shadowColor: '#1b1424',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.22,
+    shadowRadius: 16,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#2e233d',
+    overflow: 'hidden',
+  },
+  heroHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
+    marginBottom: 8,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#f8fafc',
-    letterSpacing: -0.3,
+  heroBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 12,
   },
-  sectionHint: {
-    fontSize: 12,
-    color: '#64748b',
-    fontWeight: '500',
+  heroBadgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10b981',
   },
-  sectionBadge: {
+  heroBadgeText: {
     fontSize: 11,
-    fontWeight: '600',
-    color: '#94a3b8',
-    backgroundColor: '#1e293b',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
+    fontWeight: '700',
+    color: '#e4dcf0',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  heroTabs: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 10,
+    padding: 2,
+  },
+  heroTab: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 8,
   },
+  heroTabActive: {
+    backgroundColor: '#9b6fba',
+  },
+  heroTabText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#aba0b8',
+  },
+  heroTabTextActive: {
+    color: '#ffffff',
+    fontWeight: '700',
+  },
+  heroAmountRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
+    marginVertical: 4,
+  },
+  heroMainAmount: {
+    fontSize: 34,
+    fontWeight: '900',
+    color: '#ffffff',
+    letterSpacing: -1,
+  },
+  heroSubLabel: {
+    fontSize: 12,
+    color: '#a79cb5',
+    fontWeight: '500',
+  },
+  heroDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginVertical: 14,
+  },
+  heroAccountsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  heroAccountCol: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  heroAccountIconBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(155, 111, 186, 0.22)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroSavingsIconBg: {
+    backgroundColor: 'rgba(16, 185, 129, 0.22)',
+  },
+  heroAccountLabel: {
+    fontSize: 11,
+    color: '#a79cb5',
+    fontWeight: '500',
+  },
+  heroAccountValue: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#ffffff',
+    marginTop: 2,
+  },
+  heroSavingsValue: {
+    color: '#34d399',
+  },
+  heroVerticalSep: {
+    width: 1,
+    height: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: 12,
+  },
+  heroSavingsPill: {
+    marginTop: 14,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.2)',
+  },
+  heroSavingsPillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#a7f3d0',
+  },
+  heroSavingsPillValue: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#34d399',
+  },
+
+  /* 2. QUICK ACTIONS DOCK */
+  quickActionsDock: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
+  },
+  quickActionItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 6,
+  },
+  quickActionCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  quickActionPrimaryCircle: {
+    backgroundColor: '#9b6fba',
+    borderColor: '#8d5eae',
+    shadowColor: '#9b6fba',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  quickActionLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#65576f',
+    textAlign: 'center',
+  },
+
+  /* 3. FLUX CARDS ROW */
   cashflowRow: {
     flexDirection: 'row',
     gap: 12,
   },
   cashflowCard: {
     flex: 1,
+    backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    justifyContent: 'space-between',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  incomeCard: {
-    backgroundColor: '#0c1f1a',
-    borderColor: '#064e3b',
+  incomeCardBorder: {
+    borderColor: 'rgba(16, 185, 129, 0.25)',
   },
-  expenseCard: {
-    backgroundColor: '#201016',
-    borderColor: '#4c0519',
+  expenseCardBorder: {
+    borderColor: 'rgba(225, 29, 72, 0.22)',
   },
-  cashflowCardTop: {
+  cashflowTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  cashflowIconWrapper: {
+  cashflowIconWrap: {
     width: 32,
     height: 32,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  incomeIconBg: {
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+  incomeIconWrap: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
   },
-  expenseIconBg: {
-    backgroundColor: 'rgba(244, 63, 94, 0.2)',
+  expenseIconWrap: {
+    backgroundColor: 'rgba(225, 29, 72, 0.12)',
   },
-  cashflowTagIncome: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#10b981',
+  cashflowTag: {
+    fontSize: 10,
+    fontWeight: '800',
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  cashflowTagExpense: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#f43f5e',
-    textTransform: 'uppercase',
+  incomeTag: {
+    color: '#059669',
+  },
+  expenseTag: {
+    color: '#e11d48',
   },
   cashflowLabel: {
-    fontSize: 12,
-    color: '#cbd5e1',
-    fontWeight: '500',
-  },
-  incomeAmount: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#10b981',
-    marginTop: 4,
-    marginBottom: 4,
-  },
-  expenseAmount: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#fb7185',
-    marginTop: 4,
-    marginBottom: 4,
-  },
-  cashflowSubtext: {
     fontSize: 11,
-    color: '#64748b',
+    color: '#7c6f85',
+    fontWeight: '600',
+  },
+  incomeValue: {
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#059669',
+    marginTop: 2,
+  },
+  expenseValue: {
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#e11d48',
+    marginTop: 2,
+  },
+  cashflowHint: {
+    fontSize: 11,
+    color: '#95899e',
+    marginTop: 4,
   },
 
-  /* 3. CARTE RESTE À VIVRE */
-  allowanceCard: {
-    backgroundColor: '#161928',
-    borderRadius: 20,
+  /* 4. REPARTITION DU MOIS & MULTI-SEGMENT GAUGE */
+  sectionCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 22,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#2e2554',
+    borderColor: '#e8e1d5',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  allowanceHeader: {
+  sectionCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 12,
   },
-  allowanceTitleRow: {
+  sectionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  allowanceTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#e2e8f0',
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1e1628',
   },
-  allowanceRatio: {
-    fontSize: 12,
+  sectionBadge: {
+    fontSize: 11,
     fontWeight: '700',
-    color: '#c084fc',
-    backgroundColor: 'rgba(192, 132, 252, 0.15)',
+    color: '#9b6fba',
+    backgroundColor: 'rgba(155, 111, 186, 0.1)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
   },
-  allowanceBody: {
-    marginVertical: 12,
-  },
-  allowanceAmount: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#a78bfa',
-    letterSpacing: -0.5,
-  },
-  allowanceDescription: {
-    fontSize: 12,
-    color: '#94a3b8',
-    marginTop: 3,
-  },
-  gaugeContainer: {
-    marginTop: 4,
-    gap: 6,
-  },
-  gaugeBackground: {
-    height: 8,
-    backgroundColor: 'rgba(167, 139, 250, 0.2)',
-    borderRadius: 4,
+  multiBarTrack: {
+    height: 10,
+    backgroundColor: '#f0eae0',
+    borderRadius: 6,
+    flexDirection: 'row',
     overflow: 'hidden',
+    marginVertical: 10,
   },
-  gaugeFilled: {
+  barFixed: {
+    backgroundColor: '#9b6fba',
     height: '100%',
-    backgroundColor: '#f43f5e',
-    borderRadius: 4,
   },
-  gaugeLegendRow: {
+  barVariable: {
+    backgroundColor: '#f59e0b',
+    height: '100%',
+  },
+  barSavings: {
+    backgroundColor: '#10b981',
+    height: '100%',
+  },
+  matrixRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingTop: 8,
   },
-  gaugeLegendText: {
+  matrixCol: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  matrixColRight: {
+    alignItems: 'flex-end',
+  },
+  matrixColCenter: {
+    alignItems: 'center',
+  },
+  matrixDotRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 2,
+  },
+  matrixDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
+  matrixLabel: {
     fontSize: 11,
-    color: '#64748b',
+    fontWeight: '600',
+    color: '#7c6f85',
+  },
+  matrixValue: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#1e1628',
+  },
+  matrixSubtext: {
+    fontSize: 10,
+    color: '#95899e',
+    marginTop: 1,
+  },
+  burnRateBanner: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f2ede4',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  burnRateText: {
+    fontSize: 12,
+    color: '#65576f',
     fontWeight: '500',
   },
-
-  /* 4. LISTE DES CHARGES FIXES */
-  expenseListContainer: {
-    backgroundColor: '#111827',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: '#1f2937',
+  burnRateBold: {
+    fontWeight: '800',
+    color: '#9b6fba',
   },
-  expenseListItem: {
+
+  /* 5. CHARGES FIXES LIST */
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 13,
+    marginTop: 2,
+  },
+  sectionHeading: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1e1628',
+  },
+  sectionLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  sectionLinkText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#9b6fba',
+  },
+  fixedItemsList: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  fixedItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#1f2937',
+    borderBottomColor: '#f2ede4',
   },
   noBorderBottom: {
     borderBottomWidth: 0,
   },
-  expenseListLeft: {
+  fixedItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    flex: 1,
   },
-  expenseItemIconBg: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: '#1e293b',
+  fixedItemIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#f7f4ed',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  expenseItemLabel: {
+  fixedItemLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#f1f5f9',
+    fontWeight: '700',
+    color: '#1e1628',
   },
-  expenseItemCategory: {
+  fixedItemDue: {
     fontSize: 11,
-    color: '#64748b',
-    textTransform: 'capitalize',
+    color: '#7c6f85',
     marginTop: 1,
   },
-  expenseItemAmount: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#f43f5e',
-  },
-
-  /* BOUTON PRINCIPAL */
-  primaryActionButton: {
+  fixedItemRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#2563eb',
-    paddingVertical: 15,
-    borderRadius: 16,
-    gap: 8,
-    shadowColor: '#2563eb',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 4,
+    gap: 10,
   },
-  primaryActionButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#ffffff',
+  fixedItemAmount: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#e11d48',
+  },
+  fixedItemAmountPaid: {
+    color: '#95899e',
+    textDecorationLine: 'line-through',
+  },
+  fixedCheckBtn: {
+    padding: 4,
   },
 
-  /* MODAL D'ÉDITION */
+  /* 6. ENVELOPPES DE DEPENSES CARDS */
+  envelopeCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  envelopeItem: {
+    marginBottom: 12,
+  },
+  envelopeItemLast: {
+    marginBottom: 0,
+  },
+  envelopeTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  envelopeNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  envelopeIconBg: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  envelopeName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1e1628',
+  },
+  envelopeAmounts: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#65576f',
+  },
+  envelopeTrack: {
+    height: 6,
+    backgroundColor: '#f2ede4',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  envelopeFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+
+  /* 7. RECENT TRANSACTIONS */
+  recentTxContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    shadowColor: '#231c2b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  recentTxItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2ede4',
+  },
+  recentTxLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  recentTxIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#faf7f2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recentTxLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1e1628',
+  },
+  recentTxDate: {
+    fontSize: 10,
+    color: '#95899e',
+    marginTop: 1,
+  },
+  recentTxAmount: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#e11d48',
+  },
+  emptyTxBox: {
+    paddingVertical: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  emptyTxText: {
+    fontSize: 12,
+    color: '#95899e',
+    fontWeight: '500',
+  },
+
+  /* MODALS */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(27, 20, 36, 0.55)',
     justifyContent: 'flex-end',
   },
-  modalCard: {
-    backgroundColor: '#0f172a',
+  modalContent: {
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 22,
-    maxHeight: '85%',
+    maxHeight: '90%',
+    width: '100%',
+    maxWidth: 580,
+    alignSelf: 'center',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#e8e1d5',
+    shadowColor: '#1e1628',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 10,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 18,
+    alignItems: 'center',
+    marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#f8fafc',
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#1e1628',
   },
-  modalSubtitle: {
-    fontSize: 13,
-    color: '#94a3b8',
-    marginTop: 3,
-  },
-  modalCloseButton: {
-    padding: 6,
-    backgroundColor: '#1e293b',
-    borderRadius: 20,
-  },
-  modalBody: {
-    marginBottom: 16,
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f7f4ed',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 14,
   },
-  inputLabelRow: {
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#473d52',
+    marginBottom: 6,
+  },
+  textInput: {
+    backgroundColor: '#faf7f2',
+    borderWidth: 1,
+    borderColor: '#e8e1d5',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1e1628',
+  },
+  categoryChipScroll: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingVertical: 4,
+    marginBottom: 12,
+  },
+  categoryChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 6,
-  },
-  inputLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#cbd5e1',
-  },
-  textInput: {
-    backgroundColor: '#1e293b',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#334155',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#f8fafc',
-    height: 50,
+    borderColor: '#e8e1d5',
+    backgroundColor: '#ffffff',
   },
-  textInputFocused: {
-    borderColor: '#38bdf8',
-    backgroundColor: '#1e293b',
+  categoryChipSelected: {
+    backgroundColor: '#9b6fba',
+    borderColor: '#9b6fba',
   },
-  modalFooter: {
+  categoryChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#65576f',
+  },
+  categoryChipTextSelected: {
+    color: '#ffffff',
+  },
+  modalActionRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 8,
+    marginTop: 10,
   },
-  modalCancelButton: {
+  modalCancelBtn: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: '#1e293b',
+    backgroundColor: '#f7f4ed',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#e8e1d5',
   },
   modalCancelText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#94a3b8',
+    fontWeight: '700',
+    color: '#7c6f85',
   },
-  modalSubmitButton: {
+  modalConfirmBtn: {
     flex: 2,
     paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: '#0284c7',
+    backgroundColor: '#9b6fba',
     alignItems: 'center',
+    shadowColor: '#9b6fba',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  modalSubmitText: {
+  modalConfirmText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#ffffff',
   },
 });

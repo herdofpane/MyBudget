@@ -1,0 +1,68 @@
+{
+  "fixedCategories": {
+    "logement": {
+      "label": "Logement",
+      "icon": "home-outline",
+      "color": "#9b6fba",
+      "bg": "rgba(155, 111, 186, 0.12)"
+    },
+    "energie": {
+      "label": "Énergie",
+      "icon": "flash-outline",
+      "color": "#d9822b",
+      "bg": "rgba(217, 130, 43, 0.12)"
+    },
+    "assurance": {
+      "label": "Assurance",
+      "icon": "shield-checkmark-outline",
+      "color": "#1b9963",
+      "bg": "rgba(27, 153, 99, 0.12)"
+    },
+    "abonnements": {
+      "label": "Abonnements",
+      "icon": "wifi-outline",
+      "color": "#8557a5",
+      "bg": "rgba(133, 87, 165, 0.12)"
+    },
+    "transport": {
+      "label": "Transport",
+      "icon": "car-outline",
+      "color": "#2563eb",
+      "bg": "rgba(37, 99, 235, 0.12)"
+    },
+    "credit": {
+      "label": "Crédit",
+      "icon": "card-outline",
+      "color": "#d43f5e",
+      "bg": "rgba(212, 63, 94, 0.12)"
+    },
+    "autre": {
+      "label": "Autre",
+      "icon": "bookmark-outline",
+      "color": "#7c6f85",
+      "bg": "rgba(124, 111, 133, 0.12)"
+    }
+  },
+  "presetIcons": [
+    { "icon": "cart-outline", "label": "Courses" },
+    { "icon": "restaurant-outline", "label": "Resto" },
+    { "icon": "shirt-outline", "label": "Mode" },
+    { "icon": "car-sport-outline", "label": "Auto" },
+    { "icon": "medkit-outline", "label": "Santé" },
+    { "icon": "football-outline", "label": "Sport" },
+    { "icon": "film-outline", "label": "Loisirs" },
+    { "icon": "cafe-outline", "label": "Café" },
+    { "icon": "gift-outline", "label": "Cadeaux" },
+    { "icon": "alert-circle-outline", "label": "Imprévus" }
+  ],
+  "presetColors": [
+    "#9b6fba",
+    "#d9822b",
+    "#8557a5",
+    "#1b9963",
+    "#2563eb",
+    "#d43f5e",
+    "#0d9488",
+    "#e11d48"
+  ]
+}
