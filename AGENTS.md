@@ -107,9 +107,8 @@ Toute proposition de commit doit respecter les standards **Conventional Commits*
      - Les ajouts, modifications ou suppressions majeures.
      - L'impact technique ou ergonomique de la modification.
 4. **Exemple de référence** :
-```text
-feat(billing): ajout du récapitulatif de commande et fiabilisation des formulaires
-- Découplage du formulaire de paiement via un service dédié (billing-service)
-- Ajout de la validation instantanée sur les champs de carte bancaire
-- Intégration d'un indicateur de chargement sur le bouton de validation
-- Prise en charge de la fermeture du volet récapitulatif via la touche Échap
+   - feat(billing): ajout du récapitulatif de commande et fiabilisation des formulaires
+      - Découplage du formulaire de paiement via un service dédié (billing-service)
+      - Ajout de la validation instantanée sur les champs de carte bancaire
+      - Intégration d'un indicateur de chargement sur le bouton de validation
+      - Prise en charge de la fermeture du volet récapitulatif via la touche Échap
