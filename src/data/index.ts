@@ -107,3 +107,23 @@ export const PRESET_COLORS: string[] = [
   '#e11d48',
   '#d97706',
 ];
+
+// Presets d'icônes pour charges fixes (mode modification manuelle)
+export const FIXED_PRESET_ICONS: PresetIcon[] = [
+  { icon: 'home-outline', label: 'Logement' },
+  { icon: 'flash-outline', label: 'Énergie' },
+  { icon: 'shield-checkmark-outline', label: 'Assurance' },
+  { icon: 'wifi-outline', label: 'Internet' },
+  { icon: 'play-circle-outline', label: 'Streaming' },
+  { icon: 'car-sport-outline', label: 'Auto' },
+  { icon: 'train-outline', label: 'Transport' },
+  { icon: 'card-outline', label: 'Banque' },
+  { icon: 'cash-outline', label: 'Crédit' },
+  { icon: 'medkit-outline', label: 'Santé' },
+  { icon: 'barbell-outline', label: 'Sport' },
+  { icon: 'document-text-outline', label: 'Impôts' },
+  { icon: 'school-outline', label: 'École' },
+  { icon: 'paw-outline', label: 'Animaux' },
+  { icon: 'receipt-outline', label: 'Autre' },
+];
+

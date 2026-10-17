@@ -25,7 +25,7 @@ import { colors } from '@/theme/colors';
 
 import { useFixedExpenses } from '@/hooks/use-fixed-expenses';
 import { FixedCategoryType } from '@/types';
-import { CATEGORY_CONFIG } from '@/data';
+import { CATEGORY_CONFIG, FIXED_PRESET_ICONS } from '@/data';
 import { formatEuro, formatEuroRound, formatPercent } from '@/constants/formatters';
 import {
   getChargeScheduleStatus,
@@ -55,6 +55,7 @@ export default function FixedExpensesScreen() {
     setLabelInput,
     handleLabelChange,
     iconInput,
+    isIconManuallySelected,
     amountInput,
     setAmountInput,
     categoryInput,
@@ -73,6 +74,7 @@ export default function FixedExpensesScreen() {
     openAddModal,
     openEditModal,
     handleSelectCategory,
+    handleSelectIcon,
     handleSave,
     handleAdvanceMonth,
     handleDelete,
@@ -434,11 +436,16 @@ export default function FixedExpensesScreen() {
               {/* EN-TÊTE DU FORMULAIRE */}
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
-                  <View className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
+                  <View
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl justify-center items-center shrink-0 border"
+                    style={{
+                      backgroundColor: CATEGORY_CONFIG[categoryInput]?.bg || '#f3eef8',
+                      borderColor: `${CATEGORY_CONFIG[categoryInput]?.color || colors.lavender}40`,
+                    }}>
                     <Ionicons
                       name={(iconInput || (editingItem ? 'create-outline' : 'add-circle-outline')) as any}
                       size={18}
-                      color={colors.lavender}
+                      color={CATEGORY_CONFIG[categoryInput]?.color || colors.lavender}
                     />
                   </View>
                   <View className="flex-1">
@@ -474,7 +481,9 @@ export default function FixedExpensesScreen() {
                     {iconInput && (
                       <Badge variant="outline" className="border-indigo-200 bg-indigo-50/70 px-1.5 py-0.5 rounded-full flex-row items-center gap-1">
                         <Ionicons name={iconInput as any} size={11} color={colors.lavender} />
-                        <Text className="text-[10px] font-semibold text-lavender">Icône auto</Text>
+                        <Text className="text-[10px] font-semibold text-lavender">
+                          {editingItem ? (isIconManuallySelected ? 'Icône choisie' : 'Icône auto') : 'Icône auto'}
+                        </Text>
                       </Badge>
                     )}
                   </View>
@@ -501,39 +510,104 @@ export default function FixedExpensesScreen() {
                   />
                 </View>
 
-                {/* CHAMP 3 : CATÉGORIE */}
-                <View className="gap-1">
-                  <Text className="text-xs font-bold text-foreground">Catégorie</Text>
-                  <View className="flex-row flex-wrap gap-1.5">
-                    {(Object.keys(CATEGORY_CONFIG) as FixedCategoryType[]).map((catKey) => {
-                      const isSelected = categoryInput === catKey;
-                      const c = CATEGORY_CONFIG[catKey];
-                      return (
-                        <TouchableOpacity
-                          key={catKey}
-                          onPress={() => handleSelectCategory(catKey)}
-                          activeOpacity={0.7}
-                          className={`flex-row items-center gap-1.5 px-2.5 py-1.5 rounded-xl border ${
-                            isSelected
-                              ? 'border-indigo-500 bg-indigo-50'
-                              : 'border-border bg-muted/20'
-                          }`}>
-                          <Ionicons
-                            name={c.icon as any}
-                            size={14}
-                            color={isSelected ? c.color : colors.textMuted}
-                          />
-                          <Text
-                            className={`text-xs font-semibold ${
-                              isSelected ? 'text-lavender font-bold' : 'text-foreground'
-                            }`}>
-                            {c.label}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
+                {/* EN MODE MODIFICATION : PERSONNALISATION DE LA CATÉGORIE ET DE L'ICÔNE */}
+                {editingItem ? (
+                  <>
+                    {/* CHAMP 3 : CATÉGORIE */}
+                    <View className="gap-1">
+                      <Text className="text-xs font-bold text-foreground">Catégorie</Text>
+                      <View className="flex-row flex-wrap gap-1.5">
+                        {(Object.keys(CATEGORY_CONFIG) as FixedCategoryType[]).map((catKey) => {
+                          const isSelected = categoryInput === catKey;
+                          const c = CATEGORY_CONFIG[catKey];
+                          return (
+                            <TouchableOpacity
+                              key={catKey}
+                              onPress={() => handleSelectCategory(catKey)}
+                              activeOpacity={0.7}
+                              className={`flex-row items-center gap-1.5 px-2.5 py-1.5 rounded-xl border ${
+                                isSelected
+                                  ? 'border-indigo-500 bg-indigo-50'
+                                  : 'border-border bg-muted/20'
+                              }`}>
+                              <Ionicons
+                                name={c.icon as any}
+                                size={14}
+                                color={isSelected ? c.color : colors.textMuted}
+                              />
+                              <Text
+                                className={`text-xs font-semibold ${
+                                  isSelected ? 'text-lavender font-bold' : 'text-foreground'
+                                }`}>
+                                {c.label}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    </View>
+
+                    {/* CHAMP : ICÔNE PERSONNALISÉE */}
+                    <View className="gap-1">
+                      <View className="flex-row items-center justify-between">
+                        <Text className="text-xs font-bold text-foreground">Icône personnalisée</Text>
+                        <Text className="text-[10px] text-muted-foreground font-medium">
+                          Sélection manuelle
+                        </Text>
+                      </View>
+                      <View className="flex-row gap-1.5 flex-wrap">
+                        {FIXED_PRESET_ICONS.map((item) => {
+                          const isSelected = iconInput === item.icon;
+                          return (
+                            <Button
+                              key={item.icon}
+                              variant="outline"
+                              size="icon"
+                              onPress={() => handleSelectIcon(item.icon)}
+                              className={`w-9 h-9 rounded-xl ${
+                                isSelected ? 'border-indigo-500 bg-indigo-50' : 'border-border bg-muted/20'
+                              }`}>
+                              <Ionicons
+                                name={item.icon as any}
+                                size={16}
+                                color={isSelected ? colors.lavender : colors.textMuted}
+                              />
+                            </Button>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  </>
+                ) : (
+                  /* EN MODE CRÉATION : APERÇU CATÉGORIE & ICÔNE AUTOMATIQUES */
+                  <View className="flex-row items-center bg-indigo-50/70 p-3 rounded-2xl border border-indigo-200/80 gap-3">
+                    <View
+                      className="w-10 h-10 rounded-xl justify-center items-center shrink-0 border"
+                      style={{
+                        backgroundColor: CATEGORY_CONFIG[categoryInput]?.bg || '#f3eef8',
+                        borderColor: `${CATEGORY_CONFIG[categoryInput]?.color || colors.lavender}40`,
+                      }}>
+                      <Ionicons
+                        name={(iconInput || CATEGORY_CONFIG[categoryInput]?.icon || 'receipt-outline') as any}
+                        size={18}
+                        color={CATEGORY_CONFIG[categoryInput]?.color || colors.lavender}
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <View className="flex-row items-center gap-1.5">
+                        <Text className="text-xs font-bold text-foreground">
+                          {CATEGORY_CONFIG[categoryInput]?.label || 'Autres charges'}
+                        </Text>
+                        <Badge variant="outline" className="border-indigo-300 bg-white px-1.5 py-0.2 rounded-full">
+                          <Text className="text-[9px] font-bold text-lavender">Auto</Text>
+                        </Badge>
+                      </View>
+                      <Text className="text-[10px] text-muted-foreground mt-0.5">
+                        Catégorie et icône choisies automatiquement selon le nom saisi.
+                      </Text>
+                    </View>
                   </View>
-                </View>
+                )}
 
                 {/* CHAMP 4 : OPTION CRÉDIT SUR DURÉE LIMITÉE */}
                 <View className="rounded-2xl border border-border bg-muted/20 p-3 sm:p-4 gap-2.5">

@@ -62,23 +62,41 @@ export function useVariableExpenses() {
   const handleLabelChange = useCallback(
     (text: string) => {
       setLabelInput(text);
-      if (!isIconManuallySelected) {
+      if (!editingCategory) {
+        // En création : toujours automatique selon le titre saisi (pas de personnalisation manuelle)
+        const detected = autoDetectExpenseMeta(text);
+        setIconInput(detected.icon);
+        setColorInput(detected.color);
+      } else if (!isIconManuallySelected) {
+        // En modification : suit le titre tant qu'aucune icône n'a été choisie manuellement
         const detected = autoDetectExpenseMeta(text);
         setIconInput(detected.icon);
         setColorInput(detected.color);
       }
     },
-    [isIconManuallySelected]
+    [editingCategory, isIconManuallySelected]
   );
 
-  const handleSelectIcon = useCallback((icon: string) => {
-    setIsIconManuallySelected(true);
-    setIconInput(icon);
-  }, []);
+  const handleSelectIcon = useCallback(
+    (icon: string) => {
+      // Personnalisation manuelle réservée exclusivement au mode modification
+      if (editingCategory) {
+        setIsIconManuallySelected(true);
+        setIconInput(icon);
+      }
+    },
+    [editingCategory]
+  );
 
-  const handleSelectColor = useCallback((color: string) => {
-    setColorInput(color);
-  }, []);
+  const handleSelectColor = useCallback(
+    (color: string) => {
+      // Personnalisation de couleur réservée exclusivement au mode modification
+      if (editingCategory) {
+        setColorInput(color);
+      }
+    },
+    [editingCategory]
+  );
 
   // Ouvrir modal ajout
   const openAddModal = useCallback(() => {
@@ -121,8 +139,14 @@ export function useVariableExpenses() {
     }
 
     const detected = autoDetectExpenseMeta(labelInput);
-    const finalIcon = isIconManuallySelected ? iconInput : (detected.icon || iconInput);
-    const finalColor = colorInput || detected.color || '#9b6fba';
+    // En création : icône et couleur 100% automatiques
+    // En modification : personnalisation manuelle respectée
+    const finalIcon = editingCategory
+      ? (isIconManuallySelected ? iconInput : (detected.icon || iconInput))
+      : (detected.icon || 'pricetag-outline');
+    const finalColor = editingCategory
+      ? (colorInput || detected.color || '#9b6fba')
+      : (detected.color || '#9b6fba');
     const monthly = Math.round((total / duration) * 100) / 100;
 
     setIsSaving(true);

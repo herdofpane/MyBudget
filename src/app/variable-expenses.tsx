@@ -450,57 +450,81 @@ export default function VariableExpensesScreen() {
                   )}
                 </View>
 
-                {/* CHAMP 4 : ICÔNE */}
-                <View className="gap-1">
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-xs font-bold text-foreground">Icône</Text>
-                    <Text className="text-[10px] text-muted-foreground font-medium">
-                      {isIconManuallySelected ? 'Sélection manuelle' : 'Choisie selon le titre'}
-                    </Text>
-                  </View>
-                  <View className="flex-row gap-1.5 flex-wrap">
-                    {PRESET_ICONS.map((item) => {
-                      const isSelected = iconInput === item.icon;
-                      return (
-                        <Button
-                          key={item.icon}
-                          variant="outline"
-                          size="icon"
-                          onPress={() => handleSelectIcon(item.icon)}
-                          className={`w-9 h-9 rounded-xl ${
-                            isSelected ? 'border-amber-500 bg-amber-50' : 'border-border bg-muted/30'
-                          }`}>
-                          <Ionicons
-                            name={item.icon as any}
-                            size={16}
-                            color={isSelected ? '#D97706' : colors.textMuted}
-                          />
-                        </Button>
-                      );
-                    })}
-                  </View>
-                </View>
+                {/* EN MODE MODIFICATION : PERSONNALISATION MANUELLE DE L'ICÔNE ET DE LA COULEUR */}
+                {editingCategory ? (
+                  <>
+                    {/* CHAMP 4 : ICÔNE */}
+                    <View className="gap-1">
+                      <View className="flex-row items-center justify-between">
+                        <Text className="text-xs font-bold text-foreground">Icône personnalisée</Text>
+                        <Text className="text-[10px] text-muted-foreground font-medium">
+                          Sélection manuelle
+                        </Text>
+                      </View>
+                      <View className="flex-row gap-1.5 flex-wrap">
+                        {PRESET_ICONS.map((item) => {
+                          const isSelected = iconInput === item.icon;
+                          return (
+                            <Button
+                              key={item.icon}
+                              variant="outline"
+                              size="icon"
+                              onPress={() => handleSelectIcon(item.icon)}
+                              className={`w-9 h-9 rounded-xl ${
+                                isSelected ? 'border-amber-500 bg-amber-50' : 'border-border bg-muted/30'
+                              }`}>
+                              <Ionicons
+                                name={item.icon as any}
+                                size={16}
+                                color={isSelected ? '#D97706' : colors.textMuted}
+                              />
+                            </Button>
+                          );
+                        })}
+                      </View>
+                    </View>
 
-                {/* CHAMP 5 : COULEUR */}
-                <View className="gap-1">
-                  <Text className="text-xs font-bold text-foreground">Couleur</Text>
-                  <View className="flex-row gap-2 flex-wrap">
-                    {PRESET_COLORS.map((color) => (
-                      <TouchableOpacity
-                        key={color}
-                        onPress={() => handleSelectColor(color)}
-                        activeOpacity={0.7}
-                        className={`w-8 h-8 rounded-full justify-center items-center ${
-                          colorInput === color ? 'border-2 border-foreground' : ''
-                        }`}
-                        style={{ backgroundColor: color }}>
-                        {colorInput === color && (
-                          <Ionicons name="checkmark" size={14} color="#ffffff" />
-                        )}
-                      </TouchableOpacity>
-                    ))}
+                    {/* CHAMP 5 : COULEUR */}
+                    <View className="gap-1">
+                      <Text className="text-xs font-bold text-foreground">Couleur</Text>
+                      <View className="flex-row gap-2 flex-wrap">
+                        {PRESET_COLORS.map((color) => (
+                          <TouchableOpacity
+                            key={color}
+                            onPress={() => handleSelectColor(color)}
+                            activeOpacity={0.7}
+                            className={`w-8 h-8 rounded-full justify-center items-center ${
+                              colorInput === color ? 'border-2 border-foreground' : ''
+                            }`}
+                            style={{ backgroundColor: color }}>
+                            {colorInput === color && (
+                              <Ionicons name="checkmark" size={14} color="#ffffff" />
+                            )}
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  </>
+                ) : (
+                  <View className="flex-row items-center bg-indigo-50/60 p-3 rounded-2xl border border-indigo-200/70 gap-2.5">
+                    <View
+                      className="w-8 h-8 rounded-xl justify-center items-center shrink-0 border"
+                      style={{
+                        backgroundColor: `${colorInput}18`,
+                        borderColor: `${colorInput}35`,
+                      }}>
+                      <Ionicons name={(iconInput || 'pricetag-outline') as any} size={16} color={colorInput} />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-xs font-bold text-foreground">
+                        Icône & couleur automatiques
+                      </Text>
+                      <Text className="text-[10px] text-muted-foreground">
+                        Détectées automatiquement selon le titre saisi. Vous pourrez les personnaliser lors de la modification.
+                      </Text>
+                    </View>
                   </View>
-                </View>
+                )}
               </ScrollView>
 
               {/* BOUTONS D'ACTION DU MODAL */}

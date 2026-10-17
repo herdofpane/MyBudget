@@ -69,6 +69,7 @@ export function useFixedExpenses() {
   const [categoryInput, setCategoryInput] = useState<FixedCategoryType>('logement');
   const [iconInput, setIconInput] = useState('home-outline');
   const [isCategoryManuallySelected, setIsCategoryManuallySelected] = useState(false);
+  const [isIconManuallySelected, setIsIconManuallySelected] = useState(false);
 
   // Champs spécifiques aux crédits sur durée limitée (X mois)
   const [isCreditInput, setIsCreditInput] = useState(false);
@@ -93,24 +94,43 @@ export function useFixedExpenses() {
   // Détection automatique en temps réel de l'icône et de la catégorie selon le libellé saisi
   const handleLabelChange = useCallback((text: string) => {
     setLabelInput(text);
-    const detected = autoDetectExpenseMeta(text, categoryInput);
-    setIconInput(detected.icon);
-    if (!isCategoryManuallySelected && detected.category) {
-      setCategoryInput(detected.category);
+    if (!editingItem) {
+      // En création : détection 100% automatique de l'icône et de la catégorie
+      const detected = autoDetectExpenseMeta(text, 'autre');
+      setIconInput(detected.icon);
+      setCategoryInput(detected.category || 'autre');
       if (detected.category === 'credit') {
         setIsCreditInput(true);
         if (!durationInput) setDurationInput('12');
       }
+    } else {
+      // En modification : suit le texte seulement si l'icône / catégorie n'a pas été modifiée à la main
+      if (!isIconManuallySelected) {
+        const detected = autoDetectExpenseMeta(text, categoryInput);
+        setIconInput(detected.icon);
+        if (!isCategoryManuallySelected && detected.category) {
+          setCategoryInput(detected.category);
+        }
+      }
     }
-  }, [categoryInput, isCategoryManuallySelected, durationInput]);
+  }, [editingItem, isIconManuallySelected, categoryInput, isCategoryManuallySelected, durationInput]);
+
+  const handleSelectIcon = useCallback((icon: string) => {
+    // Personnalisation manuelle de l'icône réservée exclusivement au mode modification
+    if (editingItem) {
+      setIsIconManuallySelected(true);
+      setIconInput(icon);
+    }
+  }, [editingItem]);
 
   const openAddModal = useCallback(() => {
     setEditingItem(null);
     setLabelInput('');
     setAmountInput('');
-    setCategoryInput('logement');
-    setIconInput('home-outline');
+    setCategoryInput('autre');
+    setIconInput('receipt-outline');
     setIsCategoryManuallySelected(false);
+    setIsIconManuallySelected(false);
     setIsCreditInput(false);
     setDurationInput('12');
     setPaidMonthsInput('0');
@@ -127,6 +147,7 @@ export function useFixedExpenses() {
     setCategoryInput(item.category);
     setIconInput(item.icon || CATEGORY_CONFIG[item.category]?.icon || 'home-outline');
     setIsCategoryManuallySelected(true);
+    setIsIconManuallySelected(true);
     setIsCreditInput(!!item.isCredit);
     setDurationInput((item.durationMonths || 12).toString());
     setPaidMonthsInput((item.paidMonthsCount ?? 0).toString());
@@ -138,16 +159,20 @@ export function useFixedExpenses() {
   }, [currentMonthStr]);
 
   const handleSelectCategory = useCallback((catKey: FixedCategoryType) => {
+    // Personnalisation manuelle de la catégorie réservée exclusivement au mode modification
+    if (!editingItem) return;
     setIsCategoryManuallySelected(true);
     setCategoryInput(catKey);
     const catConfig = CATEGORY_CONFIG[catKey] || CATEGORY_CONFIG.autre;
-    const detected = autoDetectExpenseMeta(labelInput, catKey);
-    setIconInput(detected.icon || catConfig.icon);
+    if (!isIconManuallySelected) {
+      const detected = autoDetectExpenseMeta(labelInput, catKey);
+      setIconInput(detected.icon || catConfig.icon);
+    }
     if (catKey === 'credit' && !isCreditInput) {
       setIsCreditInput(true);
       if (!durationInput) setDurationInput('12');
     }
-  }, [labelInput, isCreditInput, durationInput]);
+  }, [editingItem, isIconManuallySelected, labelInput, isCreditInput, durationInput]);
 
   const handleSave = useCallback(async () => {
     const amount = parseFloat(amountInput.replace(',', '.'));
@@ -161,8 +186,16 @@ export function useFixedExpenses() {
       return;
     }
 
-    const catConfig = CATEGORY_CONFIG[categoryInput] || CATEGORY_CONFIG.autre;
-    const finalIcon = iconInput || autoDetectExpenseMeta(labelInput, categoryInput).icon || catConfig.icon;
+    const detected = autoDetectExpenseMeta(labelInput, 'autre');
+    // En création : catégorie et icône 100% automatiques
+    // En modification : personnalisations manuelles respectées
+    const finalCategory = editingItem
+      ? categoryInput
+      : (detected.category || 'autre');
+    const finalCatConfig = CATEGORY_CONFIG[finalCategory] || CATEGORY_CONFIG.autre;
+    const finalIcon = editingItem
+      ? (isIconManuallySelected ? iconInput : (detected.icon || finalCatConfig.icon))
+      : (detected.icon || finalCatConfig.icon);
     const parsedDuration = isCreditInput ? Math.max(1, parseInt(durationInput, 10) || 12) : undefined;
     const parsedPaidMonths = isCreditInput ? Math.max(0, parseInt(paidMonthsInput, 10) || 0) : undefined;
     const finalActivationType: FixedExpenseActivationType = isScheduledInput ? activationTypeInput : 'all';
@@ -175,7 +208,7 @@ export function useFixedExpenses() {
           ...editingItem,
           label: labelInput.trim(),
           amount,
-          category: categoryInput,
+          category: finalCategory,
           icon: finalIcon,
           isCredit: isCreditInput,
           durationMonths: parsedDuration,
@@ -188,7 +221,7 @@ export function useFixedExpenses() {
         await addFixedExpense({
           label: labelInput.trim(),
           amount,
-          category: categoryInput,
+          category: finalCategory,
           icon: finalIcon,
           isCredit: isCreditInput,
           durationMonths: parsedDuration,
@@ -207,6 +240,7 @@ export function useFixedExpenses() {
     labelInput,
     categoryInput,
     iconInput,
+    isIconManuallySelected,
     isCreditInput,
     durationInput,
     paidMonthsInput,
@@ -390,10 +424,12 @@ export function useFixedExpenses() {
     setActivationTypeInput,
     targetMonthInput,
     setTargetMonthInput,
+    isIconManuallySelected,
     // Actions
     openAddModal,
     openEditModal,
     handleSelectCategory,
+    handleSelectIcon,
     handleSave,
     handleAdvanceMonth,
     handleDelete,
