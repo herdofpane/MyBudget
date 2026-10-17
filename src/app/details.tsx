@@ -233,7 +233,7 @@ export default function DetailsScreen() {
                       value={monthlyFixedInput}
                       onChangeText={(v) => setOverrideMonthlyFixed(v.replace(/[^0-9.,]/g, ''))}
                       keyboardType="decimal-pad"
-                      placeholder="61.73"
+                      placeholder="0.00"
                       placeholderTextColor={colors.textMuted}
                       className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />

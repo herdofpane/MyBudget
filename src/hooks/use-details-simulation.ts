@@ -154,7 +154,7 @@ export function useDetailsSimulation() {
   const executeReset = useCallback(() => {
     if (isMonthly) {
       setOverrideMonthlyIncome('977');
-      setOverrideMonthlyFixed('61.73');
+      setOverrideMonthlyFixed('0');
       setOverrideMonthlyNecessary('123');
     } else {
       setOverrideOneTimeAmount('566.17');
@@ -165,7 +165,7 @@ export function useDetailsSimulation() {
       visible: true,
       type: 'info',
       title: 'Valeurs restaurées',
-      message: 'Les paramètres du tableur standard ont été réappliqués dans les champs.',
+      message: 'Les paramètres par défaut ont été réappliqués dans les champs.',
     });
   }, [isMonthly]);
 

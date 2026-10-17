@@ -35,6 +35,13 @@ class BudgetStorageService {
   }
 
   /**
+   * Identifiants des anciens mocks par défaut à purger si présents dans le stockage local
+   */
+  private readonly legacyMockFixedIds = new Set(['1', '2', '3']);
+  private readonly legacyMockVarIds = new Set(['v1', 'v2', 'v3', 'v4', 'v5', 'v6']);
+  private readonly legacyMockHistoryIds = new Set(['h1', 'h2', 'h3']);
+
+  /**
    * Charge l'état budgétaire sauvegardé avec validation et valeurs par défaut
    */
   async loadState(): Promise<PersistedBudgetState> {
@@ -50,18 +57,72 @@ class BudgetStorageService {
       }
 
       const parsed = JSON.parse(raw);
-      return {
-        budget: parsed.budget ? { ...DEFAULT_BUDGET, ...parsed.budget } : DEFAULT_BUDGET,
-        fixedExpensesList: Array.isArray(parsed.fixedExpensesList)
-          ? parsed.fixedExpensesList
-          : DEFAULT_FIXED_EXPENSES,
-        variableCategories: Array.isArray(parsed.variableCategories)
-          ? parsed.variableCategories
-          : DEFAULT_VARIABLE_CATEGORIES,
-        expenseHistory: Array.isArray(parsed.expenseHistory)
-          ? parsed.expenseHistory
-          : DEFAULT_EXPENSE_HISTORY,
+
+      // Purger les anciennes données de test/démonstration
+      const fixedExpensesList: FixedExpenseItem[] = Array.isArray(parsed.fixedExpensesList)
+        ? parsed.fixedExpensesList.filter(
+            (item: FixedExpenseItem) =>
+              !(
+                this.legacyMockFixedIds.has(item.id) &&
+                ['Abonnements & Forfait mobile', 'Assurance', 'Frais bancaires & divers'].includes(
+                  item.label
+                )
+              )
+          )
+        : DEFAULT_FIXED_EXPENSES;
+
+      const variableCategories: VariableCategory[] = Array.isArray(parsed.variableCategories)
+        ? parsed.variableCategories.filter(
+            (cat: VariableCategory) =>
+              !(
+                this.legacyMockVarIds.has(cat.id) &&
+                [
+                  'Alimentation & Courses',
+                  'Sorties & Restaurants',
+                  'Shopping & Habillement',
+                  'Carburant & Déplacements',
+                  'Santé, Beauté & Bien-être',
+                  'Loisirs, Sport & Vacances',
+                ].includes(cat.label)
+              )
+          )
+        : DEFAULT_VARIABLE_CATEGORIES;
+
+      const expenseHistory: ExpenseRecord[] = Array.isArray(parsed.expenseHistory)
+        ? parsed.expenseHistory.filter(
+            (rec: ExpenseRecord) => !this.legacyMockHistoryIds.has(rec.id)
+          )
+        : DEFAULT_EXPENSE_HISTORY;
+
+      const sumFixed = fixedExpensesList.reduce((sum, item) => sum + (item.amount || 0), 0);
+      const cleanedFixedExpenses = sumFixed > 0 ? Math.round(sumFixed * 100) / 100 : 0;
+
+      const budget: BudgetData = parsed.budget
+        ? {
+            ...DEFAULT_BUDGET,
+            ...parsed.budget,
+            fixedExpenses:
+              parsed.budget.fixedExpenses === 61.73 ? cleanedFixedExpenses : (parsed.budget.fixedExpenses ?? cleanedFixedExpenses),
+          }
+        : DEFAULT_BUDGET;
+
+      const cleanedState: PersistedBudgetState = {
+        budget,
+        fixedExpensesList,
+        variableCategories,
+        expenseHistory,
       };
+
+      // Si le stockage contenait les anciens mocks, resynchroniser immédiatement
+      if (
+        (parsed.fixedExpensesList && parsed.fixedExpensesList.length !== fixedExpensesList.length) ||
+        (parsed.variableCategories && parsed.variableCategories.length !== variableCategories.length) ||
+        (parsed.budget && parsed.budget.fixedExpenses === 61.73)
+      ) {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedState));
+      }
+
+      return cleanedState;
     } catch (error) {
       console.warn('[BudgetStorageService] Erreur lors du chargement des données:', error);
       return {

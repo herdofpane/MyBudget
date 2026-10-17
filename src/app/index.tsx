@@ -28,9 +28,6 @@ export default function HomeScreen() {
     epargneAmount,
     checkingAmount,
     totalFixedExpenses,
-    daysRemaining,
-    spendingRatio,
-    spendingRemainingPercentage,
     infoDialog,
     setInfoDialog,
     setLocalIncome,
@@ -108,8 +105,8 @@ export default function HomeScreen() {
           {/* CONTENU PRINCIPAL DÉCALÉ VERS LE HAUT SUR LE BANDEAU BLEU NUIT */}
           <View className="px-3.5 sm:px-4 -mt-5 gap-3.5 sm:gap-4">
 
-            {/* 2. CARTE HÉROS DU TOTAL BALANCE & MONTHLY SPENDING (MOCKUP EXACT) */}
-            <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-sm gap-4">
+            {/* 2. CARTE HÉROS DU TOTAL BALANCE */}
+            <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-sm">
               {/* SECTION TOTAL BALANCE */}
               <View>
                 <View className="flex-row justify-between items-start">
@@ -149,49 +146,6 @@ export default function HomeScreen() {
                   </Badge>
                   <Text className="text-[11px] text-muted-foreground">
                     Reste à vivre : {renderMoney(resteAVivre)}
-                  </Text>
-                </View>
-              </View>
-
-              {/* SÉPARATEUR DISCRET */}
-              <View className="h-px bg-slate-100" />
-
-              {/* SECTION MONTHLY SPENDING AVEC JAUGE DE PROGRESSION */}
-              <View className="gap-2">
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-sm font-bold text-foreground">
-                    Monthly Spending
-                  </Text>
-                  <Text className="text-xs font-bold text-accent">
-                    {spendingRatio}%
-                  </Text>
-                </View>
-
-                {/* Montant dépensé / Limite mensuelle */}
-                <View className="flex-row justify-between items-baseline">
-                  <Text className="text-xs font-extrabold text-foreground">
-                    {renderMoney(totalFixedExpenses)}{' '}
-                    <Text className="font-medium text-muted-foreground">
-                      / {renderMoney(budget.income)} Limit
-                    </Text>
-                  </Text>
-                </View>
-
-                {/* BARRE DE PROGRESSION ÉMERAUDE ARRONDIE */}
-                <View className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <View
-                    className="h-full bg-accent rounded-full"
-                    style={{ width: `${Math.min(100, Math.max(5, spendingRatio))}%` }}
-                  />
-                </View>
-
-                {/* SUBTEXT DU BUDGET RESTANT */}
-                <View className="flex-row justify-between items-center mt-0.5">
-                  <Text className="text-[11px] font-medium text-muted-foreground">
-                    {daysRemaining} jours restants
-                  </Text>
-                  <Text className="text-[11px] font-bold text-muted-foreground">
-                    {spendingRemainingPercentage}% restant
                   </Text>
                 </View>
               </View>

@@ -259,7 +259,7 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
   const totalFixedExpenses =
     fixedExpensesList.length > 0
       ? Math.round(activeFixedExpenses.reduce((acc, item) => acc + item.amount, 0) * 100) / 100
-      : (budget.fixedExpenses || 61.73);
+      : (budget.fixedExpenses ?? 0);
   const totalPaidFixedExpenses = activeFixedExpenses
     .filter((item) => item.isPaid)
     .reduce((acc, item) => acc + item.amount, 0);

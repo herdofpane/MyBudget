@@ -53,8 +53,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "predeploy": "expo export -p web",
-    "deploy": "gh-pages --nojekyll -d dist",
+    "predeploy": "expo export -p web && node -e \"require('fs').writeFileSync('dist/.gitignore', '')\"",
+    "deploy": "gh-pages -t --nojekyll -d dist",
     "postinstall": "node ./scripts/patch-react-native-css-interop.js"
   },
   "private": true

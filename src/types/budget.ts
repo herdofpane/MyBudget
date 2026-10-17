@@ -22,7 +22,7 @@ export interface OneTimeIncomeData {
 
 export interface BudgetData {
   income: number;             // Revenu mensuel net (ex : 977 €)
-  fixedExpenses: number;      // Somme des charges fixes (ex : 61.73 €)
+  fixedExpenses: number;      // Somme des charges fixes (ex : 0 €)
   checkingAccount: number;    // Montant compte courant
   savingsAccount: number;     // Montant épargne
   targetNecessary?: number;   // Montant nécessaire / seuil survie (ex : 78.16 ou 123 €)

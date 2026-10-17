@@ -11,9 +11,9 @@ import {
 // Données initiales du budget (synchronisées avec le modèle mensuel et ponctuel)
 export const DEFAULT_BUDGET: BudgetData = {
   income: 977,
-  fixedExpenses: 61.73,
-  checkingAccount: 915.27,
-  savingsAccount: 579.74,
+  fixedExpenses: 0,
+  checkingAccount: 977,
+  savingsAccount: 0,
   targetNecessary: 123,
   targetFacultative: 130,
   oneTimeIncome: {
@@ -24,125 +24,15 @@ export const DEFAULT_BUDGET: BudgetData = {
   },
 };
 
-// Liste des charges fixes par défaut (Total = 61.73 € synchronisé avec le tableur CSV)
-export const DEFAULT_FIXED_EXPENSES: FixedExpenseItem[] = [
-  {
-    id: '1',
-    label: 'Abonnements & Forfait mobile',
-    amount: 19.99,
-    category: 'abonnements',
-    icon: 'phone-portrait-outline',
-    dueDay: 5,
-    isPaid: true,
-  },
-  {
-    id: '2',
-    label: 'Assurance',
-    amount: 30.00,
-    category: 'assurance',
-    icon: 'shield-checkmark-outline',
-    dueDay: 10,
-    isPaid: true,
-  },
-  {
-    id: '3',
-    label: 'Frais bancaires & divers',
-    amount: 11.74,
-    category: 'autre',
-    icon: 'card-outline',
-    dueDay: 15,
-    isPaid: true,
-  },
-];
+// Liste des charges fixes par défaut (vide par défaut)
+export const DEFAULT_FIXED_EXPENSES: FixedExpenseItem[] = [];
 
-// Liste des charges variables par défaut avec durée de vie et lissage mensuel
-export const DEFAULT_VARIABLE_CATEGORIES: VariableCategory[] = [
-  {
-    id: 'v1',
-    label: 'Alimentation & Courses',
-    totalAmount: 450,
-    durationMonths: 1,
-    estimatedBudget: 450,
-    spent: 280,
-    icon: 'cart-outline',
-    color: '#9b6fba',
-  },
-  {
-    id: 'v2',
-    label: 'Sorties & Restaurants',
-    totalAmount: 220,
-    durationMonths: 1,
-    estimatedBudget: 220,
-    spent: 165,
-    icon: 'restaurant-outline',
-    color: '#d9822b',
-  },
-  {
-    id: 'v3',
-    label: 'Shopping & Habillement',
-    totalAmount: 150,
-    durationMonths: 1,
-    estimatedBudget: 150,
-    spent: 65,
-    icon: 'shirt-outline',
-    color: '#8557a5',
-  },
-  {
-    id: 'v4',
-    label: 'Carburant & Déplacements',
-    totalAmount: 90,
-    durationMonths: 1,
-    estimatedBudget: 90,
-    spent: 50,
-    icon: 'car-sport-outline',
-    color: '#2563eb',
-  },
-  {
-    id: 'v5',
-    label: 'Santé, Beauté & Bien-être',
-    totalAmount: 70,
-    durationMonths: 1,
-    estimatedBudget: 70,
-    spent: 30,
-    icon: 'medkit-outline',
-    color: '#1b9963',
-  },
-  {
-    id: 'v6',
-    label: 'Loisirs, Sport & Vacances',
-    totalAmount: 120,
-    durationMonths: 1,
-    estimatedBudget: 120,
-    spent: 75,
-    icon: 'football-outline',
-    color: '#0891b2',
-  },
-];
+// Liste des charges variables par défaut (vide par défaut)
+export const DEFAULT_VARIABLE_CATEGORIES: VariableCategory[] = [];
 
-// Historique des dépenses initial
-export const DEFAULT_EXPENSE_HISTORY: ExpenseRecord[] = [
-  {
-    id: 'h1',
-    categoryId: 'v1',
-    label: 'Courses supermarché',
-    amount: 85.5,
-    date: '2026-10-14T10:30:00Z',
-  },
-  {
-    id: 'h2',
-    categoryId: 'v2',
-    label: 'Restaurant italien',
-    amount: 45.0,
-    date: '2026-10-12T20:15:00Z',
-  },
-  {
-    id: 'h3',
-    categoryId: 'v4',
-    label: 'Plein essence SP95',
-    amount: 50.0,
-    date: '2026-10-10T08:45:00Z',
-  },
-];
+// Historique des dépenses initial (vide par défaut)
+export const DEFAULT_EXPENSE_HISTORY: ExpenseRecord[] = [];
+
 
 // Configuration visuelle des catégories fixes
 export const CATEGORY_CONFIG: Record<FixedCategoryType, CategoryMeta> = {
