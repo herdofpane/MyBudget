@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   ScrollView,
@@ -23,8 +23,7 @@ import { ConfirmDialog, AppDialog } from '@/components/confirm-dialog';
 import { ListSkeleton } from '@/components/ui/loading-state';
 import { colors } from '@/theme/colors';
 
-import { useBudget } from '@/hooks/use-budget';
-import { VariableCategory } from '@/types';
+import { useVariableExpenses } from '@/hooks/use-variable-expenses';
 import { PRESET_ICONS, PRESET_COLORS } from '@/data';
 import { formatEuro, formatEuroRound, formatPercent } from '@/constants/formatters';
 
@@ -35,139 +34,37 @@ export default function VariableExpensesScreen() {
     variableCategories,
     totalEstimatedVariable,
     variableExpenseRatio,
-    addVariableCategory,
-    updateVariableCategory,
-    deleteVariableCategory,
     isLoading,
-  } = useBudget();
+    isSaving,
+    isDeleting,
+    deleteTarget,
+    setDeleteTarget,
+    isModalVisible,
+    setIsModalVisible,
+    editingCategory,
+    feedbackDialog,
+    setFeedbackDialog,
+    labelInput,
+    setLabelInput,
+    amountInput,
+    setAmountInput,
+    durationInput,
+    setDurationInput,
+    iconInput,
+    setIconInput,
+    colorInput,
+    setColorInput,
+    openAddModal,
+    openEditModal,
+    handleSave,
+    handleDelete,
+    handleConfirmDelete,
+    averageExpense,
+    modalParsedAmount,
+    modalParsedDuration,
+    modalMonthlyImpact,
+  } = useVariableExpenses();
 
-  // États de chargement des actions asynchrones
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // État du modal de suppression
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
-
-  // État du modal de création / modification
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<VariableCategory | null>(null);
-
-  // État des pop-ups d'alerte / validation
-  const [feedbackDialog, setFeedbackDialog] = useState<{
-    visible: boolean;
-    type: 'warning' | 'error' | 'success';
-    title: string;
-    message: string;
-  } | null>(null);
-
-  // Support touche Échap sur le Web pour fermer le modal de formulaire
-  useEffect(() => {
-    if (Platform.OS !== 'web' || !isModalVisible) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsModalVisible(false);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isModalVisible]);
-
-  const [labelInput, setLabelInput] = useState('');
-  const [amountInput, setAmountInput] = useState('');
-  const [durationInput, setDurationInput] = useState('1');
-  const [iconInput, setIconInput] = useState('cart-outline');
-  const [colorInput, setColorInput] = useState('#9b6fba');
-
-  // Ouvrir modal ajout
-  const openAddModal = () => {
-    setEditingCategory(null);
-    setLabelInput('');
-    setAmountInput('');
-    setDurationInput('1');
-    setIconInput('cart-outline');
-    setColorInput('#9b6fba');
-    setIsModalVisible(true);
-  };
-
-  // Ouvrir modal modification
-  const openEditModal = (cat: VariableCategory) => {
-    setEditingCategory(cat);
-    setLabelInput(cat.label);
-    const total = cat.totalAmount !== undefined ? cat.totalAmount : cat.estimatedBudget;
-    const duration = cat.durationMonths || 1;
-    setAmountInput(total.toString());
-    setDurationInput(duration.toString());
-    setIconInput(cat.icon);
-    setColorInput(cat.color);
-    setIsModalVisible(true);
-  };
-
-  const handleSave = async () => {
-    const total = parseFloat(amountInput.replace(',', '.'));
-    const duration = Math.max(0.01, parseFloat(durationInput.replace(',', '.')) || 1);
-
-    if (!labelInput.trim() || isNaN(total) || total <= 0) {
-      setFeedbackDialog({
-        visible: true,
-        type: 'warning',
-        title: 'Champs incomplets',
-        message: 'Veuillez saisir un titre et un montant prévisionnel valide supérieur à 0 €.',
-      });
-      return;
-    }
-
-    const monthly = Math.round((total / duration) * 100) / 100;
-
-    setIsSaving(true);
-    try {
-      if (editingCategory) {
-        await updateVariableCategory({
-          ...editingCategory,
-          label: labelInput.trim(),
-          totalAmount: total,
-          durationMonths: duration,
-          estimatedBudget: monthly,
-          icon: iconInput,
-          color: colorInput,
-        });
-      } else {
-        await addVariableCategory({
-          label: labelInput.trim(),
-          totalAmount: total,
-          durationMonths: duration,
-          estimatedBudget: monthly,
-          spent: 0,
-          icon: iconInput,
-          color: colorInput,
-        });
-      }
-      setIsModalVisible(false);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDelete = (id: string, label: string) => {
-    setDeleteTarget({ id, label });
-  };
-
-  const handleConfirmDelete = async () => {
-    if (deleteTarget) {
-      setIsDeleting(true);
-      try {
-        await deleteVariableCategory(deleteTarget.id);
-        setDeleteTarget(null);
-      } finally {
-        setIsDeleting(false);
-      }
-    }
-  };
-
-  const averageExpense =
-    variableCategories.length > 0 ? totalEstimatedVariable / variableCategories.length : 0;
-
-  // Calculs dynamiques pour le modal
-  const modalParsedAmount = parseFloat(amountInput.replace(',', '.')) || 0;
-  const modalParsedDuration = Math.max(0.01, parseFloat(durationInput.replace(',', '.')) || 1);
-  const modalMonthlyImpact = modalParsedAmount > 0 ? modalParsedAmount / modalParsedDuration : 0;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
