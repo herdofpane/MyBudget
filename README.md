@@ -37,24 +37,30 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
 - **Édition Instantanée du Revenu** : Ajustez votre revenu net mensuel directement depuis l'en-tête avec sauvegarde automatique.
 
 ### 2. 📅 Échéancier des Charges Fixes & Amortissement de Crédits
+- **Détection Automatique Intelligente** : À la création, la catégorie et l'icône sont déduites à 100% automatiquement dès la frappe du nom (*Loyer, EDF, Netflix, Navigo, Prêt...*), sans sélection manuelle superflue. En modification, l'utilisateur a la liberté de réajuster la catégorie et de sélectionner une icône personnalisée.
 - **Typologie Complète** : Ventilation par catégories dédiées (*Logement, Énergie, Assurance, Abonnements, Transport, Crédit, Autre*).
-- **Gestion des Crédits et Emprunts** : Suivi des charges temporaires avec calcul de progression (mensualités honorées vs durée totale, barre de progression visuelle).
+- **Gestion des Crédits et Emprunts** : Suivi des charges temporaires avec calcul de progression (mensualités honorées vs durée totale, barre de progression visuelle, activation automatique lors de la saisie de mots-clés d'emprunt).
 - **Planification Temporelle Avancée** :
   - *Tous les mois* : prélèvements récurrents perpétuels.
   - *À partir d'un mois donné* : charges démarrant dans le futur.
   - *Uniquement ce mois* : charges ponctuelles associées à une échéance unique.
 - **Pointage des Prélèvements** : Marquage en un tap du statut prélevé / en attente.
 - **Ratio d'Endettement Fixe** : Calcul automatique du pourcentage du revenu absorbé par les charges incompressibles.
+- **Initialisation Vierge** : Démarrage propre avec un carnet vierge de charges par défaut (zéro donnée fictive pré-remplie).
 
 ### 3. 🛒 Charges Variables & Lissage Pluriannuel
-- **Enveloppes Budgétaires Visuelles** : Gestion fine par postes de dépenses (Alimentation & Courses, Sorties & Restos, Habillement, Carburant...).
+- **Attribution Automatique d'Icône & Teinte** : Dès la saisie du titre (*Courses, Restaurant, Vacances, Basic Fit, Essence...*), l'icône thématique et la couleur harmonieuse sont instantanément choisies. En modification, la palette de couleurs et la grille d'icônes sont accessibles pour une personnalisation sur-mesure.
+- **Enveloppes Budgétaires Visuelles** : Gestion fine par postes de dépenses.
 - **Lissage Temporel des Dépenses Importantes** : Possibilité d'étaler un achat ou un poste sur plusieurs mois (*1, 3, 6, 12 ou 24 mois*) pour neutraliser son impact mensuel sans déséquilibrer un mois isolé.
 - **Suivi Budgété vs Dépensé** : Jauges de consommation en temps réel avec alertes de dépassement.
-- **Personnalisation Totale** : Choix des icônes et palettes de couleurs par enveloppe.
+- **Initialisation Vierge** : Démarrage propre sans données factices.
 
 ### 4. 🧮 Simulateur Budgétaire & Ventilation Mathématique (Calcul & Détail)
+- **Synchronisation Directe avec le Réel** :
+  - Le **revenu mensuel** provient directement de la saisie instantanée sur l'écran d'accueil (`income`).
+  - Le **total des charges fixes** provient directement de la somme réelle des charges fixes actives de votre échéancier (`totalFixedExpenses`).
 - **Double Mode de Calcul** :
-  - **Mode Mensuel Récurrent** : Simulation sur la base du salaire régulier.
+  - **Mode Mensuel Récurrent** : Simulation sur la base du salaire régulier et des charges fixes réelles.
   - **Mode Revenu Ponctuel (Extra)** : Ventilation d'une prime, d'un bonus ou d'une rentrée d'argent exceptionnelle.
 - **Ventilation du Nécessaire (Seuil de survie)** :
   - 🛒 *Courses & Entretien* : **49%**
@@ -102,7 +108,11 @@ MyBudget/
     ├── services/            # Couche d'accès aux données (AsyncStorage Service)
     ├── theme/               # Charte graphique unifiée (palette de couleurs fintech)
     ├── types/               # Définitions des contrats TypeScript
-    └── utils/               # Fonctions utilitaires pures (dates, échéanciers)
+    └── utils/               # Fonctions utilitaires pures
+        ├── auto-icon.ts     # Moteur sémantique de détection d'icônes, catégories & couleurs
+        ├── fixed-expenses.ts# Calculs des échéanciers et statuts de crédit
+        ├── credit.ts        # Logique mathématique des durées d'emprunts
+        └── index.ts         # Point d'entrée des utilitaires
 ```
 
 - **S (Single Responsibility)** : Chaque composant UI se concentre sur l'affichage ; toute la logique métier réside dans des hooks dédiés.
