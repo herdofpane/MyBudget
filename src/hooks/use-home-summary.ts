@@ -50,6 +50,23 @@ export function useHomeSummary() {
     [resteAVivre, epargneAmount]
   );
 
+  // Jours restants dans le mois
+  const daysRemaining = useMemo(() => {
+    const now = new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    return Math.max(1, lastDay - now.getDate());
+  }, []);
+
+  // Ratio des charges / dépenses par rapport au revenu
+  const spendingRatio = useMemo(() => {
+    if (parsedIncome <= 0) return 0;
+    return Math.min(100, Math.round((totalFixedExpenses / parsedIncome) * 100));
+  }, [totalFixedExpenses, parsedIncome]);
+
+  const spendingRemainingPercentage = useMemo(() => {
+    return Math.max(0, 100 - spendingRatio);
+  }, [spendingRatio]);
+
   // Sauvegarde automatique lors du blur
   const handleBlurIncome = useCallback(async () => {
     if (parsedIncome <= 0) {
@@ -100,6 +117,9 @@ export function useHomeSummary() {
     epargneAmount,
     checkingAmount,
     totalFixedExpenses,
+    daysRemaining,
+    spendingRatio,
+    spendingRemainingPercentage,
     infoDialog,
     setInfoDialog,
     setLocalIncome,
