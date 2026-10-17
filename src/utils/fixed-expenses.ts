@@ -1,5 +1,6 @@
 import { FixedExpenseItem } from '@/types';
 import { isCreditExpired, getCreditProgress, formatCreditEndDate } from '@/utils/credit';
+import { colors } from '@/theme/colors';
 
 export { isCreditExpired, getCreditProgress, formatCreditEndDate };
 
@@ -74,7 +75,7 @@ export function getChargeScheduleStatus(
       badgeLabel: 'Soldé',
       isCounted: false,
       description: 'Crédit entièrement remboursé',
-      badgeColor: '#64748B',
+      badgeColor: colors.textMuted,
       badgeBg: '#F1F5F9',
       badgeBorder: '#CBD5E1',
     };
@@ -91,7 +92,7 @@ export function getChargeScheduleStatus(
         badgeLabel: `Dès ${formatMonthYear(targetMonth)}`,
         isCounted: false,
         description: `Charge différée active à partir de ${formatMonthYear(targetMonth)}`,
-        badgeColor: '#6366F1',
+        badgeColor: colors.lavender,
         badgeBg: '#EEF2FF',
         badgeBorder: '#C7D2FE',
       };
@@ -116,7 +117,7 @@ export function getChargeScheduleStatus(
         badgeLabel: `Unique • ${formatMonthYear(targetMonth)}`,
         isCounted: false,
         description: `Charge ponctuelle prévue pour ${formatMonthYear(targetMonth)}`,
-        badgeColor: '#6366F1',
+        badgeColor: colors.lavender,
         badgeBg: '#EEF2FF',
         badgeBorder: '#C7D2FE',
       };
@@ -126,7 +127,7 @@ export function getChargeScheduleStatus(
         badgeLabel: `Passée (${formatMonthYear(targetMonth)})`,
         isCounted: false,
         description: `Charge ponctuelle passée de ${formatMonthYear(targetMonth)}`,
-        badgeColor: '#94A3B8',
+        badgeColor: colors.textMuted,
         badgeBg: '#F8FAFC',
         badgeBorder: '#E2E8F0',
       };
@@ -139,7 +140,7 @@ export function getChargeScheduleStatus(
     badgeLabel: 'Mensuelle',
     isCounted: true,
     description: 'Prélèvement récurrent chaque mois',
-    badgeColor: '#10B981',
+    badgeColor: colors.accent,
     badgeBg: '#ECFDF5',
     badgeBorder: '#A7F3D0',
   };

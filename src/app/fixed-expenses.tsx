@@ -21,6 +21,7 @@ import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
 import { ConfirmDialog, AppDialog } from '@/components/confirm-dialog';
 import { ListSkeleton } from '@/components/ui/loading-state';
+import { colors } from '@/theme/colors';
 
 import { useBudget } from '@/hooks/use-budget';
 import { FixedExpenseItem, FixedCategoryType, FixedExpenseActivationType } from '@/types';
@@ -360,7 +361,7 @@ export default function FixedExpensesScreen() {
               </View>
 
               <Badge variant="outline" className="bg-indigo-50 border-indigo-200 px-2.5 py-1 rounded-full flex-row items-center gap-1.5">
-                <Ionicons name="layers-outline" size={14} color="#6366F1" />
+                <Ionicons name="layers-outline" size={14} color={colors.lavender} />
                 <Text className="text-xs font-bold text-lavender">
                   {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
                 </Text>
@@ -370,7 +371,7 @@ export default function FixedExpensesScreen() {
             {/* BANDEAU SI DES CRÉDITS SONT ARRIVÉS À ÉCHÉANCE */}
             {expiredCreditsCount > 0 && (
               <View className="flex-row items-center bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 gap-2">
-                <Ionicons name="shield-checkmark" size={15} color="#10B981" />
+                <Ionicons name="shield-checkmark" size={15} color={colors.accent} />
                 <Text className="text-xs text-accentDark font-semibold flex-1">
                   {expiredCreditsCount} crédit{expiredCreditsCount > 1 ? 's' : ''} arrivé{expiredCreditsCount > 1 ? 's' : ''} à terme automatiquement exclu{expiredCreditsCount > 1 ? 's' : ''} du total
                 </Text>
@@ -380,7 +381,7 @@ export default function FixedExpensesScreen() {
             {/* BANDEAU SI DES CHARGES SONT DIFFÉRÉES */}
             {upcomingChargesCount > 0 && (
               <View className="flex-row items-center bg-indigo-50 p-2.5 rounded-xl border border-indigo-200 gap-2">
-                <Ionicons name="calendar-outline" size={15} color="#6366F1" />
+                <Ionicons name="calendar-outline" size={15} color={colors.lavender} />
                 <Text className="text-xs text-lavender font-semibold flex-1">
                   {upcomingChargesCount} charge{upcomingChargesCount > 1 ? 's' : ''} différée{upcomingChargesCount > 1 ? 's' : ''} à venir (non imputée{upcomingChargesCount > 1 ? 's' : ''} ce mois-ci)
                 </Text>
@@ -411,7 +412,7 @@ export default function FixedExpensesScreen() {
             <View className="flex-row justify-between items-center p-4 sm:p-5 border-b border-border">
               <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
                 <View className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
-                  <Ionicons name="receipt-outline" size={18} color="#6366F1" />
+                  <Ionicons name="receipt-outline" size={18} color={colors.lavender} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm sm:text-base font-bold text-foreground">
@@ -430,14 +431,14 @@ export default function FixedExpensesScreen() {
                 size="sm"
                 onPress={openAddModal}
                 className="border-indigo-300 bg-indigo-50 gap-1 rounded-xl h-8 px-2.5 shrink-0">
-                <Ionicons name="add-circle" size={15} color="#6366F1" />
+                <Ionicons name="add-circle" size={15} color={colors.lavender} />
                 <Text className="text-xs font-bold text-lavender">Ajouter</Text>
               </Button>
             </View>
 
             {fixedExpensesList.length === 0 ? (
               <View className="p-8 items-center justify-center gap-3">
-                <Ionicons name="folder-open-outline" size={42} color="#6366F1" />
+                <Ionicons name="folder-open-outline" size={42} color={colors.lavender} />
                 <Text className="text-base font-bold text-foreground text-center">
                   Aucune charge fixe enregistrée
                 </Text>
@@ -591,26 +592,29 @@ export default function FixedExpensesScreen() {
                             variant="ghost"
                             size="icon"
                             onPress={() => handleAdvanceMonth(item)}
+                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                             className="w-7 h-7 rounded-lg"
                             accessibilityLabel={`Enregistrer +1 mois payé pour ${item.label}`}>
-                            <Ionicons name="checkmark-circle-outline" size={16} color="#10B981" />
+                            <Ionicons name="checkmark-circle-outline" size={16} color={colors.accent} />
                           </Button>
                         )}
                         <Button
                           variant="ghost"
                           size="icon"
                           onPress={() => openEditModal(item)}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                           className="w-7 h-7 rounded-lg"
                           accessibilityLabel={`Modifier ${item.label}`}>
-                          <Ionicons name="pencil-outline" size={15} color="#64748B" />
+                          <Ionicons name="pencil-outline" size={15} color={colors.textMuted} />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onPress={() => handleDelete(item.id, item.label)}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                           className="w-7 h-7 rounded-lg"
                           accessibilityLabel={`Supprimer ${item.label}`}>
-                          <Ionicons name="trash-outline" size={15} color="#F87171" />
+                          <Ionicons name="trash-outline" size={15} color={colors.danger} />
                         </Button>
                       </View>
                     </View>
@@ -649,7 +653,7 @@ export default function FixedExpensesScreen() {
         transparent
         onRequestClose={() => setIsModalVisible(false)}>
         <Pressable
-          className="flex-1 bg-black/50 justify-center items-center p-3.5 sm:p-4"
+          className="flex-1 bg-primary/50 justify-center items-center p-3.5 sm:p-4"
           onPress={() => setIsModalVisible(false)}>
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -665,7 +669,7 @@ export default function FixedExpensesScreen() {
                     <Ionicons
                       name={editingItem ? 'create-outline' : 'add-circle-outline'}
                       size={18}
-                      color="#6366F1"
+                      color={colors.lavender}
                     />
                   </View>
                   <View className="flex-1">
@@ -682,9 +686,10 @@ export default function FixedExpensesScreen() {
                   variant="ghost"
                   size="icon"
                   onPress={() => setIsModalVisible(false)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   className="w-8 h-8 rounded-full"
                   accessibilityLabel="Fermer la boîte de dialogue">
-                  <Ionicons name="close" size={20} color="#64748B" />
+                  <Ionicons name="close" size={20} color={colors.textMuted} />
                 </Button>
               </View>
 
@@ -700,7 +705,7 @@ export default function FixedExpensesScreen() {
                     value={labelInput}
                     onChangeText={setLabelInput}
                     placeholder="Ex: Loyer, EDF, Forfait internet..."
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={colors.textMuted}
                     className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                     autoFocus={!editingItem}
                   />
@@ -714,7 +719,7 @@ export default function FixedExpensesScreen() {
                     onChangeText={setAmountInput}
                     keyboardType="decimal-pad"
                     placeholder="Ex: 85.00"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={colors.textMuted}
                     className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                   />
                 </View>
@@ -739,7 +744,7 @@ export default function FixedExpensesScreen() {
                           <Ionicons
                             name={c.icon as any}
                             size={14}
-                            color={isSelected ? c.color : '#64748B'}
+                            color={isSelected ? c.color : colors.textMuted}
                           />
                           <Text
                             className={`text-xs font-semibold ${
@@ -764,7 +769,7 @@ export default function FixedExpensesScreen() {
                         <Ionicons
                           name={isCreditInput ? 'time' : 'time-outline'}
                           size={16}
-                          color={isCreditInput ? '#10B981' : '#64748B'}
+                          color={isCreditInput ? colors.accent : colors.textMuted}
                         />
                       </View>
                       <View className="flex-1">
@@ -834,7 +839,7 @@ export default function FixedExpensesScreen() {
                             onChangeText={setDurationInput}
                             keyboardType="number-pad"
                             placeholder="12"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={colors.textMuted}
                             className="bg-card border-border rounded-xl px-2.5 py-1.5 text-sm font-bold text-foreground h-9"
                           />
                         </View>
@@ -848,7 +853,7 @@ export default function FixedExpensesScreen() {
                             onChangeText={setPaidMonthsInput}
                             keyboardType="number-pad"
                             placeholder="0"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={colors.textMuted}
                             className="bg-card border-border rounded-xl px-2.5 py-1.5 text-sm font-bold text-foreground h-9"
                           />
                         </View>
@@ -896,7 +901,7 @@ export default function FixedExpensesScreen() {
                         <Ionicons
                           name={isScheduledInput ? 'calendar' : 'calendar-outline'}
                           size={16}
-                          color={isScheduledInput ? '#6366F1' : '#64748B'}
+                          color={isScheduledInput ? colors.lavender : colors.textMuted}
                         />
                       </View>
                       <View className="flex-1">
@@ -937,7 +942,7 @@ export default function FixedExpensesScreen() {
                             <Ionicons
                               name="arrow-forward-circle-outline"
                               size={14}
-                              color={activationTypeInput === 'starting_from' ? '#6366F1' : '#64748B'}
+                              color={activationTypeInput === 'starting_from' ? colors.lavender : colors.textMuted}
                             />
                             <Text
                               className={`text-xs font-bold ${
@@ -965,7 +970,7 @@ export default function FixedExpensesScreen() {
                             <Ionicons
                               name="stopwatch-outline"
                               size={14}
-                              color={activationTypeInput === 'only_month' ? '#6366F1' : '#64748B'}
+                              color={activationTypeInput === 'only_month' ? colors.lavender : colors.textMuted}
                             />
                             <Text
                               className={`text-xs font-bold ${
@@ -1017,7 +1022,7 @@ export default function FixedExpensesScreen() {
                           value={targetMonthInput}
                           onChangeText={setTargetMonthInput}
                           placeholder={currentMonthStr}
-                          placeholderTextColor="#64748B"
+                          placeholderTextColor={colors.textMuted}
                           maxLength={7}
                           className="bg-card border-border rounded-xl px-2.5 py-1.5 text-sm font-bold text-foreground h-9"
                         />

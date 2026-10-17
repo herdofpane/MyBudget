@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { NavigationHeader } from '@/components/navigation-header';
 import { AppDialog } from '@/components/confirm-dialog';
 import { DetailsSkeleton } from '@/components/ui/loading-state';
+import { colors } from '@/theme/colors';
 
 import { useBudget } from '@/hooks/use-budget';
 import { formatEuro, formatPercent } from '@/constants/formatters';
@@ -200,7 +201,7 @@ export default function DetailsScreen() {
               <Ionicons
                 name="calendar-outline"
                 size={16}
-                color={isMonthly ? '#ffffff' : '#64748B'}
+                color={isMonthly ? '#ffffff' : colors.textMuted}
               />
               <Text
                 className={`text-xs ${
@@ -219,7 +220,7 @@ export default function DetailsScreen() {
               <Ionicons
                 name="flash-outline"
                 size={16}
-                color={!isMonthly ? '#ffffff' : '#64748B'}
+                color={!isMonthly ? '#ffffff' : colors.textMuted}
               />
               <Text
                 className={`text-xs ${
@@ -248,7 +249,7 @@ export default function DetailsScreen() {
               {/* Pilier 1 : Total Nécessaire */}
               <View className="flex-1 rounded-2xl p-3 sm:p-3.5 border border-emerald-200 bg-emerald-50">
                 <Badge variant="outline" className="border-emerald-300 bg-emerald-100/60 self-start gap-1 px-1.5 py-0.5 mb-1 rounded-md">
-                  <Ionicons name="cart-outline" size={12} color="#047857" />
+                  <Ionicons name="cart-outline" size={12} color={colors.accentDark} />
                   <Text className="text-[10px] sm:text-[11px] font-bold text-accentDark">Total Nécessaire</Text>
                 </Badge>
                 <Text
@@ -263,7 +264,7 @@ export default function DetailsScreen() {
               {/* Pilier 2 : Épargne */}
               <View className="flex-1 rounded-2xl p-3 sm:p-3.5 border border-indigo-200 bg-indigo-50">
                 <Badge variant="outline" className="border-indigo-300 bg-indigo-100/60 self-start gap-1 px-1.5 py-0.5 mb-1 rounded-md">
-                  <Ionicons name="wallet-outline" size={12} color="#6366F1" />
+                  <Ionicons name="wallet-outline" size={12} color={colors.lavender} />
                   <Text className="text-[10px] sm:text-[11px] font-bold text-lavender">Épargne</Text>
                 </Badge>
                 <Text
@@ -284,7 +285,7 @@ export default function DetailsScreen() {
 
             {/* BANDEAU FORMULE EN TOUTES LETTRES */}
             <View className="flex-row items-start bg-indigo-50/70 p-3 sm:p-3.5 rounded-2xl border border-indigo-100 gap-2.5">
-              <Ionicons name="calculator-outline" size={18} color="#6366F1" className="mt-0.5" />
+              <Ionicons name="calculator-outline" size={18} color={colors.lavender} className="mt-0.5" />
               <View className="flex-1">
                 <Text className="text-xs font-bold text-foreground">
                   Calcul de l’Épargne :{' '}
@@ -305,7 +306,7 @@ export default function DetailsScreen() {
             <View className="flex-row items-center gap-2.5 sm:gap-3 justify-between">
               <View className="flex-row items-center gap-2.5 flex-1 pr-1">
                 <View className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
-                  <Ionicons name="create-outline" size={18} color="#6366F1" />
+                  <Ionicons name="create-outline" size={18} color={colors.lavender} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm sm:text-base font-bold text-foreground">Zone pour modifier le calcul</Text>
@@ -322,7 +323,7 @@ export default function DetailsScreen() {
                 size="sm"
                 onPress={() => setShowResetDialog(true)}
                 className="gap-1 px-2.5 py-1.5 rounded-lg border-border bg-muted/40 h-auto shrink-0">
-                <Ionicons name="refresh-outline" size={13} color="#64748B" />
+                <Ionicons name="refresh-outline" size={13} color={colors.textMuted} />
                 <Text className="text-[11px] font-semibold text-muted-foreground">Standard</Text>
               </Button>
             </View>
@@ -339,7 +340,7 @@ export default function DetailsScreen() {
                       onChangeText={(v) => setOverrideMonthlyIncome(v.replace(/[^0-9.,]/g, ''))}
                       keyboardType="decimal-pad"
                       placeholder="977"
-                      placeholderTextColor="#64748B"
+                      placeholderTextColor={colors.textMuted}
                       className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
@@ -352,7 +353,7 @@ export default function DetailsScreen() {
                       onChangeText={(v) => setOverrideMonthlyFixed(v.replace(/[^0-9.,]/g, ''))}
                       keyboardType="decimal-pad"
                       placeholder="61.73"
-                      placeholderTextColor="#64748B"
+                      placeholderTextColor={colors.textMuted}
                       className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
@@ -365,7 +366,7 @@ export default function DetailsScreen() {
                       onChangeText={(v) => setOverrideMonthlyNecessary(v.replace(/[^0-9.,]/g, ''))}
                       keyboardType="decimal-pad"
                       placeholder="123"
-                      placeholderTextColor="#64748B"
+                      placeholderTextColor={colors.textMuted}
                       className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
@@ -380,7 +381,7 @@ export default function DetailsScreen() {
                       onChangeText={(v) => setOverrideOneTimeAmount(v.replace(/[^0-9.,]/g, ''))}
                       keyboardType="decimal-pad"
                       placeholder="566.17"
-                      placeholderTextColor="#64748B"
+                      placeholderTextColor={colors.textMuted}
                       className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
@@ -393,7 +394,7 @@ export default function DetailsScreen() {
                       onChangeText={(v) => setOverrideOneTimeNecessary(v.replace(/[^0-9.,]/g, ''))}
                       keyboardType="decimal-pad"
                       placeholder="198.16"
-                      placeholderTextColor="#64748B"
+                      placeholderTextColor={colors.textMuted}
                       className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
@@ -430,11 +431,11 @@ export default function DetailsScreen() {
             className="flex-row items-center justify-between bg-card rounded-2xl p-3.5 sm:p-4 border border-border shadow-xs">
             <View className="flex-row items-center gap-3">
               <View className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
-                <Ionicons name="calendar-outline" size={18} color="#6366F1" />
+                <Ionicons name="calendar-outline" size={18} color={colors.lavender} />
               </View>
               <Text className="text-sm font-bold text-foreground">Gérer mes charges fixes</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color="#64748B" />
+            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
           </TouchableOpacity>
         </ScrollView>
       )}

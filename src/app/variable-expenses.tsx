@@ -21,6 +21,7 @@ import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
 import { ConfirmDialog, AppDialog } from '@/components/confirm-dialog';
 import { ListSkeleton } from '@/components/ui/loading-state';
+import { colors } from '@/theme/colors';
 
 import { useBudget } from '@/hooks/use-budget';
 import { VariableCategory } from '@/types';
@@ -346,17 +347,19 @@ export default function VariableExpensesScreen() {
                           variant="ghost"
                           size="icon"
                           onPress={() => openEditModal(item)}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                           className="w-7 h-7 rounded-lg"
                           accessibilityLabel={`Modifier ${item.label}`}>
-                          <Ionicons name="pencil-outline" size={15} color="#64748B" />
+                          <Ionicons name="pencil-outline" size={15} color={colors.textMuted} />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onPress={() => handleDelete(item.id, item.label)}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                           className="w-7 h-7 rounded-lg"
                           accessibilityLabel={`Supprimer ${item.label}`}>
-                          <Ionicons name="trash-outline" size={15} color="#F87171" />
+                          <Ionicons name="trash-outline" size={15} color={colors.danger} />
                         </Button>
                       </View>
                     </View>
@@ -395,7 +398,7 @@ export default function VariableExpensesScreen() {
         transparent
         onRequestClose={() => setIsModalVisible(false)}>
         <Pressable
-          className="flex-1 bg-black/50 justify-center items-center p-3.5 sm:p-4"
+          className="flex-1 bg-primary/50 justify-center items-center p-3.5 sm:p-4"
           onPress={() => setIsModalVisible(false)}>
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -428,9 +431,10 @@ export default function VariableExpensesScreen() {
                   variant="ghost"
                   size="icon"
                   onPress={() => setIsModalVisible(false)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   className="w-8 h-8 rounded-full"
                   accessibilityLabel="Fermer la boîte de dialogue">
-                  <Ionicons name="close" size={20} color="#64748B" />
+                  <Ionicons name="close" size={20} color={colors.textMuted} />
                 </Button>
               </View>
 
@@ -446,7 +450,7 @@ export default function VariableExpensesScreen() {
                     value={labelInput}
                     onChangeText={setLabelInput}
                     placeholder="Ex: Entretien voiture, Vacances..."
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={colors.textMuted}
                     className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                     autoFocus={!editingCategory}
                   />
@@ -460,7 +464,7 @@ export default function VariableExpensesScreen() {
                     onChangeText={setAmountInput}
                     keyboardType="decimal-pad"
                     placeholder="Ex: 600.00"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={colors.textMuted}
                     className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                   />
                 </View>
@@ -481,7 +485,7 @@ export default function VariableExpensesScreen() {
                       }}
                       keyboardType="decimal-pad"
                       placeholder="1"
-                      placeholderTextColor="#64748B"
+                      placeholderTextColor={colors.textMuted}
                       className="w-16 bg-muted/40 border-border rounded-xl px-2 py-2 text-sm font-bold text-foreground h-10 text-center"
                     />
                     <Text className="text-xs font-bold text-muted-foreground">mois</Text>
@@ -548,7 +552,7 @@ export default function VariableExpensesScreen() {
                           <Ionicons
                             name={item.icon as any}
                             size={16}
-                            color={isSelected ? '#D97706' : '#64748B'}
+                            color={isSelected ? '#D97706' : colors.textMuted}
                           />
                         </Button>
                       );
