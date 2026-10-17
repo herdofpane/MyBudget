@@ -13,6 +13,7 @@ import {
   getCreditProgress,
   formatCreditEndDate,
 } from '@/utils/fixed-expenses';
+import { autoDetectExpenseMeta } from '@/utils/auto-icon';
 
 export interface FeedbackDialogState {
   visible: boolean;
@@ -66,6 +67,8 @@ export function useFixedExpenses() {
   const [labelInput, setLabelInput] = useState('');
   const [amountInput, setAmountInput] = useState('');
   const [categoryInput, setCategoryInput] = useState<FixedCategoryType>('logement');
+  const [iconInput, setIconInput] = useState('home-outline');
+  const [isCategoryManuallySelected, setIsCategoryManuallySelected] = useState(false);
 
   // Champs spécifiques aux crédits sur durée limitée (X mois)
   const [isCreditInput, setIsCreditInput] = useState(false);
@@ -87,11 +90,27 @@ export function useFixedExpenses() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isModalVisible]);
 
+  // Détection automatique en temps réel de l'icône et de la catégorie selon le libellé saisi
+  const handleLabelChange = useCallback((text: string) => {
+    setLabelInput(text);
+    const detected = autoDetectExpenseMeta(text, categoryInput);
+    setIconInput(detected.icon);
+    if (!isCategoryManuallySelected && detected.category) {
+      setCategoryInput(detected.category);
+      if (detected.category === 'credit') {
+        setIsCreditInput(true);
+        if (!durationInput) setDurationInput('12');
+      }
+    }
+  }, [categoryInput, isCategoryManuallySelected, durationInput]);
+
   const openAddModal = useCallback(() => {
     setEditingItem(null);
     setLabelInput('');
     setAmountInput('');
     setCategoryInput('logement');
+    setIconInput('home-outline');
+    setIsCategoryManuallySelected(false);
     setIsCreditInput(false);
     setDurationInput('12');
     setPaidMonthsInput('0');
@@ -106,6 +125,8 @@ export function useFixedExpenses() {
     setLabelInput(item.label);
     setAmountInput(item.amount.toString());
     setCategoryInput(item.category);
+    setIconInput(item.icon || CATEGORY_CONFIG[item.category]?.icon || 'home-outline');
+    setIsCategoryManuallySelected(true);
     setIsCreditInput(!!item.isCredit);
     setDurationInput((item.durationMonths || 12).toString());
     setPaidMonthsInput((item.paidMonthsCount ?? 0).toString());
@@ -117,12 +138,16 @@ export function useFixedExpenses() {
   }, [currentMonthStr]);
 
   const handleSelectCategory = useCallback((catKey: FixedCategoryType) => {
+    setIsCategoryManuallySelected(true);
     setCategoryInput(catKey);
+    const catConfig = CATEGORY_CONFIG[catKey] || CATEGORY_CONFIG.autre;
+    const detected = autoDetectExpenseMeta(labelInput, catKey);
+    setIconInput(detected.icon || catConfig.icon);
     if (catKey === 'credit' && !isCreditInput) {
       setIsCreditInput(true);
       if (!durationInput) setDurationInput('12');
     }
-  }, [isCreditInput, durationInput]);
+  }, [labelInput, isCreditInput, durationInput]);
 
   const handleSave = useCallback(async () => {
     const amount = parseFloat(amountInput.replace(',', '.'));
@@ -137,6 +162,7 @@ export function useFixedExpenses() {
     }
 
     const catConfig = CATEGORY_CONFIG[categoryInput] || CATEGORY_CONFIG.autre;
+    const finalIcon = iconInput || autoDetectExpenseMeta(labelInput, categoryInput).icon || catConfig.icon;
     const parsedDuration = isCreditInput ? Math.max(1, parseInt(durationInput, 10) || 12) : undefined;
     const parsedPaidMonths = isCreditInput ? Math.max(0, parseInt(paidMonthsInput, 10) || 0) : undefined;
     const finalActivationType: FixedExpenseActivationType = isScheduledInput ? activationTypeInput : 'all';
@@ -150,7 +176,7 @@ export function useFixedExpenses() {
           label: labelInput.trim(),
           amount,
           category: categoryInput,
-          icon: catConfig.icon,
+          icon: finalIcon,
           isCredit: isCreditInput,
           durationMonths: parsedDuration,
           paidMonthsCount: parsedPaidMonths,
@@ -163,7 +189,7 @@ export function useFixedExpenses() {
           label: labelInput.trim(),
           amount,
           category: categoryInput,
-          icon: catConfig.icon,
+          icon: finalIcon,
           isCredit: isCreditInput,
           durationMonths: parsedDuration,
           paidMonthsCount: parsedPaidMonths,
@@ -180,6 +206,7 @@ export function useFixedExpenses() {
     amountInput,
     labelInput,
     categoryInput,
+    iconInput,
     isCreditInput,
     durationInput,
     paidMonthsInput,
@@ -344,6 +371,9 @@ export function useFixedExpenses() {
     // Form fields
     labelInput,
     setLabelInput,
+    handleLabelChange,
+    iconInput,
+    setIconInput,
     amountInput,
     setAmountInput,
     categoryInput,

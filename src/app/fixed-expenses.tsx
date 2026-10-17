@@ -53,6 +53,8 @@ export default function FixedExpensesScreen() {
     monthPresets,
     labelInput,
     setLabelInput,
+    handleLabelChange,
+    iconInput,
     amountInput,
     setAmountInput,
     categoryInput,
@@ -263,7 +265,7 @@ export default function FixedExpensesScreen() {
                         <View
                           className="w-8 h-8 rounded-lg justify-center items-center shrink-0"
                           style={{ backgroundColor: cat.bg }}>
-                          <Ionicons name={cat.icon as any} size={16} color={cat.color} />
+                          <Ionicons name={(item.icon || cat.icon) as any} size={16} color={cat.color} />
                         </View>
                         <View className="flex-1">
                           <View className="flex-row items-center gap-1.5 flex-wrap">
@@ -434,7 +436,7 @@ export default function FixedExpensesScreen() {
                 <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
                   <View className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
                     <Ionicons
-                      name={editingItem ? 'create-outline' : 'add-circle-outline'}
+                      name={(iconInput || (editingItem ? 'create-outline' : 'add-circle-outline')) as any}
                       size={18}
                       color={colors.lavender}
                     />
@@ -467,11 +469,19 @@ export default function FixedExpensesScreen() {
                 
                 {/* CHAMP 1 : NOM */}
                 <View className="gap-1">
-                  <Text className="text-xs font-bold text-foreground">Nom de la charge</Text>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-xs font-bold text-foreground">Nom de la charge</Text>
+                    {iconInput && (
+                      <Badge variant="outline" className="border-indigo-200 bg-indigo-50/70 px-1.5 py-0.5 rounded-full flex-row items-center gap-1">
+                        <Ionicons name={iconInput as any} size={11} color={colors.lavender} />
+                        <Text className="text-[10px] font-semibold text-lavender">Icône auto</Text>
+                      </Badge>
+                    )}
+                  </View>
                   <Input
                     value={labelInput}
-                    onChangeText={setLabelInput}
-                    placeholder="Ex: Loyer, EDF, Forfait internet..."
+                    onChangeText={handleLabelChange}
+                    placeholder="Ex: Loyer, EDF, Forfait internet, Netflix..."
                     placeholderTextColor={colors.textMuted}
                     className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                     autoFocus={!editingItem}

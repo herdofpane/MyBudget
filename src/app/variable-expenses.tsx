@@ -46,6 +46,7 @@ export default function VariableExpensesScreen() {
     setFeedbackDialog,
     labelInput,
     setLabelInput,
+    handleLabelChange,
     amountInput,
     setAmountInput,
     durationInput,
@@ -54,6 +55,9 @@ export default function VariableExpensesScreen() {
     setIconInput,
     colorInput,
     setColorInput,
+    isIconManuallySelected,
+    handleSelectIcon,
+    handleSelectColor,
     openAddModal,
     openEditModal,
     handleSave,
@@ -307,11 +311,16 @@ export default function VariableExpensesScreen() {
               {/* EN-TÊTE MODAL */}
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
-                  <View className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-50 border border-amber-200 justify-center items-center shrink-0">
+                  <View
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl justify-center items-center shrink-0 border"
+                    style={{
+                      backgroundColor: `${colorInput}18`,
+                      borderColor: `${colorInput}35`,
+                    }}>
                     <Ionicons
-                      name={editingCategory ? 'create-outline' : 'add-circle-outline'}
+                      name={(iconInput || (editingCategory ? 'create-outline' : 'add-circle-outline')) as any}
                       size={18}
-                      color="#D97706"
+                      color={colorInput}
                     />
                   </View>
                   <View className="flex-1">
@@ -342,11 +351,21 @@ export default function VariableExpensesScreen() {
                 
                 {/* CHAMP 1 : TITRE */}
                 <View className="gap-1">
-                  <Text className="text-xs font-bold text-foreground">Titre</Text>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-xs font-bold text-foreground">Titre</Text>
+                    {iconInput && (
+                      <Badge variant="outline" className="border-amber-200 bg-amber-50/70 px-1.5 py-0.5 rounded-full flex-row items-center gap-1">
+                        <Ionicons name={iconInput as any} size={11} color={colorInput} />
+                        <Text className="text-[10px] font-semibold text-amber-800">
+                          {isIconManuallySelected ? 'Icône choisie' : 'Icône auto'}
+                        </Text>
+                      </Badge>
+                    )}
+                  </View>
                   <Input
                     value={labelInput}
-                    onChangeText={setLabelInput}
-                    placeholder="Ex: Entretien voiture, Vacances..."
+                    onChangeText={handleLabelChange}
+                    placeholder="Ex: Courses, Restaurant, Essence, Vacances..."
                     placeholderTextColor={colors.textMuted}
                     className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                     autoFocus={!editingCategory}
@@ -433,7 +452,12 @@ export default function VariableExpensesScreen() {
 
                 {/* CHAMP 4 : ICÔNE */}
                 <View className="gap-1">
-                  <Text className="text-xs font-bold text-foreground">Icône</Text>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-xs font-bold text-foreground">Icône</Text>
+                    <Text className="text-[10px] text-muted-foreground font-medium">
+                      {isIconManuallySelected ? 'Sélection manuelle' : 'Choisie selon le titre'}
+                    </Text>
+                  </View>
                   <View className="flex-row gap-1.5 flex-wrap">
                     {PRESET_ICONS.map((item) => {
                       const isSelected = iconInput === item.icon;
@@ -442,7 +466,7 @@ export default function VariableExpensesScreen() {
                           key={item.icon}
                           variant="outline"
                           size="icon"
-                          onPress={() => setIconInput(item.icon)}
+                          onPress={() => handleSelectIcon(item.icon)}
                           className={`w-9 h-9 rounded-xl ${
                             isSelected ? 'border-amber-500 bg-amber-50' : 'border-border bg-muted/30'
                           }`}>
@@ -464,7 +488,7 @@ export default function VariableExpensesScreen() {
                     {PRESET_COLORS.map((color) => (
                       <TouchableOpacity
                         key={color}
-                        onPress={() => setColorInput(color)}
+                        onPress={() => handleSelectColor(color)}
                         activeOpacity={0.7}
                         className={`w-8 h-8 rounded-full justify-center items-center ${
                           colorInput === color ? 'border-2 border-foreground' : ''

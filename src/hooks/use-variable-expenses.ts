@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Platform } from 'react-native';
 import { useBudget } from '@/hooks/use-budget';
 import { VariableCategory } from '@/types';
+import { autoDetectExpenseMeta } from '@/utils/auto-icon';
 
 export interface VariableFeedbackDialogState {
   visible: boolean;
@@ -53,8 +54,31 @@ export function useVariableExpenses() {
   const [labelInput, setLabelInput] = useState('');
   const [amountInput, setAmountInput] = useState('');
   const [durationInput, setDurationInput] = useState('1');
-  const [iconInput, setIconInput] = useState('cart-outline');
+  const [iconInput, setIconInput] = useState('pricetag-outline');
   const [colorInput, setColorInput] = useState('#9b6fba');
+  const [isIconManuallySelected, setIsIconManuallySelected] = useState(false);
+
+  // Détection automatique en temps réel de l'icône et de la couleur selon le libellé saisi
+  const handleLabelChange = useCallback(
+    (text: string) => {
+      setLabelInput(text);
+      if (!isIconManuallySelected) {
+        const detected = autoDetectExpenseMeta(text);
+        setIconInput(detected.icon);
+        setColorInput(detected.color);
+      }
+    },
+    [isIconManuallySelected]
+  );
+
+  const handleSelectIcon = useCallback((icon: string) => {
+    setIsIconManuallySelected(true);
+    setIconInput(icon);
+  }, []);
+
+  const handleSelectColor = useCallback((color: string) => {
+    setColorInput(color);
+  }, []);
 
   // Ouvrir modal ajout
   const openAddModal = useCallback(() => {
@@ -62,8 +86,9 @@ export function useVariableExpenses() {
     setLabelInput('');
     setAmountInput('');
     setDurationInput('1');
-    setIconInput('cart-outline');
+    setIconInput('pricetag-outline');
     setColorInput('#9b6fba');
+    setIsIconManuallySelected(false);
     setIsModalVisible(true);
   }, []);
 
@@ -77,6 +102,7 @@ export function useVariableExpenses() {
     setDurationInput(duration.toString());
     setIconInput(cat.icon);
     setColorInput(cat.color);
+    setIsIconManuallySelected(true);
     setIsModalVisible(true);
   }, []);
 
@@ -94,6 +120,9 @@ export function useVariableExpenses() {
       return;
     }
 
+    const detected = autoDetectExpenseMeta(labelInput);
+    const finalIcon = isIconManuallySelected ? iconInput : (detected.icon || iconInput);
+    const finalColor = colorInput || detected.color || '#9b6fba';
     const monthly = Math.round((total / duration) * 100) / 100;
 
     setIsSaving(true);
@@ -105,8 +134,8 @@ export function useVariableExpenses() {
           totalAmount: total,
           durationMonths: duration,
           estimatedBudget: monthly,
-          icon: iconInput,
-          color: colorInput,
+          icon: finalIcon,
+          color: finalColor,
         });
       } else {
         await addVariableCategory({
@@ -115,8 +144,8 @@ export function useVariableExpenses() {
           durationMonths: duration,
           estimatedBudget: monthly,
           spent: 0,
-          icon: iconInput,
-          color: colorInput,
+          icon: finalIcon,
+          color: finalColor,
         });
       }
       setIsModalVisible(false);
@@ -130,6 +159,7 @@ export function useVariableExpenses() {
     editingCategory,
     iconInput,
     colorInput,
+    isIconManuallySelected,
     updateVariableCategory,
     addVariableCategory,
   ]);
@@ -177,6 +207,7 @@ export function useVariableExpenses() {
     // Form fields
     labelInput,
     setLabelInput,
+    handleLabelChange,
     amountInput,
     setAmountInput,
     durationInput,
@@ -185,6 +216,9 @@ export function useVariableExpenses() {
     setIconInput,
     colorInput,
     setColorInput,
+    isIconManuallySelected,
+    handleSelectIcon,
+    handleSelectColor,
     // Actions
     openAddModal,
     openEditModal,
