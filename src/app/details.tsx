@@ -25,6 +25,8 @@ import { formatEuro, formatPercent } from '@/constants/formatters';
 
 export default function DetailsScreen() {
   const {
+    budget,
+    totalFixedExpenses,
     isLoading,
     isSaving,
     setActiveTab,
@@ -32,13 +34,9 @@ export default function DetailsScreen() {
     setFeedbackDialog,
     showResetDialog,
     setShowResetDialog,
-    setOverrideMonthlyIncome,
-    setOverrideMonthlyFixed,
     setOverrideMonthlyNecessary,
     setOverrideOneTimeAmount,
     setOverrideOneTimeNecessary,
-    monthlyIncomeInput,
-    monthlyFixedInput,
     monthlyNecessaryInput,
     oneTimeAmountInput,
     oneTimeNecessaryInput,
@@ -193,7 +191,7 @@ export default function DetailsScreen() {
                   <Text className="text-sm sm:text-base font-bold text-foreground">Zone pour modifier le calcul</Text>
                   <Text className="text-[11px] text-muted-foreground" numberOfLines={1}>
                     {isMonthly
-                      ? 'Revenu, Charges et Nécessaire'
+                      ? 'Revenu (Accueil), Charges fixes et Seuil nécessaire'
                       : 'Montant ponctuel et Nécessaire'}
                   </Text>
                 </View>
@@ -213,35 +211,66 @@ export default function DetailsScreen() {
             <View className="gap-2.5 sm:gap-3">
               {isMonthly ? (
                 <>
-                  {/* 1. REVENU MENSUEL */}
-                  <View>
-                    <Text className="text-xs font-bold text-foreground mb-1">Revenu mensuel (€)</Text>
-                    <Input
-                      value={monthlyIncomeInput}
-                      onChangeText={(v) => setOverrideMonthlyIncome(v.replace(/[^0-9.,]/g, ''))}
-                      keyboardType="decimal-pad"
-                      placeholder="977"
-                      placeholderTextColor={colors.textMuted}
-                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
-                    />
+                  {/* 1. REVENU MENSUEL (Issu de l'Accueil) */}
+                  <View className="bg-muted/30 border border-border rounded-2xl p-3 sm:p-3.5 flex-row items-center justify-between">
+                    <View className="flex-1 pr-2">
+                      <View className="flex-row items-center gap-1.5 mb-1">
+                        <Ionicons name="cash-outline" size={14} color={colors.accent} />
+                        <Text className="text-xs font-bold text-foreground">Revenu mensuel</Text>
+                        <Badge variant="outline" className="border-emerald-200 bg-emerald-50 px-1.5 py-0 rounded">
+                          <Text className="text-[10px] font-semibold text-accent">Accueil</Text>
+                        </Badge>
+                      </View>
+                      <Text className="text-base sm:text-lg font-black text-foreground">
+                        {formatEuro(budget.income)}
+                      </Text>
+                      <Text className="text-[10px] text-muted-foreground mt-0.5">
+                        Défini dans l&apos;input de la page Accueil
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => router.push('/')}
+                      className="px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 flex-row items-center gap-1">
+                      <Text className="text-[11px] font-bold text-accent">Modifier</Text>
+                      <Ionicons name="arrow-forward" size={12} color={colors.accent} />
+                    </TouchableOpacity>
                   </View>
 
-                  {/* 2. CHARGES FIXES */}
-                  <View>
-                    <Text className="text-xs font-bold text-foreground mb-1">Charges fixes (€)</Text>
-                    <Input
-                      value={monthlyFixedInput}
-                      onChangeText={(v) => setOverrideMonthlyFixed(v.replace(/[^0-9.,]/g, ''))}
-                      keyboardType="decimal-pad"
-                      placeholder="0.00"
-                      placeholderTextColor={colors.textMuted}
-                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
-                    />
+                  {/* 2. CHARGES FIXES (Issues du total de la page Charges Fixes) */}
+                  <View className="bg-muted/30 border border-border rounded-2xl p-3 sm:p-3.5 flex-row items-center justify-between">
+                    <View className="flex-1 pr-2">
+                      <View className="flex-row items-center gap-1.5 mb-1">
+                        <Ionicons name="calendar-outline" size={14} color={colors.lavender} />
+                        <Text className="text-xs font-bold text-foreground">Charges fixes</Text>
+                        <Badge variant="outline" className="border-indigo-200 bg-indigo-50 px-1.5 py-0 rounded">
+                          <Text className="text-[10px] font-semibold text-lavender">Charges Fixes</Text>
+                        </Badge>
+                      </View>
+                      <Text className="text-base sm:text-lg font-black text-foreground">
+                        {formatEuro(totalFixedExpenses)}
+                      </Text>
+                      <Text className="text-[10px] text-muted-foreground mt-0.5">
+                        Total calculé depuis la page Charges Fixes
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => router.push('/fixed-expenses')}
+                      className="px-2.5 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 flex-row items-center gap-1">
+                      <Text className="text-[11px] font-bold text-lavender">Gérer</Text>
+                      <Ionicons name="arrow-forward" size={12} color={colors.lavender} />
+                    </TouchableOpacity>
                   </View>
 
-                  {/* 3. TOTAL NÉCESSAIRE */}
+                  {/* 3. TOTAL NÉCESSAIRE (Ajustable pour la simulation) */}
                   <View>
-                    <Text className="text-xs font-bold text-foreground mb-1">Total Nécessaire (Seuil survie) (€)</Text>
+                    <View className="flex-row items-center justify-between mb-1">
+                      <Text className="text-xs font-bold text-foreground">Total Nécessaire (Seuil survie) (€)</Text>
+                      <Badge variant="outline" className="border-border bg-muted/40 px-1.5 py-0 rounded">
+                        <Text className="text-[10px] font-semibold text-muted-foreground">Paramètre de calcul</Text>
+                      </Badge>
+                    </View>
                     <Input
                       value={monthlyNecessaryInput}
                       onChangeText={(v) => setOverrideMonthlyNecessary(v.replace(/[^0-9.,]/g, ''))}
@@ -250,6 +279,9 @@ export default function DetailsScreen() {
                       placeholderTextColor={colors.textMuted}
                       className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
+                    <Text className="text-[10px] text-muted-foreground mt-1">
+                      Ajustez le montant nécessaire pour observer l&apos;impact sur la répartition et l&apos;épargne.
+                    </Text>
                   </View>
                 </>
               ) : (
@@ -328,7 +360,7 @@ export default function DetailsScreen() {
         title="Restaurer le tableur standard ?"
         message={
           isMonthly
-            ? 'Cela réinitialisera le Revenu (977 €), les Charges fixes (61,73 €) et le Seuil nécessaire (123 €).'
+            ? 'Cela réinitialisera le Seuil nécessaire au montant par défaut (123 €).'
             : 'Cela réinitialisera le Revenu ponctuel (566,17 €) et le Seuil nécessaire (198,16 €).'
         }
         subtext="Vos modifications non appliquées seront perdues."
