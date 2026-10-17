@@ -17,19 +17,19 @@ export function NavigationHeader({
   actionButton,
 }: NavHeaderProps) {
   return (
-    <View className="px-4 py-3.5 bg-background w-full max-w-[960px] self-center">
+    <View className="px-3.5 sm:px-4 py-2 sm:py-3 bg-background w-full max-w-[960px] self-center">
       <View className="flex-row justify-between items-center">
-        <View className="flex-1">
+        <View className="flex-1 pr-2">
           {subtitle ? (
-            <Text className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+            <Text className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider" numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}
-          <Text className="text-2xl font-black text-foreground tracking-tight mt-0.5">
+          <Text className="text-xl sm:text-2xl font-black text-foreground tracking-tight mt-0.5">
             {title}
           </Text>
         </View>
-        {actionButton ? <View className="ml-3">{actionButton}</View> : null}
+        {actionButton ? <View className="ml-2 shrink-0">{actionButton}</View> : null}
       </View>
     </View>
   );

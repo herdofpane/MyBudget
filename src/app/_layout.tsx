@@ -26,7 +26,7 @@ function TabIcon({ name, focusedName, focused, color }: TabIconProps) {
       ]}>
       <Ionicons
         name={focused ? focusedName : name}
-        size={20}
+        size={22}
         color={focused ? colors.accent : (color || colors.textMuted)}
       />
     </View>
@@ -45,21 +45,21 @@ export default function RootLayout() {
   const isNarrow = width < 420;
 
   const containerWidth = isDesktop ? Math.min(width, 960) : width;
-  const horizontalMargin = isDesktop ? 32 : isNarrow ? 16 : 24;
+  const horizontalMargin = isDesktop ? 32 : isNarrow ? 14 : 20;
   const maxDock = isDesktop ? 580 : 500;
   const dockWidth = Math.min(containerWidth - horizontalMargin, maxDock);
   const dockLeft = (containerWidth - dockWidth) / 2;
 
-  // Hauteur et espacement du footer optimisés pour éviter tout écrasement ou rognage de texte
+  // Hauteur et espacement du footer optimisés pour que le texte et les icônes soient parfaitement lisibles et confortables
   const dockBottom = isDesktop
     ? 16
     : isWeb
     ? 12
-    : Math.max(insets.bottom, 10);
+    : Math.max(insets.bottom, 12);
 
-  const tabBarHeight = isDesktop ? 68 : 62;
-  const tabBarPaddingBottom = 4;
-  const tabBarPaddingTop = 4;
+  const tabBarHeight = isDesktop ? 74 : 70;
+  const tabBarPaddingBottom = isDesktop ? 8 : 6;
+  const tabBarPaddingTop = isDesktop ? 8 : 6;
 
   return (
     <BudgetProvider>
@@ -74,7 +74,7 @@ export default function RootLayout() {
                   backgroundColor: colors.card,
                   borderColor: colors.border,
                   borderWidth: 1,
-                  borderRadius: isDesktop ? 24 : 20,
+                  borderRadius: isDesktop ? 26 : 22,
                   height: tabBarHeight,
                   paddingBottom: tabBarPaddingBottom,
                   paddingTop: tabBarPaddingTop,
@@ -91,17 +91,17 @@ export default function RootLayout() {
                 tabBarItemStyle: {
                   justifyContent: 'center',
                   alignItems: 'center',
-                  paddingVertical: 3,
+                  paddingVertical: 2,
                   paddingHorizontal: 2,
                 },
                 tabBarActiveTintColor: colors.accent,
                 tabBarInactiveTintColor: colors.textMuted,
                 tabBarLabelStyle: {
-                  fontSize: isNarrow ? 10 : 11,
+                  fontSize: isNarrow ? 11 : 12,
                   fontWeight: '700',
                   marginTop: 2,
                   marginBottom: 0,
-                  lineHeight: 13,
+                  lineHeight: 14,
                 },
               }}>
             {/* 1. ACCUEIL */}
@@ -209,12 +209,12 @@ const styles = StyleSheet.create({
       : {}),
   },
   iconContainer: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 1,
+    marginBottom: 2,
   },
   iconContainerFocused: {
     backgroundColor: '#ECFDF5',

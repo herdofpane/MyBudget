@@ -187,7 +187,7 @@ export default function DetailsScreen() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="px-4 pt-2.5 pb-[110px] gap-4 w-full max-w-[860px] self-center">
+          contentContainerClassName="px-3.5 sm:px-4 pt-1.5 pb-[115px] gap-3.5 sm:gap-4 w-full max-w-[860px] self-center">
 
           {/* 1. SÉLECTEUR D'ONGLET : MENSUELLE vs REVENU PONCTUEL */}
           <View className="flex-row bg-slate-100 p-1 rounded-2xl gap-1">
@@ -231,46 +231,51 @@ export default function DetailsScreen() {
           </View>
 
           {/* 2. RÉSULTAT DU CALCUL (BILAN DE SYNTHÈSE DU TABLEUR) */}
-          <Card className="bg-card rounded-3xl p-5 border border-border shadow-xs gap-4">
+          <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-xs gap-3.5 sm:gap-4">
             <View>
-              <Text className="text-lg font-black text-foreground">
+              <Text className="text-base sm:text-lg font-black text-foreground">
                 {isMonthly ? 'Bilan Mensuel Calculé' : 'Bilan du Revenu Ponctuel'}
               </Text>
               <Text className="text-xs text-muted-foreground font-semibold mt-0.5">
                 {isMonthly
-                  ? `Revenu (${formatEuro(currentIncome)}) − Charges fixes (${formatEuro(parsedMonthlyFixed)}) = Reste à vivre (${formatEuro(monthlyResteAVivre)})`
+                  ? `Revenu (${formatEuro(currentIncome)}) − Charges (${formatEuro(parsedMonthlyFixed)}) = Reste à vivre (${formatEuro(monthlyResteAVivre)})`
                   : `Montant total ponctuel reçu : ${formatEuro(currentIncome)}`}
               </Text>
             </View>
 
             {/* LES 2 RÉSULTATS CLÉS (NÉCESSAIRE | ÉPARGNE) */}
-            <View className="flex-row gap-3">
+            <View className="flex-row gap-2.5 sm:gap-3">
               {/* Pilier 1 : Total Nécessaire */}
-              <View className="flex-1 rounded-2xl p-3.5 border border-emerald-200 bg-emerald-50">
-                <Badge variant="outline" className="border-emerald-300 bg-emerald-100/60 self-start gap-1 px-2 py-0.5 mb-1 rounded-md">
+              <View className="flex-1 rounded-2xl p-3 sm:p-3.5 border border-emerald-200 bg-emerald-50">
+                <Badge variant="outline" className="border-emerald-300 bg-emerald-100/60 self-start gap-1 px-1.5 py-0.5 mb-1 rounded-md">
                   <Ionicons name="cart-outline" size={12} color="#047857" />
-                  <Text className="text-[11px] font-bold text-accentDark">Total Nécessaire</Text>
+                  <Text className="text-[10px] sm:text-[11px] font-bold text-accentDark">Total Nécessaire</Text>
                 </Badge>
-                <Text className="text-xl font-black text-accentDark my-1">
+                <Text
+                  className="text-lg sm:text-xl font-black text-accentDark my-1"
+                  numberOfLines={1}
+                  adjustsFontSizeToFit>
                   {formatEuro(currentNecessary)}
                 </Text>
-                <Text className="text-[11px] text-emerald-700/80 font-medium">Seuil de survie</Text>
+                <Text className="text-[10px] sm:text-[11px] text-emerald-700/80 font-medium">Seuil de survie</Text>
               </View>
 
               {/* Pilier 2 : Épargne */}
-              <View className="flex-1 rounded-2xl p-3.5 border border-indigo-200 bg-indigo-50">
-                <Badge variant="outline" className="border-indigo-300 bg-indigo-100/60 self-start gap-1 px-2 py-0.5 mb-1 rounded-md">
+              <View className="flex-1 rounded-2xl p-3 sm:p-3.5 border border-indigo-200 bg-indigo-50">
+                <Badge variant="outline" className="border-indigo-300 bg-indigo-100/60 self-start gap-1 px-1.5 py-0.5 mb-1 rounded-md">
                   <Ionicons name="wallet-outline" size={12} color="#6366F1" />
-                  <Text className="text-[11px] font-bold text-lavender">Épargne</Text>
+                  <Text className="text-[10px] sm:text-[11px] font-bold text-lavender">Épargne</Text>
                 </Badge>
                 <Text
-                  className={`text-xl font-black my-1 ${
+                  className={`text-lg sm:text-xl font-black my-1 ${
                     currentEpargne >= 0 ? 'text-lavender' : 'text-danger'
-                  }`}>
+                  }`}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit>
                   {currentEpargne >= 0 ? '+' : ''}{formatEuro(currentEpargne)}
                 </Text>
                 <Badge variant="secondary" className="bg-indigo-100/70 border-0 self-start px-1.5 py-0.5 rounded">
-                  <Text className="text-[11px] text-indigo-700 font-semibold">
+                  <Text className="text-[10px] sm:text-[11px] text-indigo-700 font-semibold">
                     {currentIncome > 0 ? formatPercent((currentEpargne / currentIncome) * 100) : '0%'} du total
                   </Text>
                 </Badge>
@@ -278,8 +283,8 @@ export default function DetailsScreen() {
             </View>
 
             {/* BANDEAU FORMULE EN TOUTES LETTRES */}
-            <View className="flex-row items-start bg-indigo-50/70 p-3.5 rounded-2xl border border-indigo-100 gap-2.5">
-              <Ionicons name="calculator-outline" size={18} color="#6366F1" />
+            <View className="flex-row items-start bg-indigo-50/70 p-3 sm:p-3.5 rounded-2xl border border-indigo-100 gap-2.5">
+              <Ionicons name="calculator-outline" size={18} color="#6366F1" className="mt-0.5" />
               <View className="flex-1">
                 <Text className="text-xs font-bold text-foreground">
                   Calcul de l’Épargne :{' '}
@@ -296,32 +301,34 @@ export default function DetailsScreen() {
           </Card>
 
           {/* 3. ZONE POUR MODIFIER LE CALCUL (CHAMPS INTERACTIFS) */}
-          <Card className="bg-card rounded-3xl p-5 border border-border shadow-xs gap-4">
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
-                <Ionicons name="create-outline" size={20} color="#6366F1" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-base font-bold text-foreground">Zone pour modifier le calcul</Text>
-                <Text className="text-xs text-muted-foreground mt-0.5">
-                  {isMonthly
-                    ? 'Ajustez le Revenu, les Charges fixes et le Nécessaire pour recalculer l’Épargne'
-                    : 'Ajustez le montant ponctuel et le Nécessaire pour recalculer l’Épargne'}
-                </Text>
+          <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-xs gap-3.5 sm:gap-4">
+            <View className="flex-row items-center gap-2.5 sm:gap-3 justify-between">
+              <View className="flex-row items-center gap-2.5 flex-1 pr-1">
+                <View className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
+                  <Ionicons name="create-outline" size={18} color="#6366F1" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-sm sm:text-base font-bold text-foreground">Zone pour modifier le calcul</Text>
+                  <Text className="text-[11px] text-muted-foreground" numberOfLines={1}>
+                    {isMonthly
+                      ? 'Revenu, Charges et Nécessaire'
+                      : 'Montant ponctuel et Nécessaire'}
+                  </Text>
+                </View>
               </View>
 
               <Button
                 variant="outline"
                 size="sm"
                 onPress={() => setShowResetDialog(true)}
-                className="gap-1 px-2.5 py-1.5 rounded-lg border-border bg-muted/40 h-auto">
+                className="gap-1 px-2.5 py-1.5 rounded-lg border-border bg-muted/40 h-auto shrink-0">
                 <Ionicons name="refresh-outline" size={13} color="#64748B" />
                 <Text className="text-[11px] font-semibold text-muted-foreground">Standard</Text>
               </Button>
             </View>
 
             {/* CHAMPS SELON LE MODE */}
-            <View className="gap-3">
+            <View className="gap-2.5 sm:gap-3">
               {isMonthly ? (
                 <>
                   {/* 1. REVENU MENSUEL */}
@@ -333,7 +340,7 @@ export default function DetailsScreen() {
                       keyboardType="decimal-pad"
                       placeholder="977"
                       placeholderTextColor="#64748B"
-                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-base font-bold text-foreground h-11"
+                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
 
@@ -346,7 +353,7 @@ export default function DetailsScreen() {
                       keyboardType="decimal-pad"
                       placeholder="61.73"
                       placeholderTextColor="#64748B"
-                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-base font-bold text-foreground h-11"
+                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
 
@@ -359,7 +366,7 @@ export default function DetailsScreen() {
                       keyboardType="decimal-pad"
                       placeholder="123"
                       placeholderTextColor="#64748B"
-                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-base font-bold text-foreground h-11"
+                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
                 </>
@@ -374,7 +381,7 @@ export default function DetailsScreen() {
                       keyboardType="decimal-pad"
                       placeholder="566.17"
                       placeholderTextColor="#64748B"
-                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-base font-bold text-foreground h-11"
+                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
 
@@ -387,7 +394,7 @@ export default function DetailsScreen() {
                       keyboardType="decimal-pad"
                       placeholder="198.16"
                       placeholderTextColor="#64748B"
-                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-base font-bold text-foreground h-11"
+                      className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
                     />
                   </View>
                 </>
@@ -406,12 +413,12 @@ export default function DetailsScreen() {
               ) : (
                 <Ionicons name="checkmark-circle" size={18} color="#ffffff" />
               )}
-              <Text className="text-sm font-bold text-white">
+              <Text className="text-xs sm:text-sm font-bold text-white">
                 {isSaving
                   ? 'Enregistrement...'
                   : isMonthly
                   ? 'Appliquer comme budget officiel'
-                  : 'Enregistrer ce calcul de revenu ponctuel'}
+                  : 'Enregistrer ce revenu ponctuel'}
               </Text>
             </Button>
           </Card>
@@ -420,7 +427,7 @@ export default function DetailsScreen() {
           <TouchableOpacity
             onPress={() => router.push('/fixed-expenses')}
             activeOpacity={0.8}
-            className="flex-row items-center justify-between bg-card rounded-2xl p-4 border border-border shadow-xs">
+            className="flex-row items-center justify-between bg-card rounded-2xl p-3.5 sm:p-4 border border-border shadow-xs">
             <View className="flex-row items-center gap-3">
               <View className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
                 <Ionicons name="calendar-outline" size={18} color="#6366F1" />
@@ -449,7 +456,7 @@ export default function DetailsScreen() {
         onCancel={() => setShowResetDialog(false)}
       />
 
-      {/* POP-UP DE RÉSULTAT / FEEDBACK (SUCCÈS, INFO OU ERREUR) */}
+      {/* POP-UP DE RÉSULTAT / FEEDBACK */}
       {feedbackDialog && (
         <AppDialog
           visible={feedbackDialog.visible}

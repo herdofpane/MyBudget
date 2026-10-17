@@ -126,7 +126,7 @@ export default function FixedExpensesScreen() {
     setIsModalVisible(true);
   };
 
-  // Sélection intelligente de catégorie : active automatiquement l'option crédit si la catégorie 'credit' est choisie
+  // Sélection intelligente de catégorie
   const handleSelectCategory = (catKey: FixedCategoryType) => {
     setCategoryInput(catKey);
     if (catKey === 'credit' && !isCreditInput) {
@@ -335,23 +335,23 @@ export default function FixedExpensesScreen() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="px-4 pt-2.5 pb-[110px] gap-4 w-full max-w-[860px] self-center">
+          contentContainerClassName="px-3.5 sm:px-4 pt-1.5 pb-[115px] gap-3.5 sm:gap-4 w-full max-w-[860px] self-center">
 
           {/* 1. CARTE DU TOTAL DES CHARGES FIXES */}
-          <Card className="bg-card rounded-3xl p-5 border border-border shadow-xs gap-4">
+          <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-xs gap-3.5 sm:gap-4">
             <View className="flex-row justify-between items-start">
               <View className="flex-1">
                 <View className="flex-row items-center gap-2 mb-1">
                   <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    Total des charges fixes
+                    Total charges fixes
                   </Text>
-                  <Badge variant="outline" className="border-border bg-muted/30 px-2 py-0.5 rounded-full">
+                  <Badge variant="outline" className="border-border bg-muted/30 px-1.5 py-0.5 rounded-full">
                     <Text className="text-[10px] text-muted-foreground font-semibold">
-                      Arrondi à l&apos;unité
+                      Arrondi unité
                     </Text>
                   </Badge>
                 </View>
-                <Text className="text-3xl font-black text-foreground tracking-tight">
+                <Text className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
                   {formatEuroRound(totalFixedExpenses)}
                 </Text>
                 <Text className="text-xs text-muted-foreground mt-0.5">
@@ -388,17 +388,17 @@ export default function FixedExpensesScreen() {
             )}
 
             {/* PETIT RÉCAPITULATIF STATISTIQUE */}
-            <View className="flex-row items-center bg-muted/30 rounded-2xl p-3 border border-border">
+            <View className="flex-row items-center bg-muted/30 rounded-2xl p-2.5 sm:p-3 border border-border">
               <View className="flex-1 items-center">
                 <Text className="text-[11px] text-muted-foreground font-medium">Moyenne par charge</Text>
-                <Text className="text-sm font-bold text-foreground mt-0.5">
+                <Text className="text-xs sm:text-sm font-bold text-foreground mt-0.5">
                   ~{formatEuroRound(averageExpense)}
                 </Text>
               </View>
-              <View className="w-px h-8 bg-border" />
+              <View className="w-px h-7 bg-border" />
               <View className="flex-1 items-center">
                 <Text className="text-[11px] text-muted-foreground font-medium">Part des revenus</Text>
-                <Text className="text-sm font-bold text-foreground mt-0.5">
+                <Text className="text-xs sm:text-sm font-bold text-foreground mt-0.5">
                   {formatPercent(fixedExpenseRatio)}
                 </Text>
               </View>
@@ -408,17 +408,17 @@ export default function FixedExpensesScreen() {
           {/* 2. LE TABLEAU DES CHARGES FIXES */}
           <Card className="bg-card rounded-3xl border border-border shadow-xs overflow-hidden">
             {/* EN-TÊTE DU TABLEAU */}
-            <View className="flex-row justify-between items-center p-5 border-b border-border">
-              <View className="flex-row items-center gap-3 flex-1 pr-2">
-                <View className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
+            <View className="flex-row justify-between items-center p-4 sm:p-5 border-b border-border">
+              <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
+                <View className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
                   <Ionicons name="receipt-outline" size={18} color="#6366F1" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-base font-bold text-foreground">
+                  <Text className="text-sm sm:text-base font-bold text-foreground">
                     Charges fixes & abonnements
                   </Text>
-                  <Text className="text-xs text-muted-foreground mt-0.5">
-                    {activeFixedExpenses.length} prélèvement{activeFixedExpenses.length > 1 ? 's' : ''} actif{activeFixedExpenses.length > 1 ? 's' : ''}
+                  <Text className="text-[11px] text-muted-foreground mt-0.5">
+                    {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
                     {expiredCreditsCount > 0 && ` • ${expiredCreditsCount} soldé${expiredCreditsCount > 1 ? 's' : ''}`}
                     {upcomingChargesCount > 0 && ` • ${upcomingChargesCount} à venir`}
                   </Text>
@@ -429,9 +429,9 @@ export default function FixedExpensesScreen() {
                 variant="outline"
                 size="sm"
                 onPress={openAddModal}
-                className="border-indigo-300 bg-indigo-50 gap-1.5 rounded-xl h-9 px-3">
-                <Ionicons name="add-circle" size={16} color="#6366F1" />
-                <Text className="text-xs font-bold text-lavender">Nouvelle charge</Text>
+                className="border-indigo-300 bg-indigo-50 gap-1 rounded-xl h-8 px-2.5 shrink-0">
+                <Ionicons name="add-circle" size={15} color="#6366F1" />
+                <Text className="text-xs font-bold text-lavender">Ajouter</Text>
               </Button>
             </View>
 
@@ -456,14 +456,14 @@ export default function FixedExpensesScreen() {
             ) : (
               <View>
                 {/* LIGNE DES COLONNES DU TABLEAU */}
-                <View className="flex-row items-center px-4 py-3 bg-muted/40 border-b border-border">
-                  <Text className="flex-[2] text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                <View className="flex-row items-center px-3.5 sm:px-4 py-2.5 bg-muted/40 border-b border-border">
+                  <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                     POSTE DE CHARGE
                   </Text>
-                  <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right">
-                    MONTANT / MOIS
+                  <Text className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right pr-2">
+                    MONTANT
                   </Text>
-                  <Text className="w-24 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right">
+                  <Text className="w-20 sm:w-24 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right">
                     ACTIONS
                   </Text>
                 </View>
@@ -481,7 +481,7 @@ export default function FixedExpensesScreen() {
                   return (
                     <View
                       key={item.id}
-                      className={`flex-row items-center px-4 py-3.5 border-b border-border/60 ${
+                      className={`flex-row items-center px-3.5 sm:px-4 py-3 border-b border-border/60 ${
                         isExpired
                           ? 'bg-slate-50/70 opacity-60'
                           : isNotCounted
@@ -491,16 +491,16 @@ export default function FixedExpensesScreen() {
                           : 'bg-muted/10'
                       }`}>
                       {/* COLONNE 1 : CHARGE & CATÉGORIE & CRÉDIT */}
-                      <View className="flex-[2] flex-row items-center gap-2.5 pr-2">
+                      <View className="flex-1 flex-row items-center gap-2.5 pr-2">
                         <View
-                          className="w-8 h-8 rounded-lg justify-center items-center"
+                          className="w-8 h-8 rounded-lg justify-center items-center shrink-0"
                           style={{ backgroundColor: cat.bg }}>
                           <Ionicons name={cat.icon as any} size={16} color={cat.color} />
                         </View>
                         <View className="flex-1">
                           <View className="flex-row items-center gap-1.5 flex-wrap">
                             <Text
-                              className={`text-sm font-bold text-foreground ${
+                              className={`text-xs sm:text-sm font-bold text-foreground ${
                                 isExpired ? 'line-through text-muted-foreground' : ''
                               }`}
                               numberOfLines={1}>
@@ -520,7 +520,7 @@ export default function FixedExpensesScreen() {
                                   className={`text-[10px] font-bold ${
                                     isExpired ? 'text-slate-500' : 'text-lavender'
                                   }`}>
-                                  {isExpired ? 'Soldé' : `${creditInfo?.paid}/${creditInfo?.total} mois`}
+                                  {isExpired ? 'Soldé' : `${creditInfo?.paid}/${creditInfo?.total}m`}
                                 </Text>
                               </Badge>
                             )}
@@ -543,7 +543,7 @@ export default function FixedExpensesScreen() {
                             )}
                           </View>
 
-                          <Text className="text-[11px] font-medium mt-0.5" style={{ color: cat.color }}>
+                          <Text className="text-[10px] sm:text-[11px] font-medium mt-0.5" style={{ color: cat.color }}>
                             {cat.label}
                             {isCredit && !isExpired && ` • Reste ${creditInfo?.remainingMonths} mois`}
                             {!isCredit && schedule.status === 'upcoming' && ` • Dès ${formatMonthYear(item.targetMonth || item.startMonth || '')}`}
@@ -553,7 +553,7 @@ export default function FixedExpensesScreen() {
 
                           {/* Progression du crédit */}
                           {isCredit && !isExpired && (
-                            <View className="h-1 bg-muted rounded-full overflow-hidden mt-1 max-w-[120px]">
+                            <View className="h-1 bg-muted rounded-full overflow-hidden mt-1 max-w-[100px]">
                               <View
                                 className="h-full bg-accent rounded-full"
                                 style={{ width: `${creditInfo?.percent || 0}%` }}
@@ -564,9 +564,9 @@ export default function FixedExpensesScreen() {
                       </View>
 
                       {/* COLONNE 2 : MONTANT */}
-                      <View className="flex-1 items-end">
+                      <View className="items-end pr-2 shrink-0">
                         <Text
-                          className={`text-sm font-black ${
+                          className={`text-xs sm:text-sm font-black ${
                             isExpired ? 'text-muted-foreground line-through' : 'text-foreground'
                           }`}>
                           -{formatEuro(item.amount)}
@@ -579,13 +579,13 @@ export default function FixedExpensesScreen() {
                         )}
                         {isCredit && !isExpired && (
                           <Text className="text-[10px] text-muted-foreground">
-                            Dû : {formatEuro(creditInfo?.remainingAmount || 0)}
+                            Dû: {formatEuro(creditInfo?.remainingAmount || 0)}
                           </Text>
                         )}
                       </View>
 
                       {/* COLONNE 3 : ACTIONS */}
-                      <View className="w-24 flex-row items-center justify-end gap-1">
+                      <View className="w-20 sm:w-24 flex-row items-center justify-end gap-1 shrink-0">
                         {isCredit && !isExpired && (
                           <Button
                             variant="ghost"
@@ -593,7 +593,7 @@ export default function FixedExpensesScreen() {
                             onPress={() => handleAdvanceMonth(item)}
                             className="w-7 h-7 rounded-lg"
                             accessibilityLabel={`Enregistrer +1 mois payé pour ${item.label}`}>
-                            <Ionicons name="checkmark-circle-outline" size={17} color="#10B981" />
+                            <Ionicons name="checkmark-circle-outline" size={16} color="#10B981" />
                           </Button>
                         )}
                         <Button
@@ -618,20 +618,20 @@ export default function FixedExpensesScreen() {
                 })}
 
                 {/* PIED DU TABLEAU : TOTAL ARRONDI */}
-                <View className="flex-row justify-between items-center px-5 py-4 bg-muted/30 border-t border-border">
+                <View className="flex-row justify-between items-center px-4 sm:px-5 py-3.5 bg-muted/30 border-t border-border">
                   <View>
                     <Text className="text-xs font-black text-foreground uppercase tracking-wider">
                       TOTAL DES CHARGES
                     </Text>
                     <Text className="text-[11px] text-muted-foreground">
-                      Arrondi à l&apos;unité • {activeFixedExpenses.length} charge{activeFixedExpenses.length > 1 ? 's' : ''} active{activeFixedExpenses.length > 1 ? 's' : ''}
+                      Arrondi unité • {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
                     </Text>
                   </View>
                   <View className="items-end">
-                    <Text className="text-xl font-black text-foreground">
+                    <Text className="text-lg sm:text-xl font-black text-foreground">
                       {formatEuroRound(totalFixedExpenses)}
                     </Text>
-                    <Text className="text-[11px] text-muted-foreground">
+                    <Text className="text-[10px] sm:text-[11px] text-muted-foreground">
                       Exact : {formatEuro(totalFixedExpenses)}
                     </Text>
                   </View>
@@ -649,30 +649,30 @@ export default function FixedExpensesScreen() {
         transparent
         onRequestClose={() => setIsModalVisible(false)}>
         <Pressable
-          className="flex-1 bg-black/50 justify-center items-center p-4"
+          className="flex-1 bg-black/50 justify-center items-center p-3.5 sm:p-4"
           onPress={() => setIsModalVisible(false)}>
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             className="w-full max-w-[500px]">
             <Pressable
-              className="bg-card rounded-3xl p-6 border border-border shadow-lg w-full gap-4 max-h-[90vh]"
+              className="bg-card rounded-3xl p-4 sm:p-6 border border-border shadow-lg w-full gap-3.5 sm:gap-4 max-h-[90vh]"
               onPress={(e) => e.stopPropagation()}>
               
               {/* EN-TÊTE DU FORMULAIRE */}
               <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center gap-3 flex-1 pr-2">
-                  <View className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
+                <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
+                  <View className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
                     <Ionicons
                       name={editingItem ? 'create-outline' : 'add-circle-outline'}
-                      size={20}
+                      size={18}
                       color="#6366F1"
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-lg font-black text-foreground">
+                    <Text className="text-base sm:text-lg font-black text-foreground">
                       {editingItem ? 'Modifier la charge' : 'Nouvelle charge fixe'}
                     </Text>
-                    <Text className="text-xs text-muted-foreground">
+                    <Text className="text-[11px] text-muted-foreground" numberOfLines={1}>
                       Poste de dépense mensuelle récurrente
                     </Text>
                   </View>
@@ -690,24 +690,24 @@ export default function FixedExpensesScreen() {
 
               <ScrollView
                 showsVerticalScrollIndicator={false}
-                contentContainerClassName="gap-4 pb-2"
+                contentContainerClassName="gap-3 pb-2"
                 bounces={false}>
                 
                 {/* CHAMP 1 : NOM */}
-                <View className="gap-1.5">
+                <View className="gap-1">
                   <Text className="text-xs font-bold text-foreground">Nom de la charge</Text>
                   <Input
                     value={labelInput}
                     onChangeText={setLabelInput}
                     placeholder="Ex: Loyer, EDF, Forfait internet..."
                     placeholderTextColor="#64748B"
-                    className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-sm font-medium text-foreground h-11"
+                    className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                     autoFocus={!editingItem}
                   />
                 </View>
 
                 {/* CHAMP 2 : MONTANT */}
-                <View className="gap-1.5">
+                <View className="gap-1">
                   <Text className="text-xs font-bold text-foreground">Montant mensuel (€)</Text>
                   <Input
                     value={amountInput}
@@ -715,14 +715,14 @@ export default function FixedExpensesScreen() {
                     keyboardType="decimal-pad"
                     placeholder="Ex: 85.00"
                     placeholderTextColor="#64748B"
-                    className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-sm font-medium text-foreground h-11"
+                    className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                   />
                 </View>
 
                 {/* CHAMP 3 : CATÉGORIE */}
-                <View className="gap-1.5">
+                <View className="gap-1">
                   <Text className="text-xs font-bold text-foreground">Catégorie</Text>
-                  <View className="flex-row flex-wrap gap-2">
+                  <View className="flex-row flex-wrap gap-1.5">
                     {(Object.keys(CATEGORY_CONFIG) as FixedCategoryType[]).map((catKey) => {
                       const isSelected = categoryInput === catKey;
                       const c = CATEGORY_CONFIG[catKey];
@@ -731,14 +731,14 @@ export default function FixedExpensesScreen() {
                           key={catKey}
                           onPress={() => handleSelectCategory(catKey)}
                           activeOpacity={0.7}
-                          className={`flex-row items-center gap-1.5 px-3 py-2 rounded-xl border ${
+                          className={`flex-row items-center gap-1.5 px-2.5 py-1.5 rounded-xl border ${
                             isSelected
                               ? 'border-indigo-500 bg-indigo-50'
                               : 'border-border bg-muted/20'
                           }`}>
                           <Ionicons
                             name={c.icon as any}
-                            size={15}
+                            size={14}
                             color={isSelected ? c.color : '#64748B'}
                           />
                           <Text
@@ -754,11 +754,11 @@ export default function FixedExpensesScreen() {
                 </View>
 
                 {/* CHAMP 4 : OPTION CRÉDIT SUR DURÉE LIMITÉE */}
-                <View className="rounded-2xl border border-border bg-muted/20 p-4 gap-3">
+                <View className="rounded-2xl border border-border bg-muted/20 p-3 sm:p-4 gap-2.5">
                   <View className="flex-row justify-between items-center">
                     <View className="flex-row items-center gap-2.5 flex-1 pr-2">
                       <View
-                        className={`w-8 h-8 rounded-lg justify-center items-center ${
+                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg justify-center items-center ${
                           isCreditInput ? 'bg-emerald-100' : 'bg-muted'
                         }`}>
                         <Ionicons
@@ -769,9 +769,9 @@ export default function FixedExpensesScreen() {
                       </View>
                       <View className="flex-1">
                         <Text className="text-xs font-bold text-foreground">
-                          Crédit / Prêt sur durée limitée
+                          Crédit sur durée limitée
                         </Text>
-                        <Text className="text-[11px] text-muted-foreground">
+                        <Text className="text-[10px] sm:text-[11px] text-muted-foreground">
                           S&apos;enlève automatiquement une fois soldé
                         </Text>
                       </View>
@@ -782,7 +782,7 @@ export default function FixedExpensesScreen() {
                       onPress={() => setIsCreditInput((prev) => !prev)}
                       accessibilityRole="switch"
                       accessibilityState={{ checked: isCreditInput }}
-                      className={`w-12 h-6 rounded-full p-0.5 justify-center ${
+                      className={`w-11 h-6 rounded-full p-0.5 justify-center ${
                         isCreditInput ? 'bg-accent items-end' : 'bg-slate-300 items-start'
                       }`}>
                       <View className="w-5 h-5 rounded-full bg-white shadow-xs" />
@@ -790,11 +790,11 @@ export default function FixedExpensesScreen() {
                   </View>
 
                   {isCreditInput && (
-                    <View className="gap-3 pt-2 border-t border-border">
+                    <View className="gap-2.5 pt-2 border-t border-border">
                       <Text className="text-[11px] font-bold text-foreground">
                         Durée de remboursement
                       </Text>
-                      <View className="flex-row flex-wrap gap-1.5">
+                      <View className="flex-row flex-wrap gap-1">
                         {[
                           { label: '3x', months: '3' },
                           { label: '6 mois', months: '6' },
@@ -810,7 +810,7 @@ export default function FixedExpensesScreen() {
                               variant={isSelected ? 'default' : 'outline'}
                               size="sm"
                               onPress={() => setDurationInput(preset.months)}
-                              className={`px-2.5 py-1 rounded-lg h-8 ${
+                              className={`px-2 py-0.5 rounded-lg h-7 ${
                                 isSelected ? 'bg-primary' : 'border-border bg-card'
                               }`}>
                               <Text
@@ -824,9 +824,9 @@ export default function FixedExpensesScreen() {
                         })}
                       </View>
 
-                      <View className="flex-row gap-3">
+                      <View className="flex-row gap-2.5">
                         <View className="flex-1 gap-1">
-                          <Text className="text-[11px] font-bold text-muted-foreground">
+                          <Text className="text-[10px] sm:text-[11px] font-bold text-muted-foreground">
                             Mois totaux
                           </Text>
                           <Input
@@ -835,12 +835,12 @@ export default function FixedExpensesScreen() {
                             keyboardType="number-pad"
                             placeholder="12"
                             placeholderTextColor="#64748B"
-                            className="bg-card border-border rounded-xl px-3 py-2 text-sm font-bold text-foreground h-10"
+                            className="bg-card border-border rounded-xl px-2.5 py-1.5 text-sm font-bold text-foreground h-9"
                           />
                         </View>
 
                         <View className="flex-1 gap-1">
-                          <Text className="text-[11px] font-bold text-muted-foreground">
+                          <Text className="text-[10px] sm:text-[11px] font-bold text-muted-foreground">
                             Mois déjà payés
                           </Text>
                           <Input
@@ -849,34 +849,34 @@ export default function FixedExpensesScreen() {
                             keyboardType="number-pad"
                             placeholder="0"
                             placeholderTextColor="#64748B"
-                            className="bg-card border-border rounded-xl px-3 py-2 text-sm font-bold text-foreground h-10"
+                            className="bg-card border-border rounded-xl px-2.5 py-1.5 text-sm font-bold text-foreground h-9"
                           />
                         </View>
                       </View>
 
                       {/* Aperçu direct */}
-                      <View className="bg-card rounded-xl p-3 border border-border gap-1">
+                      <View className="bg-card rounded-xl p-2.5 border border-border gap-1">
                         <View className="flex-row justify-between">
-                          <Text className="text-xs text-muted-foreground">Mensualité :</Text>
-                          <Text className="text-xs font-bold text-foreground">
+                          <Text className="text-[11px] text-muted-foreground">Mensualité :</Text>
+                          <Text className="text-[11px] font-bold text-foreground">
                             {formatEuro(parsedAmountForCredit)} / mois
                           </Text>
                         </View>
                         <View className="flex-row justify-between">
-                          <Text className="text-xs text-muted-foreground">Restantes :</Text>
-                          <Text className="text-xs font-bold text-foreground">
+                          <Text className="text-[11px] text-muted-foreground">Restantes :</Text>
+                          <Text className="text-[11px] font-bold text-foreground">
                             {remainingMonthsPreview} sur {parsedDurationForCredit} mois
                           </Text>
                         </View>
                         <View className="flex-row justify-between">
-                          <Text className="text-xs text-muted-foreground">Solde dû :</Text>
-                          <Text className="text-xs font-extrabold text-danger">
+                          <Text className="text-[11px] text-muted-foreground">Solde dû :</Text>
+                          <Text className="text-[11px] font-extrabold text-danger">
                             {formatEuro(remainingCostCreditPreview)}
                           </Text>
                         </View>
                         <View className="flex-row justify-between">
-                          <Text className="text-xs text-muted-foreground">Fin estimée :</Text>
-                          <Text className="text-xs font-extrabold text-accentDark">
+                          <Text className="text-[11px] text-muted-foreground">Fin estimée :</Text>
+                          <Text className="text-[11px] font-extrabold text-accentDark">
                             {remainingMonthsPreview === 0 ? 'Soldé' : estimatedEndDatePreview}
                           </Text>
                         </View>
@@ -886,11 +886,11 @@ export default function FixedExpensesScreen() {
                 </View>
 
                 {/* CHAMP 5 : OPTION MOIS D'ACTIVATION */}
-                <View className="rounded-2xl border border-border bg-muted/20 p-4 gap-3">
+                <View className="rounded-2xl border border-border bg-muted/20 p-3 sm:p-4 gap-2.5">
                   <View className="flex-row justify-between items-center">
                     <View className="flex-row items-center gap-2.5 flex-1 pr-2">
                       <View
-                        className={`w-8 h-8 rounded-lg justify-center items-center ${
+                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg justify-center items-center ${
                           isScheduledInput ? 'bg-indigo-100' : 'bg-muted'
                         }`}>
                         <Ionicons
@@ -903,7 +903,7 @@ export default function FixedExpensesScreen() {
                         <Text className="text-xs font-bold text-foreground">
                           Planifier l&apos;activation
                         </Text>
-                        <Text className="text-[11px] text-muted-foreground">
+                        <Text className="text-[10px] sm:text-[11px] text-muted-foreground">
                           Démarrer plus tard ou pour un mois donné
                         </Text>
                       </View>
@@ -914,7 +914,7 @@ export default function FixedExpensesScreen() {
                       onPress={() => setIsScheduledInput((prev) => !prev)}
                       accessibilityRole="switch"
                       accessibilityState={{ checked: isScheduledInput }}
-                      className={`w-12 h-6 rounded-full p-0.5 justify-center ${
+                      className={`w-11 h-6 rounded-full p-0.5 justify-center ${
                         isScheduledInput ? 'bg-lavender items-end' : 'bg-slate-300 items-start'
                       }`}>
                       <View className="w-5 h-5 rounded-full bg-white shadow-xs" />
@@ -922,13 +922,13 @@ export default function FixedExpensesScreen() {
                   </View>
 
                   {isScheduledInput && (
-                    <View className="gap-3 pt-2 border-t border-border">
+                    <View className="gap-2.5 pt-2 border-t border-border">
                       <Text className="text-[11px] font-bold text-foreground">Mode d&apos;application</Text>
                       <View className="flex-row gap-2">
                         <TouchableOpacity
                           activeOpacity={0.7}
                           onPress={() => setActivationTypeInput('starting_from')}
-                          className={`flex-1 p-2.5 rounded-xl border ${
+                          className={`flex-1 p-2 rounded-xl border ${
                             activationTypeInput === 'starting_from'
                               ? 'border-indigo-500 bg-indigo-50'
                               : 'border-border bg-card'
@@ -936,7 +936,7 @@ export default function FixedExpensesScreen() {
                           <View className="flex-row items-center gap-1.5 mb-0.5">
                             <Ionicons
                               name="arrow-forward-circle-outline"
-                              size={15}
+                              size={14}
                               color={activationTypeInput === 'starting_from' ? '#6366F1' : '#64748B'}
                             />
                             <Text
@@ -949,14 +949,14 @@ export default function FixedExpensesScreen() {
                             </Text>
                           </View>
                           <Text className="text-[10px] text-muted-foreground">
-                            Démarre au mois choisi et continue
+                            Démarre et continue
                           </Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                           activeOpacity={0.7}
                           onPress={() => setActivationTypeInput('only_month')}
-                          className={`flex-1 p-2.5 rounded-xl border ${
+                          className={`flex-1 p-2 rounded-xl border ${
                             activationTypeInput === 'only_month'
                               ? 'border-indigo-500 bg-indigo-50'
                               : 'border-border bg-card'
@@ -964,7 +964,7 @@ export default function FixedExpensesScreen() {
                           <View className="flex-row items-center gap-1.5 mb-0.5">
                             <Ionicons
                               name="stopwatch-outline"
-                              size={15}
+                              size={14}
                               color={activationTypeInput === 'only_month' ? '#6366F1' : '#64748B'}
                             />
                             <Text
@@ -977,16 +977,16 @@ export default function FixedExpensesScreen() {
                             </Text>
                           </View>
                           <Text className="text-[10px] text-muted-foreground">
-                            Exclusivement pour ce mois
+                            Ce mois spécifique
                           </Text>
                         </TouchableOpacity>
                       </View>
 
                       {/* Présélections mois */}
-                      <Text className="text-[11px] font-bold text-muted-foreground">
+                      <Text className="text-[10px] sm:text-[11px] font-bold text-muted-foreground">
                         Sélection rapide
                       </Text>
-                      <View className="flex-row flex-wrap gap-1.5">
+                      <View className="flex-row flex-wrap gap-1">
                         {monthPresets.map((preset) => {
                           const isSelected = targetMonthInput === preset.value;
                           return (
@@ -995,7 +995,7 @@ export default function FixedExpensesScreen() {
                               variant={isSelected ? 'default' : 'outline'}
                               size="sm"
                               onPress={() => setTargetMonthInput(preset.value)}
-                              className={`px-2.5 py-1 rounded-lg h-8 ${
+                              className={`px-2 py-0.5 rounded-lg h-7 ${
                                 isSelected ? 'bg-primary' : 'border-border bg-card'
                               }`}>
                               <Text
@@ -1010,7 +1010,7 @@ export default function FixedExpensesScreen() {
                       </View>
 
                       <View className="gap-1">
-                        <Text className="text-[11px] font-bold text-muted-foreground">
+                        <Text className="text-[10px] sm:text-[11px] font-bold text-muted-foreground">
                           Mois cible (AAAA-MM)
                         </Text>
                         <Input
@@ -1019,16 +1019,16 @@ export default function FixedExpensesScreen() {
                           placeholder={currentMonthStr}
                           placeholderTextColor="#64748B"
                           maxLength={7}
-                          className="bg-card border-border rounded-xl px-3 py-2 text-sm font-bold text-foreground h-10"
+                          className="bg-card border-border rounded-xl px-2.5 py-1.5 text-sm font-bold text-foreground h-9"
                         />
                       </View>
 
                       {/* Aperçu statut planification */}
-                      <View className="bg-card rounded-xl p-3 border border-border gap-1">
+                      <View className="bg-card rounded-xl p-2.5 border border-border gap-1">
                         <View className="flex-row justify-between items-center">
                           <Badge
                             variant="outline"
-                            className={`px-2 py-0.5 rounded ${
+                            className={`px-1.5 py-0.5 rounded ${
                               targetMonthPreviewStatus.isCounted
                                 ? 'bg-emerald-50 border-emerald-200'
                                 : 'bg-indigo-50 border-indigo-200'
@@ -1042,11 +1042,11 @@ export default function FixedExpensesScreen() {
                               {targetMonthPreviewStatus.label}
                             </Text>
                           </Badge>
-                          <Text className="text-xs font-bold text-muted-foreground">
+                          <Text className="text-[11px] font-bold text-muted-foreground">
                             {formatMonthYearFull(targetMonthInput)}
                           </Text>
                         </View>
-                        <Text className="text-xs text-muted-foreground mt-0.5">
+                        <Text className="text-[11px] text-muted-foreground mt-0.5">
                           {targetMonthPreviewStatus.description}
                         </Text>
                       </View>
@@ -1060,23 +1060,23 @@ export default function FixedExpensesScreen() {
                 <Button
                   variant="outline"
                   onPress={() => setIsModalVisible(false)}
-                  className="rounded-xl px-4 py-2.5 h-auto">
+                  className="rounded-xl px-3.5 py-2 h-auto">
                   <Text className="text-xs font-bold text-foreground">Annuler</Text>
                 </Button>
 
                 <Button
                   onPress={handleSave}
                   disabled={isSaving}
-                  className={`bg-primary rounded-xl px-4 py-2.5 gap-1.5 h-auto ${
+                  className={`bg-primary rounded-xl px-4 py-2 gap-1.5 h-auto ${
                     isSaving ? 'opacity-80' : ''
                   }`}>
                   {isSaving ? (
-                    <ActivityIndicator size="small" color="#ffffff" className="mr-1.5" />
+                    <ActivityIndicator size="small" color="#ffffff" className="mr-1" />
                   ) : (
-                    <Ionicons name="checkmark" size={18} color="#ffffff" />
+                    <Ionicons name="checkmark" size={16} color="#ffffff" />
                   )}
                   <Text className="text-xs font-bold text-white">
-                    {isSaving ? 'Enregistrement...' : editingItem ? 'Enregistrer' : 'Ajouter la charge'}
+                    {isSaving ? 'Enregistrement...' : editingItem ? 'Enregistrer' : 'Ajouter'}
                   </Text>
                 </Button>
               </View>

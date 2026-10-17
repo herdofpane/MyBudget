@@ -183,27 +183,27 @@ export default function VariableExpensesScreen() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="px-4 pt-2.5 pb-[110px] gap-4 w-full max-w-[860px] self-center">
+          contentContainerClassName="px-3.5 sm:px-4 pt-1.5 pb-[115px] gap-3.5 sm:gap-4 w-full max-w-[860px] self-center">
 
           {/* 1. CARTE DU TOTAL DES CHARGES VARIABLES (IMPACT MENSUEL LISSÉ) */}
-          <Card className="bg-card rounded-3xl p-5 border border-border shadow-xs gap-4">
+          <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-xs gap-3.5 sm:gap-4">
             <View className="flex-row justify-between items-start">
               <View className="flex-1">
                 <View className="flex-row items-center gap-2 mb-1">
                   <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    Total des charges variables (mensuel)
+                    Total charges variables
                   </Text>
-                  <Badge variant="outline" className="border-border bg-muted/30 px-2 py-0.5 rounded-full">
+                  <Badge variant="outline" className="border-border bg-muted/30 px-1.5 py-0.5 rounded-full">
                     <Text className="text-[10px] text-muted-foreground font-semibold">
-                      Arrondi à l&apos;unité
+                      Arrondi unité
                     </Text>
                   </Badge>
                 </View>
-                <Text className="text-3xl font-black text-foreground tracking-tight">
+                <Text className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
                   {formatEuroRound(totalEstimatedVariable)}
                 </Text>
                 <Text className="text-xs text-muted-foreground mt-0.5">
-                  Montant mensuel exact : {formatEuro(totalEstimatedVariable)}
+                  Montant exact : {formatEuro(totalEstimatedVariable)} / mois
                 </Text>
               </View>
 
@@ -216,17 +216,17 @@ export default function VariableExpensesScreen() {
             </View>
 
             {/* RÉCAPITULATIF STATISTIQUE */}
-            <View className="flex-row items-center bg-muted/30 rounded-2xl p-3 border border-border">
+            <View className="flex-row items-center bg-muted/30 rounded-2xl p-2.5 sm:p-3 border border-border">
               <View className="flex-1 items-center">
                 <Text className="text-[11px] text-muted-foreground font-medium">Moyenne mensuelle</Text>
-                <Text className="text-sm font-bold text-foreground mt-0.5">
+                <Text className="text-xs sm:text-sm font-bold text-foreground mt-0.5">
                   ~{formatEuroRound(averageExpense)}
                 </Text>
               </View>
-              <View className="w-px h-8 bg-border" />
+              <View className="w-px h-7 bg-border" />
               <View className="flex-1 items-center">
                 <Text className="text-[11px] text-muted-foreground font-medium">Part des revenus</Text>
-                <Text className="text-sm font-bold text-foreground mt-0.5">
+                <Text className="text-xs sm:text-sm font-bold text-foreground mt-0.5">
                   {formatPercent(variableExpenseRatio)}
                 </Text>
               </View>
@@ -236,16 +236,16 @@ export default function VariableExpensesScreen() {
           {/* 2. LE TABLEAU DES CHARGES VARIABLES */}
           <Card className="bg-card rounded-3xl border border-border shadow-xs overflow-hidden">
             {/* EN-TÊTE DE LA CARTE TABLEAU */}
-            <View className="flex-row justify-between items-center p-5 border-b border-border">
-              <View className="flex-row items-center gap-3 flex-1 pr-2">
-                <View className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 justify-center items-center">
+            <View className="flex-row justify-between items-center p-4 sm:p-5 border-b border-border">
+              <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
+                <View className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 justify-center items-center shrink-0">
                   <Ionicons name="pie-chart-outline" size={18} color="#D97706" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-base font-bold text-foreground">
+                  <Text className="text-sm sm:text-base font-bold text-foreground">
                     Charges variables & amortissements
                   </Text>
-                  <Text className="text-xs text-muted-foreground mt-0.5">
+                  <Text className="text-[11px] text-muted-foreground mt-0.5">
                     {variableCategories.length} poste{variableCategories.length > 1 ? 's' : ''} lissé{variableCategories.length > 1 ? 's' : ''} sur la durée
                   </Text>
                 </View>
@@ -255,9 +255,9 @@ export default function VariableExpensesScreen() {
                 variant="outline"
                 size="sm"
                 onPress={openAddModal}
-                className="border-amber-300 bg-amber-50 gap-1.5 rounded-xl h-9 px-3">
-                <Ionicons name="add-circle" size={16} color="#D97706" />
-                <Text className="text-xs font-bold text-amber-800">Nouvelle charge</Text>
+                className="border-amber-300 bg-amber-50 gap-1 rounded-xl h-8 px-2.5 shrink-0">
+                <Ionicons name="add-circle" size={15} color="#D97706" />
+                <Text className="text-xs font-bold text-amber-800">Ajouter</Text>
               </Button>
             </View>
 
@@ -281,16 +281,13 @@ export default function VariableExpensesScreen() {
               </View>
             ) : (
               <View>
-                {/* LIGNE DES COLONNES DU TABLEAU */}
-                <View className="flex-row items-center px-4 py-3 bg-muted/40 border-b border-border">
-                  <Text className="flex-[2] text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                    POSTE DE CHARGE
+                {/* LIGNE DES COLONNES DU TABLEAU (OPTIMISÉE MOBILE) */}
+                <View className="flex-row items-center px-3.5 sm:px-4 py-2.5 bg-muted/40 border-b border-border">
+                  <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                    POSTE & DURÉE
                   </Text>
-                  <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right">
-                    MONTANT TOTAL
-                  </Text>
-                  <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">
-                    DURÉE / LISSAGE
+                  <Text className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right pr-2">
+                    MONTANT (LISSÉ)
                   </Text>
                   <Text className="w-16 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right">
                     ACTIONS
@@ -310,45 +307,41 @@ export default function VariableExpensesScreen() {
                   return (
                     <View
                       key={item.id}
-                      className={`flex-row items-center px-4 py-3.5 border-b border-border/60 ${
+                      className={`flex-row items-center px-3.5 sm:px-4 py-3 border-b border-border/60 ${
                         isEven ? 'bg-card' : 'bg-muted/10'
                       }`}>
-                      {/* COLONNE 1 : TITRE */}
-                      <View className="flex-[2] flex-row items-center gap-2.5 pr-2">
+                      {/* COLONNE 1 : TITRE & BADGE DURÉE EN DESSOUS */}
+                      <View className="flex-1 flex-row items-center gap-2.5 pr-2">
                         <View
-                          className="w-8 h-8 rounded-lg justify-center items-center"
+                          className="w-8 h-8 rounded-lg justify-center items-center shrink-0"
                           style={{ backgroundColor: `${item.color}15` }}>
                           <Ionicons name={item.icon as any} size={16} color={item.color} />
                         </View>
-                        <Text className="text-sm font-bold text-foreground flex-1" numberOfLines={1}>
-                          {item.label}
-                        </Text>
+                        <View className="flex-1">
+                          <Text className="text-xs sm:text-sm font-bold text-foreground" numberOfLines={1}>
+                            {item.label}
+                          </Text>
+                          <Badge variant="outline" className="border-amber-200 bg-amber-50 gap-1 px-1.5 py-0.5 rounded-md self-start mt-1">
+                            <Ionicons name="calendar-outline" size={10} color="#D97706" />
+                            <Text className="text-[10px] font-semibold text-amber-800">
+                              {formattedDuration}
+                            </Text>
+                          </Badge>
+                        </View>
                       </View>
 
-                      {/* COLONNE 2 : MONTANT */}
-                      <View className="flex-1 items-end">
-                        <Text className="text-sm font-black text-foreground">
+                      {/* COLONNE 2 : MONTANTS TOTAL & LISSÉ */}
+                      <View className="items-end pr-2 shrink-0">
+                        <Text className="text-xs sm:text-sm font-black text-foreground">
                           -{formatEuro(total)}
                         </Text>
-                        {duration !== 1 && (
-                          <Text className="text-[11px] text-muted-foreground">
-                            soit {formatEuro(monthly)}/mois
-                          </Text>
-                        )}
+                        <Text className="text-[10px] sm:text-[11px] text-amber-800 font-semibold mt-0.5">
+                          {formatEuro(monthly)}/m
+                        </Text>
                       </View>
 
-                      {/* COLONNE 3 : DURÉE DE VIE SUR X MOIS */}
-                      <View className="flex-1 items-center">
-                        <Badge variant="outline" className="border-amber-200 bg-amber-50 gap-1 px-2 py-0.5 rounded-full">
-                          <Ionicons name="calendar-outline" size={12} color="#D97706" />
-                          <Text className="text-[11px] font-semibold text-amber-800">
-                            {formattedDuration}
-                          </Text>
-                        </Badge>
-                      </View>
-
-                      {/* COLONNE 4 : ACTIONS (MODIFIER / SUPPRIMER) */}
-                      <View className="w-16 flex-row items-center justify-end gap-1">
+                      {/* COLONNE 3 : ACTIONS (MODIFIER / SUPPRIMER) */}
+                      <View className="w-16 flex-row items-center justify-end gap-1 shrink-0">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -371,20 +364,20 @@ export default function VariableExpensesScreen() {
                 })}
 
                 {/* PIED DU TABLEAU : TOTAL MENSUEL LISSÉ */}
-                <View className="flex-row justify-between items-center px-5 py-4 bg-muted/30 border-t border-border">
+                <View className="flex-row justify-between items-center px-4 sm:px-5 py-3.5 bg-muted/30 border-t border-border">
                   <View>
                     <Text className="text-xs font-black text-foreground uppercase tracking-wider">
                       TOTAL MENSUEL LISSÉ
                     </Text>
                     <Text className="text-[11px] text-muted-foreground">
-                      Arrondi à l&apos;unité • {variableCategories.length} charges
+                      Arrondi unité • {variableCategories.length} charges
                     </Text>
                   </View>
                   <View className="items-end">
-                    <Text className="text-xl font-black text-foreground">
+                    <Text className="text-lg sm:text-xl font-black text-foreground">
                       {formatEuroRound(totalEstimatedVariable)}
                     </Text>
-                    <Text className="text-[11px] text-muted-foreground">
+                    <Text className="text-[10px] sm:text-[11px] text-muted-foreground">
                       Exact : {formatEuro(totalEstimatedVariable)} / mois
                     </Text>
                   </View>
@@ -402,30 +395,30 @@ export default function VariableExpensesScreen() {
         transparent
         onRequestClose={() => setIsModalVisible(false)}>
         <Pressable
-          className="flex-1 bg-black/50 justify-center items-center p-4"
+          className="flex-1 bg-black/50 justify-center items-center p-3.5 sm:p-4"
           onPress={() => setIsModalVisible(false)}>
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             className="w-full max-w-[500px]">
             <Pressable
-              className="bg-card rounded-3xl p-6 border border-border shadow-lg w-full gap-4 max-h-[90vh]"
+              className="bg-card rounded-3xl p-4 sm:p-6 border border-border shadow-lg w-full gap-3.5 sm:gap-4 max-h-[90vh]"
               onPress={(e) => e.stopPropagation()}>
               
               {/* EN-TÊTE MODAL */}
               <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center gap-3 flex-1 pr-2">
-                  <View className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 justify-center items-center">
+                <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
+                  <View className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-50 border border-amber-200 justify-center items-center shrink-0">
                     <Ionicons
                       name={editingCategory ? 'create-outline' : 'add-circle-outline'}
-                      size={20}
+                      size={18}
                       color="#D97706"
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-lg font-black text-foreground">
-                      {editingCategory ? 'Modifier la charge variable' : 'Nouvelle charge variable'}
+                    <Text className="text-base sm:text-lg font-black text-foreground">
+                      {editingCategory ? 'Modifier la charge' : 'Nouvelle charge variable'}
                     </Text>
-                    <Text className="text-xs text-muted-foreground">
+                    <Text className="text-[11px] text-muted-foreground" numberOfLines={1}>
                       Lissage automatique : Montant ÷ Durée en mois
                     </Text>
                   </View>
@@ -443,24 +436,24 @@ export default function VariableExpensesScreen() {
 
               <ScrollView
                 showsVerticalScrollIndicator={false}
-                contentContainerClassName="gap-4 pb-2"
+                contentContainerClassName="gap-3 pb-2"
                 bounces={false}>
                 
                 {/* CHAMP 1 : TITRE */}
-                <View className="gap-1.5">
+                <View className="gap-1">
                   <Text className="text-xs font-bold text-foreground">Titre</Text>
                   <Input
                     value={labelInput}
                     onChangeText={setLabelInput}
-                    placeholder="Ex: Entretien voiture, Vacances, Alimentation..."
+                    placeholder="Ex: Entretien voiture, Vacances..."
                     placeholderTextColor="#64748B"
-                    className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-sm font-medium text-foreground h-11"
+                    className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                     autoFocus={!editingCategory}
                   />
                 </View>
 
                 {/* CHAMP 2 : MONTANT */}
-                <View className="gap-1.5">
+                <View className="gap-1">
                   <Text className="text-xs font-bold text-foreground">Montant (€)</Text>
                   <Input
                     value={amountInput}
@@ -468,15 +461,15 @@ export default function VariableExpensesScreen() {
                     keyboardType="decimal-pad"
                     placeholder="Ex: 600.00"
                     placeholderTextColor="#64748B"
-                    className="bg-muted/40 border-border rounded-xl px-3.5 py-2.5 text-sm font-medium text-foreground h-11"
+                    className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
                   />
                 </View>
 
                 {/* CHAMP 3 : DURÉE DE VIE SUR X MOIS */}
-                <View className="gap-1.5">
+                <View className="gap-1">
                   <View className="flex-row justify-between items-center">
-                    <Text className="text-xs font-bold text-foreground">Durée de vie Sur x Mois</Text>
-                    <Text className="text-[11px] text-muted-foreground">Nombre de mois pour le lissage</Text>
+                    <Text className="text-xs font-bold text-foreground">Durée de vie (mois)</Text>
+                    <Text className="text-[11px] text-muted-foreground">Lissage</Text>
                   </View>
 
                   <View className="flex-row items-center gap-2">
@@ -489,12 +482,12 @@ export default function VariableExpensesScreen() {
                       keyboardType="decimal-pad"
                       placeholder="1"
                       placeholderTextColor="#64748B"
-                      className="w-20 bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-bold text-foreground h-11 text-center"
+                      className="w-16 bg-muted/40 border-border rounded-xl px-2 py-2 text-sm font-bold text-foreground h-10 text-center"
                     />
                     <Text className="text-xs font-bold text-muted-foreground">mois</Text>
 
                     {/* BOUTONS PRÉRÉGLAGES RAPIDES */}
-                    <View className="flex-row gap-1.5 flex-1 justify-end flex-wrap">
+                    <View className="flex-row gap-1 flex-1 justify-end flex-wrap">
                       {DURATION_PRESETS.map((m) => {
                         const isActive = durationInput === m.toString();
                         return (
@@ -503,7 +496,7 @@ export default function VariableExpensesScreen() {
                             variant={isActive ? 'default' : 'outline'}
                             size="sm"
                             onPress={() => setDurationInput(m.toString())}
-                            className={`px-2.5 py-1 rounded-lg h-9 ${
+                            className={`px-2 py-1 rounded-lg h-8 ${
                               isActive ? 'bg-primary' : 'border-border bg-muted/30'
                             }`}>
                             <Text
@@ -520,16 +513,16 @@ export default function VariableExpensesScreen() {
 
                   {/* ENCART EN DIRECT DU CALCUL DE LISSAGE */}
                   {modalParsedAmount > 0 && (
-                    <View className="flex-row items-center bg-amber-50 p-3 rounded-xl border border-amber-200 gap-2.5 mt-2">
-                      <Ionicons name="calculator-outline" size={18} color="#D97706" />
+                    <View className="flex-row items-center bg-amber-50 p-2.5 rounded-xl border border-amber-200 gap-2 mt-1">
+                      <Ionicons name="calculator-outline" size={16} color="#D97706" />
                       <View className="flex-1">
                         <Text className="text-xs font-bold text-foreground">
-                          Impact mensuel calculé :{' '}
+                          Impact mensuel :{' '}
                           <Text className="text-amber-800 font-extrabold">
                             {formatEuro(modalMonthlyImpact)} / mois
                           </Text>
                         </Text>
-                        <Text className="text-[11px] text-muted-foreground">
+                        <Text className="text-[10px] text-muted-foreground">
                           {formatEuro(modalParsedAmount)} lissés sur {modalParsedDuration.toString().replace('.', ',')} mois
                         </Text>
                       </View>
@@ -538,9 +531,9 @@ export default function VariableExpensesScreen() {
                 </View>
 
                 {/* CHAMP 4 : ICÔNE */}
-                <View className="gap-1.5">
-                  <Text className="text-xs font-bold text-foreground">Icône illustrative</Text>
-                  <View className="flex-row gap-2 flex-wrap">
+                <View className="gap-1">
+                  <Text className="text-xs font-bold text-foreground">Icône</Text>
+                  <View className="flex-row gap-1.5 flex-wrap">
                     {PRESET_ICONS.map((item) => {
                       const isSelected = iconInput === item.icon;
                       return (
@@ -549,12 +542,12 @@ export default function VariableExpensesScreen() {
                           variant="outline"
                           size="icon"
                           onPress={() => setIconInput(item.icon)}
-                          className={`w-10 h-10 rounded-xl ${
+                          className={`w-9 h-9 rounded-xl ${
                             isSelected ? 'border-amber-500 bg-amber-50' : 'border-border bg-muted/30'
                           }`}>
                           <Ionicons
                             name={item.icon as any}
-                            size={18}
+                            size={16}
                             color={isSelected ? '#D97706' : '#64748B'}
                           />
                         </Button>
@@ -564,20 +557,20 @@ export default function VariableExpensesScreen() {
                 </View>
 
                 {/* CHAMP 5 : COULEUR */}
-                <View className="gap-1.5">
-                  <Text className="text-xs font-bold text-foreground">Couleur distinctive</Text>
+                <View className="gap-1">
+                  <Text className="text-xs font-bold text-foreground">Couleur</Text>
                   <View className="flex-row gap-2 flex-wrap">
                     {PRESET_COLORS.map((color) => (
                       <TouchableOpacity
                         key={color}
                         onPress={() => setColorInput(color)}
                         activeOpacity={0.7}
-                        className={`w-9 h-9 rounded-full justify-center items-center ${
+                        className={`w-8 h-8 rounded-full justify-center items-center ${
                           colorInput === color ? 'border-2 border-foreground' : ''
                         }`}
                         style={{ backgroundColor: color }}>
                         {colorInput === color && (
-                          <Ionicons name="checkmark" size={16} color="#ffffff" />
+                          <Ionicons name="checkmark" size={14} color="#ffffff" />
                         )}
                       </TouchableOpacity>
                     ))}
@@ -590,23 +583,23 @@ export default function VariableExpensesScreen() {
                 <Button
                   variant="outline"
                   onPress={() => setIsModalVisible(false)}
-                  className="rounded-xl px-4 py-2.5 h-auto">
+                  className="rounded-xl px-3.5 py-2 h-auto">
                   <Text className="text-xs font-bold text-foreground">Annuler</Text>
                 </Button>
 
                 <Button
                   onPress={handleSave}
                   disabled={isSaving}
-                  className={`bg-primary rounded-xl px-4 py-2.5 gap-1.5 h-auto ${
+                  className={`bg-primary rounded-xl px-4 py-2 gap-1.5 h-auto ${
                     isSaving ? 'opacity-80' : ''
                   }`}>
                   {isSaving ? (
-                    <ActivityIndicator size="small" color="#ffffff" className="mr-1.5" />
+                    <ActivityIndicator size="small" color="#ffffff" className="mr-1" />
                   ) : (
-                    <Ionicons name="checkmark" size={18} color="#ffffff" />
+                    <Ionicons name="checkmark" size={16} color="#ffffff" />
                   )}
                   <Text className="text-xs font-bold text-white">
-                    {isSaving ? 'Enregistrement...' : editingCategory ? 'Enregistrer' : 'Ajouter la charge'}
+                    {isSaving ? 'Enregistrement...' : editingCategory ? 'Enregistrer' : 'Ajouter'}
                   </Text>
                 </Button>
               </View>

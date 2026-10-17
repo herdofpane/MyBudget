@@ -76,11 +76,11 @@ export default function HomeScreen() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="px-4 pt-2.5 pb-[110px] gap-4 w-full max-w-[860px] self-center">
+          contentContainerClassName="px-3.5 sm:px-4 pt-1.5 pb-[115px] gap-3.5 sm:gap-4 w-full max-w-[860px] self-center">
 
           {/* 1. CARTE HERO : RESTE À VIVRE */}
-          <Card className="bg-primary rounded-3xl p-6 shadow-sm border border-slate-800">
-            <View className="flex-row justify-between items-center mb-4">
+          <Card className="bg-primary rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-800">
+            <View className="flex-row justify-between items-center mb-3 flex-wrap gap-2">
               <Badge variant="outline" className="border-white/20 bg-white/10 gap-1.5 px-2.5 py-1 rounded-full">
                 <View className="w-2 h-2 rounded-full bg-accent" />
                 <Text className="text-xs font-bold text-slate-200 uppercase tracking-wider">
@@ -92,11 +92,14 @@ export default function HomeScreen() {
               </Text>
             </View>
 
-            <View className="flex-row items-baseline gap-3 mb-4 flex-wrap">
-              <Text className="text-4xl font-black text-white tracking-tight">
+            <View className="flex-row items-baseline gap-2.5 mb-3 flex-wrap">
+              <Text
+                className="text-3xl sm:text-4xl font-black text-white tracking-tight"
+                numberOfLines={1}
+                adjustsFontSizeToFit>
                 {renderMoney(resteAVivre)}
               </Text>
-              <Badge variant="secondary" className="bg-white/10 border-0 px-2 py-0.5 rounded-md">
+              <Badge variant="secondary" className="bg-white/10 border-0 px-2 py-0.5 rounded-md self-center">
                 <Text className="text-xs font-semibold text-slate-300">
                   ≈ {renderMoneyRound(resteAVivre)}
                 </Text>
@@ -122,7 +125,7 @@ export default function HomeScreen() {
                     '.',
                 })
               }
-              className="flex-row items-center pt-3 border-t border-white/10 gap-2">
+              className="flex-row items-center pt-2.5 border-t border-white/10 gap-2">
               <Ionicons name="information-circle-outline" size={16} color="#10B981" />
               <Text className="text-xs text-slate-300 flex-1 font-medium">
                 Disponible pour épargner & vivre après charges
@@ -132,8 +135,8 @@ export default function HomeScreen() {
           </Card>
 
           {/* 2. REVENU MENSUEL (MODIFIABLE DIRECTEMENT) */}
-          <Card className="bg-card rounded-2xl p-5 border border-border shadow-xs">
-            <View className="flex-row items-center gap-3 mb-3">
+          <Card className="bg-card rounded-2xl p-4 sm:p-5 border border-border shadow-xs">
+            <View className="flex-row items-center gap-3 mb-2.5">
               <View className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 justify-center items-center">
                 <Ionicons name="wallet-outline" size={20} color="#10B981" />
               </View>
@@ -150,7 +153,7 @@ export default function HomeScreen() {
               </Badge>
             </View>
 
-            <View className="flex-row items-baseline bg-muted/40 rounded-xl px-4 py-1.5 border border-border">
+            <View className="flex-row items-baseline bg-muted/40 rounded-xl px-3.5 py-1 border border-border">
               <Input
                 value={incomeInput}
                 onChangeText={setLocalIncome}
@@ -158,9 +161,9 @@ export default function HomeScreen() {
                 keyboardType="decimal-pad"
                 placeholder="0"
                 placeholderTextColor="#64748B"
-                className="flex-1 text-2xl font-black text-foreground border-0 bg-transparent shadow-none px-0 py-1 h-auto sm:h-auto"
+                className="flex-1 text-xl sm:text-2xl font-black text-foreground border-0 bg-transparent shadow-none px-0 py-1 h-auto sm:h-auto"
               />
-              <Text className="text-sm font-semibold text-muted-foreground ml-2">
+              <Text className="text-xs sm:text-sm font-semibold text-muted-foreground ml-2">
                 € / mois
               </Text>
             </View>
@@ -170,23 +173,23 @@ export default function HomeScreen() {
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => router.push('/fixed-expenses')}>
-            <Card className="bg-card rounded-2xl p-5 border border-border shadow-xs flex-row items-center justify-between">
-              <View className="flex-row items-center gap-3 flex-1 pr-3">
+            <Card className="bg-card rounded-2xl p-4 sm:p-5 border border-border shadow-xs flex-row items-center justify-between">
+              <View className="flex-row items-center gap-3 flex-1 pr-2">
                 <View className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
                   <Ionicons name="calendar-outline" size={20} color="#6366F1" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-base font-bold text-foreground">Charges Fixes</Text>
-                  <Text className="text-xs text-muted-foreground mt-0.5">
+                  <Text className="text-xs text-muted-foreground mt-0.5" numberOfLines={1}>
                     Loyer, abonnements, assurances, crédits...
                   </Text>
                 </View>
               </View>
-              <View className="items-end">
-                <Text className="text-lg font-black text-foreground">
+              <View className="items-end shrink-0">
+                <Text className="text-base sm:text-lg font-black text-foreground">
                   - {renderMoney(totalFixedExpenses)}
                 </Text>
-                <View className="flex-row items-center gap-1 mt-1">
+                <View className="flex-row items-center gap-1 mt-0.5">
                   <Text className="text-xs font-bold text-lavender">Gérer le détail</Text>
                   <Ionicons name="chevron-forward" size={12} color="#6366F1" />
                 </View>
@@ -195,16 +198,17 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           {/* 4. COMPTE COURANT & ÉPARGNE */}
-          <View className="flex-row gap-3">
+          <View className="flex-row gap-2.5 sm:gap-3">
             {/* COMPTE COURANT (NÉCESSAIRE + FACULTATIF) */}
-            <Card className="flex-1 bg-card rounded-2xl p-4 border border-border border-l-4 border-l-accent shadow-xs">
-              <View className="flex-row items-center justify-between mb-2">
-                <View className="flex-row items-center gap-1.5">
-                  <Ionicons name="card-outline" size={18} color="#10B981" />
-                  <Text className="text-xs font-bold text-foreground">Compte Courant</Text>
+            <Card className="flex-1 min-w-[135px] bg-card rounded-2xl p-3.5 sm:p-4 border border-border border-l-4 border-l-accent shadow-xs">
+              <View className="flex-row items-center justify-between mb-1.5">
+                <View className="flex-row items-center gap-1.5 flex-1 pr-1">
+                  <Ionicons name="card-outline" size={16} color="#10B981" />
+                  <Text className="text-xs font-bold text-foreground" numberOfLines={1}>Compte Courant</Text>
                 </View>
                 <TouchableOpacity
                   activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   onPress={() =>
                     setInfoDialog({
                       visible: true,
@@ -221,36 +225,40 @@ export default function HomeScreen() {
                         '.',
                     })
                   }>
-                  <Ionicons name="help-circle-outline" size={16} color="#64748B" />
+                  <Ionicons name="help-circle-outline" size={15} color="#64748B" />
                 </TouchableOpacity>
               </View>
 
-              <View className="flex-row items-baseline gap-2 mb-2 flex-wrap">
-                <Text className="text-lg font-black text-foreground">
+              <View className="mb-1.5">
+                <Text
+                  className="text-base sm:text-lg font-black text-foreground"
+                  numberOfLines={1}
+                  adjustsFontSizeToFit>
                   {renderMoney(checkingAmount)}
                 </Text>
-                <Badge variant="outline" className="bg-emerald-50 border-emerald-200 px-1.5 py-0.5 rounded">
-                  <Text className="text-[11px] font-semibold text-accentDark">
+                <Badge variant="outline" className="bg-emerald-50 border-emerald-200 px-1.5 py-0.5 rounded self-start mt-1">
+                  <Text className="text-[10px] sm:text-[11px] font-semibold text-accentDark">
                     ≈ {renderMoneyRound(checkingAmount)}
                   </Text>
                 </Badge>
               </View>
 
-              <Text className="text-xs font-bold text-foreground">Dépenses courantes</Text>
-              <Text className="text-[11px] text-muted-foreground mt-0.5">
+              <Text className="text-[11px] sm:text-xs font-bold text-foreground mt-0.5">Dépenses courantes</Text>
+              <Text className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5" numberOfLines={1}>
                 Reste à vivre − Épargne
               </Text>
             </Card>
 
             {/* COMPTE ÉPARGNE (FORMULE RACINE CARRÉE) */}
-            <Card className="flex-1 bg-card rounded-2xl p-4 border border-border border-l-4 border-l-lavender shadow-xs">
-              <View className="flex-row items-center justify-between mb-2">
-                <View className="flex-row items-center gap-1.5">
-                  <Ionicons name="trending-up" size={18} color="#6366F1" />
-                  <Text className="text-xs font-bold text-foreground">Pour Épargne</Text>
+            <Card className="flex-1 min-w-[135px] bg-card rounded-2xl p-3.5 sm:p-4 border border-border border-l-4 border-l-lavender shadow-xs">
+              <View className="flex-row items-center justify-between mb-1.5">
+                <View className="flex-row items-center gap-1.5 flex-1 pr-1">
+                  <Ionicons name="trending-up" size={16} color="#6366F1" />
+                  <Text className="text-xs font-bold text-foreground" numberOfLines={1}>Pour Épargne</Text>
                 </View>
                 <TouchableOpacity
                   activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   onPress={() =>
                     setInfoDialog({
                       visible: true,
@@ -265,23 +273,26 @@ export default function HomeScreen() {
                         '.',
                     })
                   }>
-                  <Ionicons name="help-circle-outline" size={16} color="#64748B" />
+                  <Ionicons name="help-circle-outline" size={15} color="#64748B" />
                 </TouchableOpacity>
               </View>
 
-              <View className="flex-row items-baseline gap-2 mb-2 flex-wrap">
-                <Text className="text-lg font-black text-foreground">
+              <View className="mb-1.5">
+                <Text
+                  className="text-base sm:text-lg font-black text-foreground"
+                  numberOfLines={1}
+                  adjustsFontSizeToFit>
                   {renderMoney(epargneAmount)}
                 </Text>
-                <Badge variant="outline" className="bg-indigo-50 border-indigo-200 px-1.5 py-0.5 rounded">
-                  <Text className="text-[11px] font-semibold text-lavender">
+                <Badge variant="outline" className="bg-indigo-50 border-indigo-200 px-1.5 py-0.5 rounded self-start mt-1">
+                  <Text className="text-[10px] sm:text-[11px] font-semibold text-lavender">
                     ≈ {renderMoneyRound(epargneAmount)}
                   </Text>
                 </Badge>
               </View>
 
-              <Text className="text-xs font-bold text-foreground">Épargne optimisée</Text>
-              <Text className="text-[11px] text-muted-foreground mt-0.5">
+              <Text className="text-[11px] sm:text-xs font-bold text-foreground mt-0.5">Épargne optimisée</Text>
+              <Text className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5" numberOfLines={1}>
                 B4 − √(B4 × Nécessaire)
               </Text>
             </Card>
@@ -292,8 +303,8 @@ export default function HomeScreen() {
             <TouchableOpacity
               onPress={() => router.push('/variable-expenses')}
               activeOpacity={0.8}
-              className="flex-row items-center p-4 gap-3">
-              <View className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 justify-center items-center">
+              className="flex-row items-center p-3.5 sm:p-4 gap-3">
+              <View className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 justify-center items-center shrink-0">
                 <Ionicons name="pie-chart-outline" size={20} color="#10B981" />
               </View>
               <View className="flex-1">
@@ -305,13 +316,13 @@ export default function HomeScreen() {
               <Ionicons name="chevron-forward" size={16} color="#64748B" />
             </TouchableOpacity>
 
-            <View className="h-px bg-border mx-4" />
+            <View className="h-px bg-border mx-3.5 sm:mx-4" />
 
             <TouchableOpacity
               onPress={() => router.push('/details')}
               activeOpacity={0.8}
-              className="flex-row items-center p-4 gap-3">
-              <View className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
+              className="flex-row items-center p-3.5 sm:p-4 gap-3">
+              <View className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
                 <MaterialCommunityIcons name="calculator-variant-outline" size={20} color="#6366F1" />
               </View>
               <View className="flex-1">
