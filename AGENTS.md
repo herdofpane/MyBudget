@@ -43,13 +43,32 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## Strict Rules References
 Pour toute génération de code ou d'interface, applique obligatoirement les consignes de ces fichiers :
-- Architecture & code propre : `.agents/rules/solid-architecture.md`
+- Directives d'architecture, qualité & UX : `.agents/rules/architecture-quality.md`
+- Architecture & principes SOLID : `.agents/rules/solid-architecture.md`
 - Design system & couleurs : `.agents/rules/ui-brand-guidelines.md`
 
 
 ## Git Commit Rules
-When generating commit messages:
-- Write in English.
-- Always use the Conventional Commits format (`feat: ...`, `fix: ...`, `chore: ...`, `refactor: ...`).
-- Keep the first line under 72 characters.
-- Use the imperative mood (e.g. "feat: add user authentication").
+Toute proposition ou génération de message de commit doit respecter scrupuleusement les standards suivants pour assurer une traçabilité précise et refléter fidèlement la réalité des modifications :
+
+1. **Format Conventionnel Strict (Conventional Commits)** :
+   - Structure : `<type>(<scope>): <description courte et explicite au présent>`
+   - Types autorisés : `feat`, `fix`, `refactor`, `style`, `perf`, `docs`, `chore`
+   - Le `<scope>` doit cibler le domaine exact modifié (ex: `charges-fixes`, `variables`, `dashboard`, `ui`, `theme`, `store`).
+
+2. **Fidélité & Exhaustivité des changements apportés** :
+   - **Interdiction formelle des messages vagues ou génériques** (ex: *"fix bug"*, *"update code"*, *"wip"*).
+   - Détailler systématiquement dans le corps du message (liste à puces) :
+     - Les modifications clés apportées aux composants et actions.
+     - Les éléments ajoutés, refactorisés ou explicitement supprimés.
+     - Le motif ou l'impact fonctionnel (ex: correction ergonomique, prévention d'erreur, amélioration UX).
+
+3. **Exemple de structure attendue** :
+```text
+feat(charges-fixes): simplification du tableau et ajout de la confirmation de suppression
+
+- Suppression du bouton d'ajout redondant dans l'en-tête principal
+- Ajout de la modale personnalisée de confirmation pour les actions destructives
+- Prise en charge de la fermeture de la modale au clic sur l'arrière-plan
+- Nettoyage des styles orphelins et validation lint/typecheck
+```

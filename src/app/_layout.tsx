@@ -190,22 +190,22 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     alignItems: 'center',
     ...(Platform.OS === 'web'
-      ? {
+      ? ({
           height: '100vh',
           maxHeight: '100vh',
-          overflow: 'hidden' as const,
-        }
+          overflow: 'hidden',
+        } as any)
       : {}),
   },
   appContainer: {
     flex: 1,
     width: '100%',
     ...(Platform.OS === 'web'
-      ? {
+      ? ({
           height: '100%',
           maxHeight: '100%',
-          overflow: 'hidden' as const,
-        }
+          overflow: 'hidden',
+        } as any)
       : {}),
   },
   iconContainer: {
