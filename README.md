@@ -37,7 +37,7 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
 - **Édition Instantanée du Revenu** : Ajustez votre revenu net mensuel directement depuis l'en-tête avec sauvegarde automatique.
 
 ### 2. 📅 Échéancier des Charges Fixes & Amortissement de Crédits
-- **Détection Automatique Intelligente** : À la création, la catégorie et l'icône sont déduites à 100% automatiquement dès la frappe du nom (*Loyer, EDF, Netflix, Navigo, Prêt...*), sans sélection manuelle superflue. En modification, l'utilisateur a la liberté de réajuster la catégorie et de sélectionner une icône personnalisée.
+- **Détection Automatique Intelligente** : À la création comme en modification, la catégorie et l'icône sont déduites à 100% automatiquement dès la frappe du nom (*Loyer, EDF, Netflix, Navigo, Prêt...*), garantissant une saisie rapide et fluide sans sélection manuelle superflue.
 - **Typologie Complète** : Ventilation par catégories dédiées (*Logement, Énergie, Assurance, Abonnements, Transport, Crédit, Autre*).
 - **Gestion des Crédits et Emprunts** : Suivi des charges temporaires avec calcul de progression (mensualités honorées vs durée totale, barre de progression visuelle, activation automatique lors de la saisie de mots-clés d'emprunt).
 - **Planification Temporelle Avancée** :
@@ -49,7 +49,7 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
 - **Initialisation Vierge** : Démarrage propre avec un carnet vierge de charges par défaut (zéro donnée fictive pré-remplie).
 
 ### 3. 🛒 Charges Variables & Lissage Pluriannuel
-- **Attribution Automatique d'Icône & Teinte** : Dès la saisie du titre (*Courses, Restaurant, Vacances, Basic Fit, Essence...*), l'icône thématique et la couleur harmonieuse sont instantanément choisies. En modification, la palette de couleurs et la grille d'icônes sont accessibles pour une personnalisation sur-mesure.
+- **Attribution Automatique d'Icône & Teinte** : Dès la saisie du titre (*Courses, Restaurant, Vacances, Basic Fit, Essence...*), l'icône thématique et la couleur harmonieuse sont instantanément attribuées de façon 100% automatique, à la création comme en modification.
 - **Enveloppes Budgétaires Visuelles** : Gestion fine par postes de dépenses.
 - **Lissage Temporel des Dépenses Importantes** : Possibilité d'étaler un achat ou un poste sur plusieurs mois (*1, 3, 6, 12 ou 24 mois*) pour neutraliser son impact mensuel sans déséquilibrer un mois isolé.
 - **Suivi Budgété vs Dépensé** : Jauges de consommation en temps réel avec alertes de dépassement.

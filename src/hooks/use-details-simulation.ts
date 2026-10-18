@@ -59,6 +59,8 @@ export function useDetailsSimulation() {
   const monthlyResteAVivre = Math.round((parsedMonthlyIncome - parsedMonthlyFixed) * 100) / 100;
   // Épargne calculée : Reste à vivre - √(Reste à vivre × Nécessaire)
   const monthlyEpargne = computeSavings(monthlyResteAVivre, parsedMonthlyNecessary);
+  // Compte courant calculé : Reste à vivre - Épargne = √(Reste à vivre × Nécessaire)
+  const monthlyChecking = Math.max(0, Math.round((monthlyResteAVivre - monthlyEpargne) * 100) / 100);
 
   // --- CALCULS PONCTUELS ---
   const parsedOneTimeAmount = Math.max(0, parseFloat(oneTimeAmountInput.replace(',', '.')) || 0);
@@ -66,12 +68,15 @@ export function useDetailsSimulation() {
 
   // Épargne ponctuelle : Montant ponctuel - √(Montant ponctuel × Nécessaire)
   const oneTimeEpargne = computeSavings(parsedOneTimeAmount, parsedOneTimeNecessary);
+  // Compte courant ponctuel : Montant ponctuel - Épargne
+  const oneTimeChecking = Math.max(0, Math.round((parsedOneTimeAmount - oneTimeEpargne) * 100) / 100);
 
   // Sélection des valeurs affichées selon l'onglet actif
   const isMonthly = activeTab === 'monthly';
   const currentIncome = isMonthly ? parsedMonthlyIncome : parsedOneTimeAmount;
   const currentNecessary = isMonthly ? parsedMonthlyNecessary : parsedOneTimeNecessary;
   const currentEpargne = isMonthly ? monthlyEpargne : oneTimeEpargne;
+  const currentChecking = isMonthly ? monthlyChecking : oneTimeChecking;
   const currentBaseResteAVivre = isMonthly ? monthlyResteAVivre : parsedOneTimeAmount;
 
   // Enregistrer les montants personnalisés
@@ -85,7 +90,7 @@ export function useDetailsSimulation() {
           fixedExpenses: parsedMonthlyFixed,
           targetNecessary: parsedMonthlyNecessary,
           savingsAccount: monthlyEpargne,
-          checkingAccount: Math.max(0, Math.round((monthlyResteAVivre - monthlyEpargne) * 100) / 100),
+          checkingAccount: monthlyChecking,
         });
       } else {
         if (parsedOneTimeAmount <= 0) {
@@ -120,8 +125,8 @@ export function useDetailsSimulation() {
         type: 'success',
         title: isMonthly ? 'Budget officiel mis à jour' : 'Revenu ponctuel enregistré',
         message: isMonthly
-          ? `Revenu (Accueil) : ${formatEuro(parsedMonthlyIncome)} • Charges fixes : ${formatEuro(parsedMonthlyFixed)} • Épargne : ${formatEuro(monthlyEpargne)}`
-          : `Montant ponctuel : ${formatEuro(parsedOneTimeAmount)} • Épargne : ${formatEuro(oneTimeEpargne)}`,
+          ? `Revenu : ${formatEuro(parsedMonthlyIncome)} • Charges : ${formatEuro(parsedMonthlyFixed)} • Courant : ${formatEuro(monthlyChecking)} • Épargne : ${formatEuro(monthlyEpargne)}`
+          : `Montant ponctuel : ${formatEuro(parsedOneTimeAmount)} • Courant : ${formatEuro(oneTimeChecking)} • Épargne : ${formatEuro(oneTimeEpargne)}`,
         subtext: 'Vos préférences ont été sauvegardées et répercutées sur l’accueil.',
       });
     } finally {
@@ -133,12 +138,13 @@ export function useDetailsSimulation() {
     parsedMonthlyFixed,
     parsedMonthlyNecessary,
     monthlyEpargne,
-    monthlyResteAVivre,
+    monthlyChecking,
     saveBudget,
     budget,
     parsedOneTimeAmount,
     parsedOneTimeNecessary,
     oneTimeEpargne,
+    oneTimeChecking,
   ]);
 
   // Exécution de la réinitialisation confirmée
@@ -188,13 +194,16 @@ export function useDetailsSimulation() {
     parsedMonthlyNecessary,
     monthlyResteAVivre,
     monthlyEpargne,
+    monthlyChecking,
     parsedOneTimeAmount,
     parsedOneTimeNecessary,
     oneTimeEpargne,
+    oneTimeChecking,
     isMonthly,
     currentIncome,
     currentNecessary,
     currentEpargne,
+    currentChecking,
     currentBaseResteAVivre,
     // Actions
     handleApplyBudget,

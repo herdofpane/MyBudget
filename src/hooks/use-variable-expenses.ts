@@ -56,47 +56,14 @@ export function useVariableExpenses() {
   const [durationInput, setDurationInput] = useState('1');
   const [iconInput, setIconInput] = useState('pricetag-outline');
   const [colorInput, setColorInput] = useState('#9b6fba');
-  const [isIconManuallySelected, setIsIconManuallySelected] = useState(false);
 
-  // Détection automatique en temps réel de l'icône et de la couleur selon le libellé saisi
-  const handleLabelChange = useCallback(
-    (text: string) => {
-      setLabelInput(text);
-      if (!editingCategory) {
-        // En création : toujours automatique selon le titre saisi (pas de personnalisation manuelle)
-        const detected = autoDetectExpenseMeta(text);
-        setIconInput(detected.icon);
-        setColorInput(detected.color);
-      } else if (!isIconManuallySelected) {
-        // En modification : suit le titre tant qu'aucune icône n'a été choisie manuellement
-        const detected = autoDetectExpenseMeta(text);
-        setIconInput(detected.icon);
-        setColorInput(detected.color);
-      }
-    },
-    [editingCategory, isIconManuallySelected]
-  );
-
-  const handleSelectIcon = useCallback(
-    (icon: string) => {
-      // Personnalisation manuelle réservée exclusivement au mode modification
-      if (editingCategory) {
-        setIsIconManuallySelected(true);
-        setIconInput(icon);
-      }
-    },
-    [editingCategory]
-  );
-
-  const handleSelectColor = useCallback(
-    (color: string) => {
-      // Personnalisation de couleur réservée exclusivement au mode modification
-      if (editingCategory) {
-        setColorInput(color);
-      }
-    },
-    [editingCategory]
-  );
+  // Détection 100% automatique de l'icône et de la couleur selon le libellé saisi
+  const handleLabelChange = useCallback((text: string) => {
+    setLabelInput(text);
+    const detected = autoDetectExpenseMeta(text);
+    setIconInput(detected.icon || 'pricetag-outline');
+    setColorInput(detected.color || '#9b6fba');
+  }, []);
 
   // Ouvrir modal ajout
   const openAddModal = useCallback(() => {
@@ -106,7 +73,6 @@ export function useVariableExpenses() {
     setDurationInput('1');
     setIconInput('pricetag-outline');
     setColorInput('#9b6fba');
-    setIsIconManuallySelected(false);
     setIsModalVisible(true);
   }, []);
 
@@ -120,7 +86,6 @@ export function useVariableExpenses() {
     setDurationInput(duration.toString());
     setIconInput(cat.icon);
     setColorInput(cat.color);
-    setIsIconManuallySelected(true);
     setIsModalVisible(true);
   }, []);
 
@@ -139,14 +104,8 @@ export function useVariableExpenses() {
     }
 
     const detected = autoDetectExpenseMeta(labelInput);
-    // En création : icône et couleur 100% automatiques
-    // En modification : personnalisation manuelle respectée
-    const finalIcon = editingCategory
-      ? (isIconManuallySelected ? iconInput : (detected.icon || iconInput))
-      : (detected.icon || 'pricetag-outline');
-    const finalColor = editingCategory
-      ? (colorInput || detected.color || '#9b6fba')
-      : (detected.color || '#9b6fba');
+    const finalIcon = detected.icon || iconInput || 'pricetag-outline';
+    const finalColor = detected.color || colorInput || '#9b6fba';
     const monthly = Math.round((total / duration) * 100) / 100;
 
     setIsSaving(true);
@@ -183,7 +142,6 @@ export function useVariableExpenses() {
     editingCategory,
     iconInput,
     colorInput,
-    isIconManuallySelected,
     updateVariableCategory,
     addVariableCategory,
   ]);
@@ -240,9 +198,6 @@ export function useVariableExpenses() {
     setIconInput,
     colorInput,
     setColorInput,
-    isIconManuallySelected,
-    handleSelectIcon,
-    handleSelectColor,
     // Actions
     openAddModal,
     openEditModal,

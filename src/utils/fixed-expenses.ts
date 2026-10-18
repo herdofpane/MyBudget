@@ -1,8 +1,6 @@
 import { FixedExpenseItem } from '@/types';
-import { isCreditExpired, getCreditProgress, formatCreditEndDate } from '@/utils/credit';
+import { isCreditExpired } from '@/utils/credit';
 import { colors } from '@/theme/colors';
-
-export { isCreditExpired, getCreditProgress, formatCreditEndDate };
 
 /**
  * Utilitaires métiers pour la gestion des charges fixes (Couche 2 SOLID)
@@ -197,4 +195,66 @@ export function getMonthPresets(): { value: string; label: string; fullLabel: st
   }
 
   return presets;
+}
+
+export interface TargetMonthPreview {
+  label: string;
+  description: string;
+  isCounted: boolean;
+}
+
+/**
+ * Explication pédagogique en temps réel du mois d'activation choisi (avec guard clauses)
+ */
+export function getTargetMonthPreviewStatus(
+  isScheduled: boolean,
+  activationType: 'starting_from' | 'only_month' | 'all',
+  targetMonth: string,
+  currentMonth: string
+): TargetMonthPreview {
+  if (!isScheduled || activationType === 'all') {
+    return {
+      label: 'Active immédiatement',
+      description: 'Cette charge sera imputée chaque mois sans interruption.',
+      isCounted: true,
+    };
+  }
+
+  if (activationType === 'starting_from') {
+    if (targetMonth <= currentMonth) {
+      return {
+        label: 'Active dès ce mois-ci',
+        description: `Démarre ce mois-ci (${formatMonthYearFull(targetMonth)}) et se renouvellera chaque mois.`,
+        isCounted: true,
+      };
+    }
+    return {
+      label: `À venir en ${formatMonthYear(targetMonth)}`,
+      description: `Non imputée pour le moment. Elle s'activera automatiquement dès ${formatMonthYearFull(targetMonth)}.`,
+      isCounted: false,
+    };
+  }
+
+  // activationType === 'only_month'
+  if (targetMonth === currentMonth) {
+    return {
+      label: 'Active ce mois-ci uniquement',
+      description: `S'impute uniquement pour ce mois (${formatMonthYearFull(targetMonth)}), puis s'arrête.`,
+      isCounted: true,
+    };
+  }
+
+  if (targetMonth > currentMonth) {
+    return {
+      label: `Prévue pour ${formatMonthYear(targetMonth)}`,
+      description: `Non imputée pour le moment. S'appliquera uniquement le mois de ${formatMonthYearFull(targetMonth)}.`,
+      isCounted: false,
+    };
+  }
+
+  return {
+    label: 'Mois passé',
+    description: `Le mois de ${formatMonthYearFull(targetMonth)} est déjà passé. Cette charge n'est plus imputée.`,
+    isCounted: false,
+  };
 }

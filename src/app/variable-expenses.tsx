@@ -1,33 +1,24 @@
 import React from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Modal,
-  Pressable,
-  Platform,
-  KeyboardAvoidingView,
-  ActivityIndicator,
-} from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
 import { ConfirmDialog, AppDialog } from '@/components/confirm-dialog';
 import { ListSkeleton } from '@/components/ui/loading-state';
-import { colors } from '@/theme/colors';
+import { formatEuro, formatEuroRound } from '@/constants/formatters';
 
 import { useVariableExpenses } from '@/hooks/use-variable-expenses';
-import { PRESET_ICONS, PRESET_COLORS } from '@/data';
-import { formatEuro, formatEuroRound, formatPercent } from '@/constants/formatters';
-
-const DURATION_PRESETS = [1, 3, 6, 12, 24];
+import {
+  VariableExpensesStats,
+  VariableExpenseRow,
+  VariableExpensesEmpty,
+  VariableExpenseModal,
+} from '@/components/variable-expenses';
 
 export default function VariableExpensesScreen() {
   const {
@@ -45,19 +36,13 @@ export default function VariableExpensesScreen() {
     feedbackDialog,
     setFeedbackDialog,
     labelInput,
-    setLabelInput,
     handleLabelChange,
     amountInput,
     setAmountInput,
     durationInput,
     setDurationInput,
     iconInput,
-    setIconInput,
     colorInput,
-    setColorInput,
-    isIconManuallySelected,
-    handleSelectIcon,
-    handleSelectColor,
     openAddModal,
     openEditModal,
     handleSave,
@@ -68,7 +53,6 @@ export default function VariableExpensesScreen() {
     modalParsedDuration,
     modalMonthlyImpact,
   } = useVariableExpenses();
-
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
@@ -87,53 +71,13 @@ export default function VariableExpensesScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerClassName="px-3.5 sm:px-4 pt-1.5 pb-[115px] gap-3.5 sm:gap-4 w-full max-w-[860px] self-center">
 
-          {/* 1. CARTE DU TOTAL DES CHARGES VARIABLES (IMPACT MENSUEL LISSÉ) */}
-          <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-xs gap-3.5 sm:gap-4">
-            <View className="flex-row justify-between items-start">
-              <View className="flex-1">
-                <View className="flex-row items-center gap-2 mb-1">
-                  <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    Total charges variables
-                  </Text>
-                  <Badge variant="outline" className="border-border bg-muted/30 px-1.5 py-0.5 rounded-full">
-                    <Text className="text-[10px] text-muted-foreground font-semibold">
-                      Arrondi unité
-                    </Text>
-                  </Badge>
-                </View>
-                <Text className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-                  {formatEuroRound(totalEstimatedVariable)}
-                </Text>
-                <Text className="text-xs text-muted-foreground mt-0.5">
-                  Montant exact : {formatEuro(totalEstimatedVariable)} / mois
-                </Text>
-              </View>
-
-              <Badge variant="outline" className="bg-amber-50 border-amber-200 px-2.5 py-1 rounded-full flex-row items-center gap-1.5">
-                <Ionicons name="pie-chart-outline" size={14} color="#D97706" />
-                <Text className="text-xs font-bold text-amber-800">
-                  {variableCategories.length} charge{variableCategories.length > 1 ? 's' : ''}
-                </Text>
-              </Badge>
-            </View>
-
-            {/* RÉCAPITULATIF STATISTIQUE */}
-            <View className="flex-row items-center bg-muted/30 rounded-2xl p-2.5 sm:p-3 border border-border">
-              <View className="flex-1 items-center">
-                <Text className="text-[11px] text-muted-foreground font-medium">Moyenne mensuelle</Text>
-                <Text className="text-xs sm:text-sm font-bold text-foreground mt-0.5">
-                  ~{formatEuroRound(averageExpense)}
-                </Text>
-              </View>
-              <View className="w-px h-7 bg-border" />
-              <View className="flex-1 items-center">
-                <Text className="text-[11px] text-muted-foreground font-medium">Part des revenus</Text>
-                <Text className="text-xs sm:text-sm font-bold text-foreground mt-0.5">
-                  {formatPercent(variableExpenseRatio)}
-                </Text>
-              </View>
-            </View>
-          </Card>
+          {/* 1. CARTE DU TOTAL DES CHARGES VARIABLES */}
+          <VariableExpensesStats
+            totalEstimatedVariable={totalEstimatedVariable}
+            count={variableCategories.length}
+            averageExpense={averageExpense}
+            variableExpenseRatio={variableExpenseRatio}
+          />
 
           {/* 2. LE TABLEAU DES CHARGES VARIABLES */}
           <Card className="bg-card rounded-3xl border border-border shadow-xs overflow-hidden">
@@ -164,26 +108,10 @@ export default function VariableExpensesScreen() {
             </View>
 
             {variableCategories.length === 0 ? (
-              <View className="p-8 items-center justify-center gap-3">
-                <Ionicons name="folder-open-outline" size={42} color="#D97706" />
-                <Text className="text-base font-bold text-foreground text-center">
-                  Aucune charge variable enregistrée
-                </Text>
-                <Text className="text-xs text-muted-foreground text-center max-w-[420px]">
-                  Ajoutez vos charges variables avec leur montant et leur durée de vie sur X mois pour calculer automatiquement l&apos;impact mensuel.
-                </Text>
-                <Button
-                  onPress={openAddModal}
-                  className="bg-primary rounded-xl px-4 py-2 mt-2 gap-1.5 h-auto">
-                  <Ionicons name="add" size={16} color="#ffffff" />
-                  <Text className="text-xs font-bold text-white">
-                    Ajouter ma première charge variable
-                  </Text>
-                </Button>
-              </View>
+              <VariableExpensesEmpty onAdd={openAddModal} />
             ) : (
               <View>
-                {/* LIGNE DES COLONNES DU TABLEAU (OPTIMISÉE MOBILE) */}
+                {/* LIGNE DES COLONNES DU TABLEAU */}
                 <View className="flex-row items-center px-3.5 sm:px-4 py-2.5 bg-muted/40 border-b border-border">
                   <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                     POSTE & DURÉE
@@ -197,75 +125,15 @@ export default function VariableExpensesScreen() {
                 </View>
 
                 {/* LIGNES DES CHARGES VARIABLES */}
-                {variableCategories.map((item, index) => {
-                  const isEven = index % 2 === 0;
-                  const total = item.totalAmount !== undefined ? item.totalAmount : item.estimatedBudget;
-                  const duration = Math.max(0.01, item.durationMonths || 1);
-                  const monthly = item.estimatedBudget || Math.round((total / duration) * 100) / 100;
-                  const formattedDuration = Number.isInteger(duration)
-                    ? `${duration} mois`
-                    : `${duration.toString().replace('.', ',')} mois`;
-
-                  return (
-                    <View
-                      key={item.id}
-                      className={`flex-row items-center px-3.5 sm:px-4 py-3 border-b border-border/60 ${
-                        isEven ? 'bg-card' : 'bg-muted/10'
-                      }`}>
-                      {/* COLONNE 1 : TITRE & BADGE DURÉE EN DESSOUS */}
-                      <View className="flex-1 flex-row items-center gap-2.5 pr-2">
-                        <View
-                          className="w-8 h-8 rounded-lg justify-center items-center shrink-0"
-                          style={{ backgroundColor: `${item.color}15` }}>
-                          <Ionicons name={item.icon as any} size={16} color={item.color} />
-                        </View>
-                        <View className="flex-1">
-                          <Text className="text-xs sm:text-sm font-bold text-foreground" numberOfLines={1}>
-                            {item.label}
-                          </Text>
-                          <Badge variant="outline" className="border-amber-200 bg-amber-50 gap-1 px-1.5 py-0.5 rounded-md self-start mt-1">
-                            <Ionicons name="calendar-outline" size={10} color="#D97706" />
-                            <Text className="text-[10px] font-semibold text-amber-800">
-                              {formattedDuration}
-                            </Text>
-                          </Badge>
-                        </View>
-                      </View>
-
-                      {/* COLONNE 2 : MONTANTS TOTAL & LISSÉ */}
-                      <View className="items-end pr-2 shrink-0">
-                        <Text className="text-xs sm:text-sm font-black text-foreground">
-                          -{formatEuro(total)}
-                        </Text>
-                        <Text className="text-[10px] sm:text-[11px] text-amber-800 font-semibold mt-0.5">
-                          {formatEuro(monthly)}/m
-                        </Text>
-                      </View>
-
-                      {/* COLONNE 3 : ACTIONS (MODIFIER / SUPPRIMER) */}
-                      <View className="w-16 flex-row items-center justify-end gap-1 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onPress={() => openEditModal(item)}
-                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                          className="w-7 h-7 rounded-lg"
-                          accessibilityLabel={`Modifier ${item.label}`}>
-                          <Ionicons name="pencil-outline" size={15} color={colors.textMuted} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onPress={() => handleDelete(item.id, item.label)}
-                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                          className="w-7 h-7 rounded-lg"
-                          accessibilityLabel={`Supprimer ${item.label}`}>
-                          <Ionicons name="trash-outline" size={15} color={colors.danger} />
-                        </Button>
-                      </View>
-                    </View>
-                  );
-                })}
+                {variableCategories.map((item, index) => (
+                  <VariableExpenseRow
+                    key={item.id}
+                    item={item}
+                    isEven={index % 2 === 0}
+                    onEdit={openEditModal}
+                    onDelete={handleDelete}
+                  />
+                ))}
 
                 {/* PIED DU TABLEAU : TOTAL MENSUEL LISSÉ */}
                 <View className="flex-row justify-between items-center px-4 sm:px-5 py-3.5 bg-muted/30 border-t border-border">
@@ -293,269 +161,24 @@ export default function VariableExpensesScreen() {
       )}
 
       {/* FORMULAIRE MODAL D'AJOUT / ÉDITION D'UNE CHARGE VARIABLE */}
-      <Modal
+      <VariableExpenseModal
         visible={isModalVisible}
-        animationType="fade"
-        transparent
-        onRequestClose={() => setIsModalVisible(false)}>
-        <Pressable
-          className="flex-1 bg-primary/50 justify-center items-center p-3.5 sm:p-4"
-          onPress={() => setIsModalVisible(false)}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            className="w-full max-w-[500px]">
-            <Pressable
-              className="bg-card rounded-3xl p-4 sm:p-6 border border-border shadow-lg w-full gap-3.5 sm:gap-4 max-h-[90vh]"
-              onPress={(e) => e.stopPropagation()}>
-              
-              {/* EN-TÊTE MODAL */}
-              <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
-                  <View
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl justify-center items-center shrink-0 border"
-                    style={{
-                      backgroundColor: `${colorInput}18`,
-                      borderColor: `${colorInput}35`,
-                    }}>
-                    <Ionicons
-                      name={(iconInput || (editingCategory ? 'create-outline' : 'add-circle-outline')) as any}
-                      size={18}
-                      color={colorInput}
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-base sm:text-lg font-black text-foreground">
-                      {editingCategory ? 'Modifier la charge' : 'Nouvelle charge variable'}
-                    </Text>
-                    <Text className="text-[11px] text-muted-foreground" numberOfLines={1}>
-                      Lissage automatique : Montant ÷ Durée en mois
-                    </Text>
-                  </View>
-                </View>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onPress={() => setIsModalVisible(false)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  className="w-8 h-8 rounded-full"
-                  accessibilityLabel="Fermer la boîte de dialogue">
-                  <Ionicons name="close" size={20} color={colors.textMuted} />
-                </Button>
-              </View>
-
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerClassName="gap-3 pb-2"
-                bounces={false}>
-                
-                {/* CHAMP 1 : TITRE */}
-                <View className="gap-1">
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-xs font-bold text-foreground">Titre</Text>
-                    {iconInput && (
-                      <Badge variant="outline" className="border-amber-200 bg-amber-50/70 px-1.5 py-0.5 rounded-full flex-row items-center gap-1">
-                        <Ionicons name={iconInput as any} size={11} color={colorInput} />
-                        <Text className="text-[10px] font-semibold text-amber-800">
-                          {isIconManuallySelected ? 'Icône choisie' : 'Icône auto'}
-                        </Text>
-                      </Badge>
-                    )}
-                  </View>
-                  <Input
-                    value={labelInput}
-                    onChangeText={handleLabelChange}
-                    placeholder="Ex: Courses, Restaurant, Essence, Vacances..."
-                    placeholderTextColor={colors.textMuted}
-                    className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
-                    autoFocus={!editingCategory}
-                  />
-                </View>
-
-                {/* CHAMP 2 : MONTANT */}
-                <View className="gap-1">
-                  <Text className="text-xs font-bold text-foreground">Montant (€)</Text>
-                  <Input
-                    value={amountInput}
-                    onChangeText={setAmountInput}
-                    keyboardType="decimal-pad"
-                    placeholder="Ex: 600.00"
-                    placeholderTextColor={colors.textMuted}
-                    className="bg-muted/40 border-border rounded-xl px-3 py-2 text-sm font-medium text-foreground h-10"
-                  />
-                </View>
-
-                {/* CHAMP 3 : DURÉE DE VIE SUR X MOIS */}
-                <View className="gap-1">
-                  <View className="flex-row justify-between items-center">
-                    <Text className="text-xs font-bold text-foreground">Durée de vie (mois)</Text>
-                    <Text className="text-[11px] text-muted-foreground">Lissage</Text>
-                  </View>
-
-                  <View className="flex-row items-center gap-2">
-                    <Input
-                      value={durationInput}
-                      onChangeText={(val) => {
-                        const sanitized = val.replace(/[^0-9.,]/g, '');
-                        setDurationInput(sanitized);
-                      }}
-                      keyboardType="decimal-pad"
-                      placeholder="1"
-                      placeholderTextColor={colors.textMuted}
-                      className="w-16 bg-muted/40 border-border rounded-xl px-2 py-2 text-sm font-bold text-foreground h-10 text-center"
-                    />
-                    <Text className="text-xs font-bold text-muted-foreground">mois</Text>
-
-                    {/* BOUTONS PRÉRÉGLAGES RAPIDES */}
-                    <View className="flex-row gap-1 flex-1 justify-end flex-wrap">
-                      {DURATION_PRESETS.map((m) => {
-                        const isActive = durationInput === m.toString();
-                        return (
-                          <Button
-                            key={m}
-                            variant={isActive ? 'default' : 'outline'}
-                            size="sm"
-                            onPress={() => setDurationInput(m.toString())}
-                            className={`px-2 py-1 rounded-lg h-8 ${
-                              isActive ? 'bg-primary' : 'border-border bg-muted/30'
-                            }`}>
-                            <Text
-                              className={`text-xs font-bold ${
-                                isActive ? 'text-white' : 'text-muted-foreground'
-                              }`}>
-                              {m}m
-                            </Text>
-                          </Button>
-                        );
-                      })}
-                    </View>
-                  </View>
-
-                  {/* ENCART EN DIRECT DU CALCUL DE LISSAGE */}
-                  {modalParsedAmount > 0 && (
-                    <View className="flex-row items-center bg-amber-50 p-2.5 rounded-xl border border-amber-200 gap-2 mt-1">
-                      <Ionicons name="calculator-outline" size={16} color="#D97706" />
-                      <View className="flex-1">
-                        <Text className="text-xs font-bold text-foreground">
-                          Impact mensuel :{' '}
-                          <Text className="text-amber-800 font-extrabold">
-                            {formatEuro(modalMonthlyImpact)} / mois
-                          </Text>
-                        </Text>
-                        <Text className="text-[10px] text-muted-foreground">
-                          {formatEuro(modalParsedAmount)} lissés sur {modalParsedDuration.toString().replace('.', ',')} mois
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                </View>
-
-                {/* EN MODE MODIFICATION : PERSONNALISATION MANUELLE DE L'ICÔNE ET DE LA COULEUR */}
-                {editingCategory ? (
-                  <>
-                    {/* CHAMP 4 : ICÔNE */}
-                    <View className="gap-1">
-                      <View className="flex-row items-center justify-between">
-                        <Text className="text-xs font-bold text-foreground">Icône personnalisée</Text>
-                        <Text className="text-[10px] text-muted-foreground font-medium">
-                          Sélection manuelle
-                        </Text>
-                      </View>
-                      <View className="flex-row gap-1.5 flex-wrap">
-                        {PRESET_ICONS.map((item) => {
-                          const isSelected = iconInput === item.icon;
-                          return (
-                            <Button
-                              key={item.icon}
-                              variant="outline"
-                              size="icon"
-                              onPress={() => handleSelectIcon(item.icon)}
-                              className={`w-9 h-9 rounded-xl ${
-                                isSelected ? 'border-amber-500 bg-amber-50' : 'border-border bg-muted/30'
-                              }`}>
-                              <Ionicons
-                                name={item.icon as any}
-                                size={16}
-                                color={isSelected ? '#D97706' : colors.textMuted}
-                              />
-                            </Button>
-                          );
-                        })}
-                      </View>
-                    </View>
-
-                    {/* CHAMP 5 : COULEUR */}
-                    <View className="gap-1">
-                      <Text className="text-xs font-bold text-foreground">Couleur</Text>
-                      <View className="flex-row gap-2 flex-wrap">
-                        {PRESET_COLORS.map((color) => (
-                          <TouchableOpacity
-                            key={color}
-                            onPress={() => handleSelectColor(color)}
-                            activeOpacity={0.7}
-                            className={`w-8 h-8 rounded-full justify-center items-center ${
-                              colorInput === color ? 'border-2 border-foreground' : ''
-                            }`}
-                            style={{ backgroundColor: color }}>
-                            {colorInput === color && (
-                              <Ionicons name="checkmark" size={14} color="#ffffff" />
-                            )}
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    </View>
-                  </>
-                ) : (
-                  <View className="flex-row items-center bg-indigo-50/60 p-3 rounded-2xl border border-indigo-200/70 gap-2.5">
-                    <View
-                      className="w-8 h-8 rounded-xl justify-center items-center shrink-0 border"
-                      style={{
-                        backgroundColor: `${colorInput}18`,
-                        borderColor: `${colorInput}35`,
-                      }}>
-                      <Ionicons name={(iconInput || 'pricetag-outline') as any} size={16} color={colorInput} />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-xs font-bold text-foreground">
-                        Icône & couleur automatiques
-                      </Text>
-                      <Text className="text-[10px] text-muted-foreground">
-                        Détectées automatiquement selon le titre saisi. Vous pourrez les personnaliser lors de la modification.
-                      </Text>
-                    </View>
-                  </View>
-                )}
-              </ScrollView>
-
-              {/* BOUTONS D'ACTION DU MODAL */}
-              <View className="flex-row justify-end gap-2 pt-2 border-t border-border">
-                <Button
-                  variant="outline"
-                  onPress={() => setIsModalVisible(false)}
-                  className="rounded-xl px-3.5 py-2 h-auto">
-                  <Text className="text-xs font-bold text-foreground">Annuler</Text>
-                </Button>
-
-                <Button
-                  onPress={handleSave}
-                  disabled={isSaving}
-                  className={`bg-primary rounded-xl px-4 py-2 gap-1.5 h-auto ${
-                    isSaving ? 'opacity-80' : ''
-                  }`}>
-                  {isSaving ? (
-                    <ActivityIndicator size="small" color="#ffffff" className="mr-1" />
-                  ) : (
-                    <Ionicons name="checkmark" size={16} color="#ffffff" />
-                  )}
-                  <Text className="text-xs font-bold text-white">
-                    {isSaving ? 'Enregistrement...' : editingCategory ? 'Enregistrer' : 'Ajouter'}
-                  </Text>
-                </Button>
-              </View>
-            </Pressable>
-          </KeyboardAvoidingView>
-        </Pressable>
-      </Modal>
+        editingCategory={editingCategory}
+        isSaving={isSaving}
+        labelInput={labelInput}
+        amountInput={amountInput}
+        durationInput={durationInput}
+        iconInput={iconInput}
+        colorInput={colorInput}
+        modalParsedAmount={modalParsedAmount}
+        modalParsedDuration={modalParsedDuration}
+        modalMonthlyImpact={modalMonthlyImpact}
+        onLabelChange={handleLabelChange}
+        onAmountChange={setAmountInput}
+        onDurationChange={setDurationInput}
+        onClose={() => setIsModalVisible(false)}
+        onSave={handleSave}
+      />
 
       {/* POPUP DE CONFIRMATION DE SUPPRESSION */}
       <ConfirmDialog

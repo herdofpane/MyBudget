@@ -84,7 +84,25 @@ Toute interface et interaction développée doit intégrer les **10 heuristiques
    - Prévoir des raccourcis et actions rapides pour les profils fréquents (recherche directe, filtres rapides).
    - Garantir une navigation complète au clavier et des contrastes conformes aux standards d'accessibilité (WCAG).
 ---
-## 3. Règles de génération des messages de commit Git
+## 3. Complexité du code, découpage & efficience algorithmique
+Tout développement doit garantir un code lisible, modulaire, hautement maintenable et aux performances d'exécution optimales :
+1. **Maîtrise de la complexité cyclomatique & cognitive** :
+   - **Garde-fous et retours anticipés (*Guard Clauses / Early Returns*)** : aplatir impérativement les structures conditionnelles pour éliminer les niveaux d'imbrication profonds (`if/else` imbriqués, ternaires en cascade).
+   - **Seuils de complexité** : limiter la complexité cyclomatique de chaque fonction. Si une fonction ou méthode dépasse 30 à 40 lignes ou cumule plusieurs niveaux de décision, elle doit obligatoirement être subdivisée en sous-fonctions explicites.
+   - **Simplicité expressive** : privilégier la lisibilité et l'intention métier sur l'astuce de code (*KISS — Keep It Simple, Stupid*).
+2. **Découpage modulaire & Atomicité des composants** :
+   - **Composants d'interface granulaires** : proscrire les composants "god object" ou écrans monolithiques dépassant plusieurs centaines de lignes. Découper systématiquement les interfaces complexes en sous-composants UI dédiés, indépendants et ciblés.
+   - **Délégation systématique aux Custom Hooks** : extraire l'intégralité de la logique d'état, des effets de bord et des interactions asynchrones dans des hooks personnalisés (`use<Feature>`). Le composant visuel ne doit agir que comme une vue réactive déclarant la structure graphique.
+   - **Fonctions utilitaires pures & déterministes** : déporter tous les calculs mathématiques, transformations de données, règles de gestion et formattages dans des modules utilitaires purs (`src/utils/`), sans dépendance d'état React, testables de manière isolée et unitaire.
+3. **Efficience algorithmique & optimisation des structures de données** :
+   - **Complexité temporelle et spatiale maîtrisée** : concevoir les algorithmes en minimisant la complexité asymptotique (viser $\mathcal{O}(1)$ ou $\mathcal{O}(n)$). Proscrire formellement les itérations imbriquées $\mathcal{O}(n^2)$ ou les recherches répétées (`.find()`, `.filter()`) dans des boucles de rendu.
+   - **Indexation et structures adaptées** : utiliser des structures en tables de hachage (`Map`, dictionnaires indexés par clé/identifiant ou `Set` pour la déduplication et les tests d'appartenance) dès qu'un accès fréquent ou un croisement de données est requis.
+   - **Immutabilité sans sur-allocation** : respecter l'immutabilité des états React sans instancier inutilement des structures d'objets ou tableaux intermédiaires éphémères dans les sections critiques.
+4. **Performance d'exécution React Native & Cycles de rendu** :
+   - **Mémoïsation stratégique et mesurée** : mémoïser les calculs d'agrégation ou transformations lourdes (`useMemo`) et stabiliser les références de fonctions transmises en props à des composants enfants (`useCallback`, `React.memo`).
+   - **Virtualisation des collections** : substituer les `ScrollView` linéaires par des listes virtualisées (`FlatList` ou `FlashList`) dès que la volumétrie des éléments est dynamique ou potentiellement élevée, avec des `keyExtractor` stables et uniques.
+---
+## 4. Règles de génération des messages de commit Git
 Toute proposition de commit doit respecter les standards **Conventional Commits** :
 1. **Format attendu** :
    - Structure : `<type>(<scope>): <description courte au présent>`
