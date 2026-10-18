@@ -2,6 +2,11 @@ import { useState, useCallback } from 'react';
 import { useBudget } from '@/hooks/use-budget';
 import { formatEuro } from '@/constants/formatters';
 import { computeSavings } from '@/constants/breakdown';
+import {
+  DEFAULT_TARGET_NECESSARY,
+  DEFAULT_ONE_TIME_AMOUNT,
+  DEFAULT_ONE_TIME_NECESSARY,
+} from '@/data';
 
 export interface DetailsFeedbackDialogState {
   visible: boolean;
@@ -10,6 +15,10 @@ export interface DetailsFeedbackDialogState {
   message: string;
   subtext?: string;
 }
+
+const DEFAULT_TARGET_NECESSARY_STR = DEFAULT_TARGET_NECESSARY.toString();
+const DEFAULT_ONE_TIME_AMOUNT_STR = DEFAULT_ONE_TIME_AMOUNT.toString();
+const DEFAULT_ONE_TIME_NECESSARY_STR = DEFAULT_ONE_TIME_NECESSARY.toString();
 
 /**
  * Custom Hook Métier (SOLID SRP - Couche Logique & Accès Données)
@@ -43,10 +52,10 @@ export function useDetailsSimulation() {
   const [overrideOneTimeAmount, setOverrideOneTimeAmount] = useState<string | null>(null);
   const [overrideOneTimeNecessary, setOverrideOneTimeNecessary] = useState<string | null>(null);
 
-  const monthlyNecessaryInput = overrideMonthlyNecessary ?? (budget.targetNecessary || 123).toString();
+  const monthlyNecessaryInput = overrideMonthlyNecessary ?? (budget.targetNecessary ?? DEFAULT_TARGET_NECESSARY).toString();
 
-  const oneTimeAmountInput = overrideOneTimeAmount ?? (budget.oneTimeIncome?.amount || 566.17).toString();
-  const oneTimeNecessaryInput = overrideOneTimeNecessary ?? (budget.oneTimeIncome?.necessary || 198.16).toString();
+  const oneTimeAmountInput = overrideOneTimeAmount ?? (budget.oneTimeIncome?.amount ?? DEFAULT_ONE_TIME_AMOUNT).toString();
+  const oneTimeNecessaryInput = overrideOneTimeNecessary ?? (budget.oneTimeIncome?.necessary ?? DEFAULT_ONE_TIME_NECESSARY).toString();
 
   // --- CALCULS MENSUELS ---
   // Le revenu mensuel vient directement de l'input d'accueil
@@ -129,6 +138,14 @@ export function useDetailsSimulation() {
           : `Montant ponctuel : ${formatEuro(parsedOneTimeAmount)} • Courant : ${formatEuro(oneTimeChecking)} • Épargne : ${formatEuro(oneTimeEpargne)}`,
         subtext: 'Vos préférences ont été sauvegardées et répercutées sur l’accueil.',
       });
+    } catch (error) {
+      console.error('[useDetailsSimulation] Erreur lors de la sauvegarde du budget:', error);
+      setFeedbackDialog({
+        visible: true,
+        type: 'error',
+        title: 'Erreur d’enregistrement',
+        message: 'Impossible de sauvegarder vos modifications de budget.',
+      });
     } finally {
       setIsSaving(false);
     }
@@ -150,10 +167,10 @@ export function useDetailsSimulation() {
   // Exécution de la réinitialisation confirmée
   const executeReset = useCallback(() => {
     if (isMonthly) {
-      setOverrideMonthlyNecessary('123');
+      setOverrideMonthlyNecessary(DEFAULT_TARGET_NECESSARY_STR);
     } else {
-      setOverrideOneTimeAmount('566.17');
-      setOverrideOneTimeNecessary('198.16');
+      setOverrideOneTimeAmount(DEFAULT_ONE_TIME_AMOUNT_STR);
+      setOverrideOneTimeNecessary(DEFAULT_ONE_TIME_NECESSARY_STR);
     }
     setShowResetDialog(false);
     setFeedbackDialog({
@@ -161,7 +178,7 @@ export function useDetailsSimulation() {
       type: 'info',
       title: 'Valeurs restaurées',
       message: isMonthly
-        ? 'Le seuil nécessaire par défaut (123 €) a été réappliqué.'
+        ? `Le seuil nécessaire par défaut (${DEFAULT_TARGET_NECESSARY_STR} €) a été réappliqué.`
         : 'Les paramètres du tableur standard ont été réappliqués dans les champs.',
     });
   }, [isMonthly]);

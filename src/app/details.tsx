@@ -10,6 +10,12 @@ import { NavigationHeader } from '@/components/navigation-header';
 import { AppDialog } from '@/components/confirm-dialog';
 import { DetailsSkeleton } from '@/components/ui/loading-state';
 import { colors } from '@/theme/colors';
+import { formatEuro } from '@/constants/formatters';
+import {
+  DEFAULT_TARGET_NECESSARY,
+  DEFAULT_ONE_TIME_AMOUNT,
+  DEFAULT_ONE_TIME_NECESSARY,
+} from '@/data';
 
 import { useDetailsSimulation } from '@/hooks/use-details-simulation';
 import {
@@ -123,8 +129,8 @@ export default function DetailsScreen() {
         title="Restaurer le tableur standard ?"
         message={
           isMonthly
-            ? 'Cela réinitialisera le Seuil nécessaire au montant par défaut (123 €).'
-            : 'Cela réinitialisera le Revenu ponctuel (566,17 €) et le Seuil nécessaire (198,16 €).'
+            ? `Cela réinitialisera le Seuil nécessaire au montant par défaut (${formatEuro(DEFAULT_TARGET_NECESSARY)}).`
+            : `Cela réinitialisera le Revenu ponctuel (${formatEuro(DEFAULT_ONE_TIME_AMOUNT)}) et le Seuil nécessaire (${formatEuro(DEFAULT_ONE_TIME_NECESSARY)}).`
         }
         subtext="Vos modifications non appliquées seront perdues."
         confirmLabel="Restaurer"

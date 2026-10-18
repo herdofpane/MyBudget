@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useBudget } from '@/hooks/use-budget';
 import { computeSavings } from '@/constants/breakdown';
 import { formatEuro, formatEuroRound } from '@/constants/formatters';
+import { DEFAULT_TARGET_NECESSARY } from '@/data';
 
 /**
  * Custom Hook Métier (Couche 2 SOLID) dédié à l'écran d'accueil Klyro
@@ -40,7 +41,7 @@ export function useHomeSummary() {
 
   // Épargne calculée = formule Klyro : resteAVivre - √(resteAVivre * totalNecessaire)
   const epargneAmount = useMemo(
-    () => computeSavings(resteAVivre, budget.targetNecessary || 123),
+    () => computeSavings(resteAVivre, budget.targetNecessary ?? DEFAULT_TARGET_NECESSARY),
     [resteAVivre, budget.targetNecessary]
   );
 
@@ -82,6 +83,8 @@ export function useHomeSummary() {
         savingsAccount: epargneAmount,
         checkingAccount: checkingAmount,
       });
+    } catch (error) {
+      console.error('[useHomeSummary] Erreur lors de la sauvegarde du revenu:', error);
     } finally {
       setLocalIncome(null);
     }

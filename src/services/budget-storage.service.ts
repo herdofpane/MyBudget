@@ -42,6 +42,11 @@ class BudgetStorageService {
   private readonly legacyMockHistoryIds = new Set(['h1', 'h2', 'h3']);
 
   /**
+   * Total historique des charges fixes mockées (utilisé pour la migration/nettoyage du cache v1)
+   */
+  private readonly legacyMockFixedTotal = 61.73;
+
+  /**
    * Charge l'état budgétaire sauvegardé avec validation et valeurs par défaut
    */
   async loadState(): Promise<PersistedBudgetState> {
@@ -102,7 +107,9 @@ class BudgetStorageService {
             ...DEFAULT_BUDGET,
             ...parsed.budget,
             fixedExpenses:
-              parsed.budget.fixedExpenses === 61.73 ? cleanedFixedExpenses : (parsed.budget.fixedExpenses ?? cleanedFixedExpenses),
+              parsed.budget.fixedExpenses === this.legacyMockFixedTotal
+                ? cleanedFixedExpenses
+                : (parsed.budget.fixedExpenses ?? cleanedFixedExpenses),
           }
         : DEFAULT_BUDGET;
 
@@ -117,7 +124,7 @@ class BudgetStorageService {
       if (
         (parsed.fixedExpensesList && parsed.fixedExpensesList.length !== fixedExpensesList.length) ||
         (parsed.variableCategories && parsed.variableCategories.length !== variableCategories.length) ||
-        (parsed.budget && parsed.budget.fixedExpenses === 61.73)
+        (parsed.budget && parsed.budget.fixedExpenses === this.legacyMockFixedTotal)
       ) {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedState));
       }
@@ -135,11 +142,16 @@ class BudgetStorageService {
   }
 
   /**
-   * Sauvegarde l'état de manière sérialisée (Mutex / Queue) pour éviter les Race Conditions
+   * Sauvegarde l'état de manière sérialisée (Mutex / Queue) pour éviter les Race Conditions.
+   * Pourquoi : AsyncStorage n'est pas transactionnel. Deux écritures concurrentes non ordonnées
+   * peuvent s'écraser mutuellement.
    */
   async saveState(state: PersistedBudgetState): Promise<void> {
     this.writeQueue = this.writeQueue
-      .catch(() => {})
+      .catch((queueError) => {
+        // Enregistre l'erreur précédente sans interrompre la chaîne pour les sauvegardes futures
+        console.warn('[BudgetStorageService] Erreur résiduelle dans la file d\'écriture:', queueError);
+      })
       .then(async () => {
         try {
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));

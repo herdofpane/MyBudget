@@ -182,6 +182,14 @@ export function useFixedExpenses() {
         });
       }
       setIsModalVisible(false);
+    } catch (error) {
+      console.error('[useFixedExpenses] Erreur lors de l’enregistrement de la charge fixe:', error);
+      setFeedbackDialog({
+        visible: true,
+        type: 'error',
+        title: 'Erreur d’enregistrement',
+        message: 'Impossible de sauvegarder la charge fixe. Veuillez réessayer.',
+      });
     } finally {
       setIsSaving(false);
     }
@@ -215,15 +223,25 @@ export function useFixedExpenses() {
       return;
     }
 
-    await advanceCreditMonth(item.id);
+    try {
+      await advanceCreditMonth(item.id);
 
-    const willExpire = progress.paid + 1 >= progress.total;
-    if (willExpire) {
+      const willExpire = progress.paid + 1 >= progress.total;
+      if (willExpire) {
+        setFeedbackDialog({
+          visible: true,
+          type: 'success',
+          title: 'Félicitations ! 🎉',
+          message: `Le crédit "${item.label}" est désormais totalement remboursé ! Il est automatiquement retiré de vos charges mensuelles.`,
+        });
+      }
+    } catch (error) {
+      console.error('[useFixedExpenses] Erreur lors de l’avancement du crédit:', error);
       setFeedbackDialog({
         visible: true,
-        type: 'success',
-        title: 'Félicitations ! 🎉',
-        message: `Le crédit "${item.label}" est désormais totalement remboursé ! Il est automatiquement retiré de vos charges mensuelles.`,
+        type: 'error',
+        title: 'Erreur',
+        message: 'Impossible de faire avancer le crédit. Veuillez réessayer.',
       });
     }
   }, [advanceCreditMonth]);
@@ -233,14 +251,22 @@ export function useFixedExpenses() {
   }, []);
 
   const handleConfirmDelete = useCallback(async () => {
-    if (deleteTarget) {
-      setIsDeleting(true);
-      try {
-        await deleteFixedExpense(deleteTarget.id);
-        setDeleteTarget(null);
-      } finally {
-        setIsDeleting(false);
-      }
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteFixedExpense(deleteTarget.id);
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error('[useFixedExpenses] Erreur lors de la suppression de la charge:', error);
+      setFeedbackDialog({
+        visible: true,
+        type: 'error',
+        title: 'Erreur de suppression',
+        message: 'Impossible de supprimer cette charge fixe.',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   }, [deleteTarget, deleteFixedExpense]);
 

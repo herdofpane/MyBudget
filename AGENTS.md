@@ -40,93 +40,78 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ---
 
+# Directives de Développement
 
-# Directives d'architecture & Qualité du code
-## 1. Respect des principes SOLID & Architecture des couches
-Tout le code développé doit respecter rigoureusement les principes **SOLID** ainsi que la séparation stricte des responsabilités :
-1. **S — Single Responsibility Principle (SRP) / Responsabilité unique** :
-   - Chaque fonction, classe, module ou composant UI ne doit avoir qu'une seule responsabilité et une seule raison de changer.
-   - Séparer nettement la logique métier, la couche d'accès aux données et le rendu UI (via des hooks, des services dédiés ou des stores applicatifs).
-2. **O — Open/Closed Principle (OCP) / Ouvert/Fermé** :
-   - Les entités logicielles doivent être ouvertes à l'extension mais fermées à la modification.
-   - Privilégier la composition, les props d'extension et l'injection de dépendances plutôt que de modifier le code existant stabilisé.
-3. **L — Liskov Substitution Principle (LSP) / Substitution de Liskov** :
-   - Les implémentations d'abstractions doivent pouvoir se substituer à leurs contrats de base sans altérer le comportement attendu.
-   - Respecter scrupuleusement les contrats d'interfaces et les signatures de types.
-4. **I — Interface Segregation Principle (ISP) / Ségrégation des interfaces** :
-   - Concevoir des interfaces et des types ciblés et granulaires plutôt que des contrats volumineux.
-   - Ne jamais forcer un composant ou un service à dépendre de propriétés ou de méthodes dont il n'a pas l'utilité.
-5. **D — Dependency Inversion Principle (DIP) / Inversion des dépendances** :
-   - Dépendre des abstractions plutôt que des implémentations concrètes.
-   - Isoler les services externes (APIs, SDKs, stockage) derrière des couches d'abstraction pour faciliter les tests et l'évolutivité.
-6. **Séparation stricte Frontend / Backend** :
-   - **Découplage UI et Serveur** : interdiction formelle d'exécuter des requêtes base de données directes (SQL, ORM) ou de manipuler des secrets backend au sein des composants visuels.
-   - **Couche d'accès aux données (Data Access Layer)** : toute interaction client/serveur doit transiter par des points d'entrée dédiés et typés (services d'API, endpoints REST/GraphQL ou Server Actions agissant comme contrôleurs).
-   - **Isolation des contrats** : partager les schémas de validation et les types de données (DTOs / interfaces) sans importer de dépendances serveur dans l'environnement d'exécution client.
----
-## 2. Critères ergonomiques & Heuristiques d'utilisabilité (UX/UI)
-Toute interface et interaction développée doit intégrer les **10 heuristiques de Nielsen** et les **critères d'ergonomie de Bastien & Scapin** :
-1. **Visibilité de l'état du système & Feedback immédiat (Nielsen #1 / Guidage)** :
-   - Tout chargement ou traitement asynchrone doit fournir un retour visuel instantané (indicateurs de progression, squelettes, états inactifs, notifications contextuelles).
-   - L'utilisateur doit toujours identifier son emplacement, les filtres ou tris actifs, et le volume d'éléments concernés (compteurs).
-2. **Contrôle utilisateur & Réversibilité (Nielsen #3 / Contrôle explicite)** :
-   - Fournir des échappatoires claires : boutons d'annulation, fermeture des dialogues (croix, clic extérieur, touche `Échap`), réinitialisation aisée des paramètres.
-   - Prévoir une confirmation explicite pour toute action destructive ou irréversible.
-3. **Prévention et gestion des erreurs (Nielsen #5 & #9 / Protection des erreurs)** :
-   - Valider les formulaires en temps réel et contraindre les saisies pour prévenir les anomalies.
-   - Rédiger des messages d'erreur clairs, compréhensibles et sans jargon technique brut, en indiquant la solution pour y remédier.
-4. **Cohérence & Standards (Nielsen #4 / Homogénéité)** :
-   - Maintenir une uniformité absolue : même vocabulaire métier, mêmes conventions de placement d'actions et mêmes pictogrammes pour une fonction identique.
-5. **Réduction de la charge cognitive (Nielsen #6 & #8 / Charge de travail)** :
-   - Favoriser la reconnaissance visuelle immédiate plutôt que la mémorisation d'un écran à l'autre.
-   - Hiérarchiser l'information pour éviter l'encombrement visuel (organisation par onglets, panneaux dépliables ou modales contextuelles).
-6. **Flexibilité & Accessibilité (Nielsen #7 / Adaptabilité)** :
-   - Prévoir des raccourcis et actions rapides pour les profils fréquents (recherche directe, filtres rapides).
-   - Garantir une navigation complète au clavier et des contrastes conformes aux standards d'accessibilité (WCAG).
----
-## 3. Complexité du code, découpage & efficience algorithmique
-Tout développement doit garantir un code lisible, modulaire, hautement maintenable et aux performances d'exécution optimales :
-1. **Maîtrise de la complexité cyclomatique & cognitive** :
-   - **Garde-fous et retours anticipés (*Guard Clauses / Early Returns*)** : aplatir impérativement les structures conditionnelles pour éliminer les niveaux d'imbrication profonds (`if/else` imbriqués, ternaires en cascade).
-   - **Seuils de complexité** : limiter la complexité cyclomatique de chaque fonction. Si une fonction ou méthode dépasse 30 à 40 lignes ou cumule plusieurs niveaux de décision, elle doit obligatoirement être subdivisée en sous-fonctions explicites.
-   - **Simplicité expressive** : privilégier la lisibilité et l'intention métier sur l'astuce de code (*KISS — Keep It Simple, Stupid*).
-2. **Découpage modulaire & Atomicité des composants** :
-   - **Composants d'interface granulaires** : proscrire les composants "god object" ou écrans monolithiques dépassant plusieurs centaines de lignes. Découper systématiquement les interfaces complexes en sous-composants UI dédiés, indépendants et ciblés.
-   - **Délégation systématique aux Custom Hooks** : extraire l'intégralité de la logique d'état, des effets de bord et des interactions asynchrones dans des hooks personnalisés (`use<Feature>`). Le composant visuel ne doit agir que comme une vue réactive déclarant la structure graphique.
-   - **Fonctions utilitaires pures & déterministes** : déporter tous les calculs mathématiques, transformations de données, règles de gestion et formattages dans des modules utilitaires purs (`src/utils/`), sans dépendance d'état React, testables de manière isolée et unitaire.
-3. **Efficience algorithmique & optimisation des structures de données** :
-   - **Complexité temporelle et spatiale maîtrisée** : concevoir les algorithmes en minimisant la complexité asymptotique (viser $\mathcal{O}(1)$ ou $\mathcal{O}(n)$). Proscrire formellement les itérations imbriquées $\mathcal{O}(n^2)$ ou les recherches répétées (`.find()`, `.filter()`) dans des boucles de rendu.
-   - **Indexation et structures adaptées** : utiliser des structures en tables de hachage (`Map`, dictionnaires indexés par clé/identifiant ou `Set` pour la déduplication et les tests d'appartenance) dès qu'un accès fréquent ou un croisement de données est requis.
-   - **Immutabilité sans sur-allocation** : respecter l'immutabilité des états React sans instancier inutilement des structures d'objets ou tableaux intermédiaires éphémères dans les sections critiques.
-4. **Performance d'exécution React Native & Cycles de rendu** :
-   - **Mémoïsation stratégique et mesurée** : mémoïser les calculs d'agrégation ou transformations lourdes (`useMemo`) et stabiliser les références de fonctions transmises en props à des composants enfants (`useCallback`, `React.memo`).
-   - **Virtualisation des collections** : substituer les `ScrollView` linéaires par des listes virtualisées (`FlatList` ou `FlashList`) dès que la volumétrie des éléments est dynamique ou potentiellement élevée, avec des `keyExtractor` stables et uniques.
----
-## 4. Règles de génération des messages de commit Git
-Toute proposition de commit doit respecter les standards **Conventional Commits** :
-1. **Format attendu** :
-   - Structure : `<type>(<scope>): <description courte au présent>`
-   - Types admis :
-     - `feat` : Ajout d'une nouvelle fonctionnalité.
-     - `fix` : Correction d'une anomalie ou d'un bogue.
-     - `refactor` : Restructuration sans altération du comportement fonctionnel (ex. : refonte SOLID, isolation de couches).
-     - `style` : Ajustements purement visuels, polices, couleurs, espacements.
-     - `perf` : Optimisation des performances ou du temps de rendu.
-     - `docs` : Modification de la documentation ou des directives de développement.
-     - `chore` : Maintenance technique, mise à jour des dépendances, outillage CI/CD.
-2. **Détermination du `<scope>`** :
-   - Le périmètre doit être déduit fidèlement des fichiers modifiés :
-     - Vue applicative / composant client $\rightarrow$ nom du module UI (ex. : `auth-ui`, `billing`, `dashboard`).
-     - Service métier, contrôleur, API ou base de données $\rightarrow$ `api`, `db`, nom du domaine backend (ex. : `users-service`, `orders-api`).
-     - Logique transverse, directives ou configuration $\rightarrow$ `core`, `config`, `rules`.
-3. **Exhaustivité du message** :
-   - Proscrire les descriptions floues (*"update"*, *"fix bug"*).
-   - Détailler dans le corps du message (liste à puces) :
-     - Les ajouts, modifications ou suppressions majeures.
-     - L'impact technique ou ergonomique de la modification.
-4. **Exemple de référence** :
-   - feat(billing): ajout du récapitulatif de commande et fiabilisation des formulaires
-      - Découplage du formulaire de paiement via un service dédié (billing-service)
-      - Ajout de la validation instantanée sur les champs de carte bancaire
-      - Intégration d'un indicateur de chargement sur le bouton de validation
-      - Prise en charge de la fermeture du volet récapitulatif via la touche Échap
+Ce document définit les règles universelles et les standards de qualité que tout code généré ou modifié dans ce projet doit strictement respecter.
+
+## 1. Principes de Conception et Architecture Logicielle
+
+- **KISS (Keep It Simple, Stupid)** : Privilégie toujours la solution la plus simple et la plus directe. N'introduis pas de patterns complexes ou de sur-ingénierie sans nécessité absolue.
+- **DRY (Don't Repeat Yourself) vs WET** : Évite la duplication de logique métier. Cependant, préfère une légère duplication à une mauvaise abstraction qui créerait un couplage fort entre des modules non liés.
+- **YAGNI (You Aren't Gonna Need It)** : Ne code que ce qui est explicitement requis pour la fonctionnalité actuelle. N'ajoute pas de code, de paramètres ou d'interfaces "au cas où" pour le futur.
+- **SoC (Separation of Concerns)** : Sépare clairement la logique métier, l'interface utilisateur (UI) et l'accès aux données (API/Base de données).
+- **Single Responsibility Principle (SOLID)** : Chaque fichier, classe, module ou fonction ne doit avoir qu'une seule responsabilité et une seule raison de changer.
+- **Langage Ubiquitaire (DDD)** : Utilise exactement la même terminologie métier dans le code (noms de classes, variables, routes) que celle employée par le produit et le métier.
+
+## 2. Clean Code et Lisibilité
+
+- **Nommage explicite** : Les noms de variables, fonctions, classes et fichiers doivent révéler leur intention clairement sans nécessiter de contexte supplémentaire (ex: `daysSinceLastLogin` au lieu de `d` ou `time`).
+- **Fonctions courtes et prévisibles** :
+  - Une fonction doit faire une seule chose.
+  - Privilégie les fonctions pures et minimise les effets de bord (ne modifie pas les paramètres d'entrée ou l'état global de manière cachée).
+  - Principe de moindre surprise : Une fonction fait exactement ce que son nom indique (ex: `getUser()` ne doit rien modifier).
+- **Politique de commentaires** :
+  - **Ne commente jamais le Quoi** : Si le code a besoin d'un commentaire pour expliquer ce qu'il fait, réécris le code pour le rendre plus lisible (meilleur nommage, extraction de sous-fonctions).
+  - **Commente toujours le Pourquoi** : Documente les décisions métier complexes, les contournements techniques (workarounds) ou les contraintes externes non évidentes.
+- **Zéro valeur magique** : N'utilise pas de chaînes de caractères ou de nombres en dur (*magic numbers/strings*) dans la logique. Extrais-les dans des constantes nommées explicites ou des énumérations.
+
+## 3. Conception Système (System Design) et Résilience
+
+- **Statelessness (Absence d'état)** : Ne stocke jamais d'état de session ou de données temporaires critiques en mémoire locale du serveur. Tout état doit être déporté (base de données, cache externe, jeton client) pour garantir le scaling horizontal.
+- **Idempotence** : Les opérations de mutation critiques (PUT, DELETE, paiements, webhooks, jobs asynchrones) doivent être idempotentes : les exécuter plusieurs fois avec les mêmes paramètres doit produire le même résultat sans créer de doublons.
+- **Rétrocompatibilité** : Toute modification d'API, de contrat d'interface ou de schéma de base de données doit être rétrocompatible (pattern *Expand and Contract*) pour permettre des déploiements sans interruption de service.
+- **Asynchronisme et Découplage** : Délègue les opérations longues ou coûteuses (envoi d'e-mails, génération de fichiers, appels tiers lents) à des tâches de fond (queues/workers) pour ne pas bloquer le thread principal ou la réponse HTTP.
+
+## 4. Robustesse, Sécurité (DevSecOps) et Confidentialité
+
+- **Fail Fast & Guard Clauses** : Valide les préconditions tout en haut des fonctions et retourne immédiatement en cas d'état invalide (retours anticipés). Évite les structures `if / else` imbriquées sur plus de 2 niveaux.
+- **Never Trust User Input** : Considère toute donnée entrante (utilisateur, API externe, fichier, URL) comme potentiellement malveillante ou malformée. Valide, type et assainis les données aux frontières du système (protection contre les injections SQL, XSS, CSRF).
+- **Défense en profondeur & Moindre Privilège** :
+  - Vérifie systématiquement l'authentification et les autorisations côté serveur sur chaque route/action, même si l'interface client les masque.
+  - Restreins les permissions des services, tokens et requêtes au strict minimum nécessaire.
+- **Sécurité des secrets et Dépendances** :
+  - Ne laisse jamais de secrets, clés d'API, mots de passe ou jetons en dur dans le code. Utilise systématiquement des variables d'environnement.
+  - N'introduis pas de librairies externes lourdes ou non maintenues pour des besoins triviaux. Privilégie des licences permissives (MIT, Apache 2.0, BSD).
+- **Privacy by Design (RGPD)** : Applique la minimisation des données. Ne collecte, ne stocke et n'expose dans les réponses API que les champs strictement nécessaires à la fonctionnalité (ne renvoie jamais un objet User complet avec son hash de mot de passe ou des métadonnées privées).
+
+## 5. Observabilité, Erreurs et Exploitation (DevOps)
+
+- **Gestion stricte des erreurs** :
+  - Interdiction formelle d'utiliser des blocs `try / catch` vides qui avalent les erreurs silencieusement.
+  - Chaque erreur interceptée doit être soit traitée proprement, soit journalisée avec son contexte, soit relancée avec un message explicite.
+  - Ne renvoie jamais de stack traces ou de détails techniques internes à l'utilisateur final en production.
+- **Journalisation (Logging) structurée et sécurisée** :
+  - Produis des logs structurés et contextualisés (incluant un `request_id` ou `correlation_id` quand applicable).
+  - Interdiction absolue de logger des données sensibles (mots de passe, tokens JWT, numéros de carte bancaire, données personnelles brutes).
+- **Standardisation Temporelle** : Stocke, manipule et échange toutes les dates et heures exclusivement en UTC (format ISO 8601). La conversion dans le fuseau horaire local ne doit se faire qu'au dernier moment sur l'interface d'affichage.
+- **Configuration externe (12-Factor App)** : Sépare strictement le code de la configuration dépendante de l'environnement (URLs, feature flags, limites).
+
+## 6. Accessibilité (a11y), Performance et Éco-conception
+
+- **Accessibilité par défaut (WCAG / RGAA)** :
+  - Utilise toujours du HTML/composants sémantiques natifs plutôt que des éléments génériques non signifiants.
+  - Assure une navigation complète au clavier (gestion du focus), des labels explicites sur tous les champs de formulaire, des textes alternatifs (`alt` / `accessibilityLabel`) pertinents et des attributs d'accessibilité (`aria-*` / props accessibility) lorsque nécessaire.
+- **Performance des données** :
+  - Évite systématiquement le problème des requêtes $N+1$ (utilise le eager loading, des jointures ou du batching).
+  - Pagine ou limite systématiquement toute requête retournant une liste d'éléments depuis la base de données ou via une API.
+- **Pas d'optimisation prématurée (mais pas de négligence)** : Privilégie dans l'ordre :
+  1. L'exactitude (*Make it work*)
+  2. La clarté et la maintenabilité (*Make it right*)
+  3. La performance (*Make it fast* — si un goulot d'étranglement est prouvé ou évident).
+
+## 7. Hygiène de Code et Testabilité
+
+- **Règle du Boy Scout** : Laisse toujours le code plus propre que tu ne l'as trouvé. Supprime le code mort, les imports inutilisés et les instructions de débogage (`console.log`, `print`, `dd`) avant de finaliser.
+- **Changements atomiques** : Lors d'une modification, ne touche qu'au périmètre concerné par la demande sans casser l'existant ni reformater arbitrairement des fichiers non liés.
+- **Testabilité** : Écris du code facilement testable (injection de dépendances, découplage). Les tests doivent vérifier le comportement métier (entrées/sorties, cas limites et cas d'erreur) et non les détails d'implémentation interne.
+

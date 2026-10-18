@@ -8,19 +8,28 @@ import {
   PresetIcon,
 } from '@/types';
 
+// Constantes métier par défaut du budget standard Klyro
+export const DEFAULT_INCOME = 977;
+export const DEFAULT_TARGET_NECESSARY = 123;
+export const DEFAULT_TARGET_FACULTATIVE = 130;
+export const DEFAULT_ONE_TIME_AMOUNT = 566.17;
+export const DEFAULT_ONE_TIME_NECESSARY = 198.16;
+export const DEFAULT_ONE_TIME_FACULTATIVE = 136.79;
+export const DEFAULT_ONE_TIME_SAVINGS = 231.22;
+
 // Données initiales du budget (synchronisées avec le modèle mensuel et ponctuel)
 export const DEFAULT_BUDGET: BudgetData = {
-  income: 977,
+  income: DEFAULT_INCOME,
   fixedExpenses: 0,
-  checkingAccount: 977,
+  checkingAccount: DEFAULT_INCOME,
   savingsAccount: 0,
-  targetNecessary: 123,
-  targetFacultative: 130,
+  targetNecessary: DEFAULT_TARGET_NECESSARY,
+  targetFacultative: DEFAULT_TARGET_FACULTATIVE,
   oneTimeIncome: {
-    amount: 566.17,
-    necessary: 198.16,
-    facultative: 136.79,
-    savings: 231.22,
+    amount: DEFAULT_ONE_TIME_AMOUNT,
+    necessary: DEFAULT_ONE_TIME_NECESSARY,
+    facultative: DEFAULT_ONE_TIME_FACULTATIVE,
+    savings: DEFAULT_ONE_TIME_SAVINGS,
   },
 };
 

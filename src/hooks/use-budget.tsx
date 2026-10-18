@@ -65,12 +65,17 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
       newVariable: VariableCategory[],
       newHistory: ExpenseRecord[]
     ) => {
-      await budgetStorageService.saveState({
-        budget: newBudget,
-        fixedExpensesList: newFixed,
-        variableCategories: newVariable,
-        expenseHistory: newHistory,
-      });
+      try {
+        await budgetStorageService.saveState({
+          budget: newBudget,
+          fixedExpensesList: newFixed,
+          variableCategories: newVariable,
+          expenseHistory: newHistory,
+        });
+      } catch (err) {
+        console.error('[BudgetProvider] Erreur lors de la persistance du budget:', err);
+        throw err;
+      }
     },
     []
   );

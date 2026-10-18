@@ -132,6 +132,14 @@ export function useVariableExpenses() {
         });
       }
       setIsModalVisible(false);
+    } catch (error) {
+      console.error('[useVariableExpenses] Erreur lors de l’enregistrement de la charge variable:', error);
+      setFeedbackDialog({
+        visible: true,
+        type: 'error',
+        title: 'Erreur d’enregistrement',
+        message: 'Impossible de sauvegarder la charge variable. Veuillez réessayer.',
+      });
     } finally {
       setIsSaving(false);
     }
@@ -151,14 +159,22 @@ export function useVariableExpenses() {
   }, []);
 
   const handleConfirmDelete = useCallback(async () => {
-    if (deleteTarget) {
-      setIsDeleting(true);
-      try {
-        await deleteVariableCategory(deleteTarget.id);
-        setDeleteTarget(null);
-      } finally {
-        setIsDeleting(false);
-      }
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteVariableCategory(deleteTarget.id);
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error('[useVariableExpenses] Erreur lors de la suppression de la charge variable:', error);
+      setFeedbackDialog({
+        visible: true,
+        type: 'error',
+        title: 'Erreur de suppression',
+        message: 'Impossible de supprimer cette charge variable.',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   }, [deleteTarget, deleteVariableCategory]);
 

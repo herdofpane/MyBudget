@@ -35,7 +35,9 @@ function TabIcon({ name, focusedName, focused, color }: TabIconProps) {
 
 export default function RootLayout() {
   useEffect(() => {
-    SplashScreen.hideAsync().catch(() => {});
+    SplashScreen.hideAsync().catch((err) => {
+      console.warn('[RootLayout] Impossible de masquer le splashscreen:', err);
+    });
   }, []);
 
   const insets = useSafeAreaInsets();
