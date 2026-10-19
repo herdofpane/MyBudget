@@ -98,6 +98,8 @@ L'application respecte rigoureusement les principes **SOLID** et les heuristique
 
 ```text
 MyBudget/
+├── .github/workflows/       # Intégration & Déploiement continu (CI/CD GitHub Pages)
+├── AGENTS.md                # Directives d'architecture, qualité et règles de développement
 ├── assets/                  # Icônes adaptatives, images et splash screens
 ├── scripts/                 # Scripts utilitaires (patchs, reset)
 └── src/
@@ -205,7 +207,11 @@ Dans le terminal interactif :
 
 Le projet est configuré pour être compilé en mode statique avec un `baseUrl` adapté pour GitHub Pages (`/MyBudget`).
 
-Pour générer et publier une nouvelle version en ligne :
+### Déploiement Automatique (CI/CD GitHub Actions)
+À chaque `git push` sur la branche `main`, un workflow GitHub Actions (`.github/workflows/deploy.yml`) compile automatiquement l'export web statique et déploie la dernière version sur la branche `gh-pages` en quelques instants sans intervention manuelle.
+
+### Déploiement Manuel (Optionnel)
+Vous pouvez également déclencher un déploiement manuellement en local :
 ```bash
 npm run deploy
 ```
@@ -229,6 +235,8 @@ Exemple :
 ```bash
 git commit -m "docs(readme): mise à jour complète de la documentation du projet"
 ```
+
+> **Documentation continue** : Toute évolution fonctionnelle, technique ou structurelle doit s'accompagner **automatiquement** de la mise à jour du fichier `README.md` (badges, fonctionnalités, arborescence et commandes) afin de garantir une documentation vivante et toujours synchrone avec le code.
 
 ---
 

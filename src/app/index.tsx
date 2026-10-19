@@ -13,7 +13,6 @@ import {
   HomeBalanceCard,
   HomeAccountsCard,
   HomeIncomeCard,
-  HomeShortcuts,
 } from '@/components/home';
 
 export default function HomeScreen() {
@@ -27,7 +26,6 @@ export default function HomeScreen() {
     isSimulating,
     simulationPresets,
     selectedMonthFormatted,
-    simulatedTotalFixedExpenses,
     simulatedResteAVivre,
     simulatedEpargneAmount,
     simulatedCheckingAmount,
@@ -118,16 +116,6 @@ export default function HomeScreen() {
               onIncomeChange={setLocalIncome}
               onIncomeBlur={handleBlurIncome}
               onSubmitEditing={handleBlurIncome}
-            />
-
-            {/* 6. RACCOURCIS RAPIDES VERS LES AUTRES ÉCRANS */}
-            <HomeShortcuts
-              fixedExpensesFormatted={renderMoney(simulatedTotalFixedExpenses)}
-              fixedExpensesRoundFormatted={renderMoneyRound(simulatedTotalFixedExpenses)}
-              isSimulating={isSimulating}
-              onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
-              onNavigateVariableExpenses={() => router.push('/variable-expenses')}
-              onNavigateDetails={() => router.push('/details')}
             />
           </View>
         </ScrollView>
