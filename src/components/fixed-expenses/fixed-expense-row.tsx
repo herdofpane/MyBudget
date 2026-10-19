@@ -11,13 +11,14 @@ import {
   getChargeScheduleStatus,
   formatMonthYear,
 } from '@/utils/fixed-expenses';
-import { getCreditProgress } from '@/utils/credit';
+import { getCreditProgressInMonth } from '@/utils/credit';
 import { FixedExpenseItem, FixedCategoryType } from '@/types';
 
 interface FixedExpenseRowProps {
   item: FixedExpenseItem;
   isEven: boolean;
   currentMonthStr: string;
+  baseMonthStr?: string;
   onAdvanceMonth: (item: FixedExpenseItem) => void;
   onEdit: (item: FixedExpenseItem) => void;
   onDelete: (id: string, label: string) => void;
@@ -27,15 +28,16 @@ export function FixedExpenseRow({
   item,
   isEven,
   currentMonthStr,
+  baseMonthStr,
   onAdvanceMonth,
   onEdit,
   onDelete,
 }: FixedExpenseRowProps) {
   const cat = CATEGORY_CONFIG[item.category as FixedCategoryType] || CATEGORY_CONFIG.autre;
   const isCredit = !!item.isCredit;
-  const creditInfo = isCredit ? getCreditProgress(item) : null;
+  const creditInfo = isCredit ? getCreditProgressInMonth(item, currentMonthStr, baseMonthStr) : null;
   const isExpired = creditInfo?.isExpired ?? false;
-  const schedule = getChargeScheduleStatus(item, currentMonthStr);
+  const schedule = getChargeScheduleStatus(item, currentMonthStr, baseMonthStr);
   const isNotCounted = !schedule.isCounted;
 
   return (

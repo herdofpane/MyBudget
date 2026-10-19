@@ -35,6 +35,33 @@ export function getCreditRemainingMonths(item: FixedExpenseItem): number {
 }
 
 /**
+ * Calcule la différence en mois entre deux dates au format YYYY-MM
+ */
+function getMonthsOffset(fromMonth: string, toMonth: string): number {
+  if (!/^\d{4}-\d{2}$/.test(fromMonth) || !/^\d{4}-\d{2}$/.test(toMonth)) return 0;
+  const [yA, mA] = fromMonth.split('-').map(Number);
+  const [yB, mB] = toMonth.split('-').map(Number);
+  return (yB - yA) * 12 + (mB - mA);
+}
+
+/**
+ * Calcule le nombre de mois restants pour un crédit à un mois cible (YYYY-MM).
+ */
+export function getCreditRemainingMonthsInMonth(
+  item: FixedExpenseItem,
+  targetMonthStr?: string,
+  baseMonthStr?: string
+): number {
+  const currentRemaining = getCreditRemainingMonths(item);
+  if (currentRemaining === Infinity) return Infinity;
+  if (!targetMonthStr) return currentRemaining;
+
+  const base = baseMonthStr || new Date().toISOString().slice(0, 7);
+  const offset = getMonthsOffset(base, targetMonthStr);
+  return Math.max(0, currentRemaining - offset);
+}
+
+/**
  * Détermine si le crédit est arrivé à son terme (soldé / expiré)
  * Lorsque true, la charge ne doit plus impacter le total des charges fixes
  */
@@ -46,9 +73,27 @@ export function isCreditExpired(item: FixedExpenseItem): boolean {
 }
 
 /**
- * Calcule la progression détaillée d'un crédit
+ * Détermine si le crédit est arrivé à son terme (soldé / expiré) à un mois donné
  */
-export function getCreditProgress(item: FixedExpenseItem) {
+export function isCreditExpiredInMonth(
+  item: FixedExpenseItem,
+  targetMonthStr?: string,
+  baseMonthStr?: string
+): boolean {
+  if (!item.isCredit || !item.durationMonths || item.durationMonths <= 0) {
+    return false;
+  }
+  return getCreditRemainingMonthsInMonth(item, targetMonthStr, baseMonthStr) <= 0;
+}
+
+/**
+ * Calcule la progression détaillée d'un crédit pour un mois cible donné
+ */
+export function getCreditProgressInMonth(
+  item: FixedExpenseItem,
+  targetMonthStr?: string,
+  baseMonthStr?: string
+) {
   if (!item.isCredit || !item.durationMonths) {
     return {
       paid: 0,
@@ -61,7 +106,7 @@ export function getCreditProgress(item: FixedExpenseItem) {
   }
 
   const total = item.durationMonths;
-  const remainingMonths = getCreditRemainingMonths(item);
+  const remainingMonths = getCreditRemainingMonthsInMonth(item, targetMonthStr, baseMonthStr);
   const paid = Math.min(total, Math.max(0, total - remainingMonths));
   const percent = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
   const remainingAmount = Math.round(remainingMonths * item.amount * 100) / 100;
@@ -74,6 +119,13 @@ export function getCreditProgress(item: FixedExpenseItem) {
     percent,
     remainingAmount,
   };
+}
+
+/**
+ * Calcule la progression détaillée d'un crédit pour le mois courant
+ */
+export function getCreditProgress(item: FixedExpenseItem) {
+  return getCreditProgressInMonth(item);
 }
 
 /**

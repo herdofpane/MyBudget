@@ -19,12 +19,12 @@ import {
   FixedExpenseRow,
   FixedExpensesEmpty,
   FixedExpenseModal,
+  FixedExpensesMonthSelector,
 } from '@/components/fixed-expenses';
 
 export default function FixedExpensesScreen() {
   const {
     fixedExpensesList,
-    totalFixedExpenses,
     fixedExpenseRatio,
     isLoading,
     isSaving,
@@ -38,6 +38,20 @@ export default function FixedExpensesScreen() {
     setFeedbackDialog,
     currentMonthStr,
     monthPresets,
+    // Simulation temporelle
+    selectedMonthStr,
+    selectedMonthOffset,
+    isSimulating,
+    simulationPresets,
+    selectedMonthFormatted,
+    selectedMonthShort,
+    simulatedTotalFixedExpenses,
+    differenceWithCurrentMonth,
+    handleSelectSimulationMonth,
+    handleNextSimulationMonth,
+    handlePrevSimulationMonth,
+    handleResetToCurrentMonth,
+    // Form fields
     labelInput,
     handleLabelChange,
     iconInput,
@@ -91,17 +105,33 @@ export default function FixedExpensesScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerClassName="px-3.5 sm:px-4 pt-1.5 pb-[115px] gap-3.5 sm:gap-4 w-full max-w-[860px] self-center">
 
-          {/* 1. CARTE DU TOTAL DES CHARGES FIXES & STATS */}
+          {/* 1. SÉLECTEUR DE SIMULATION MENSUELLE */}
+          <FixedExpensesMonthSelector
+            selectedMonthStr={selectedMonthStr}
+            selectedMonthOffset={selectedMonthOffset}
+            selectedMonthFormatted={selectedMonthFormatted}
+            isSimulating={isSimulating}
+            simulationPresets={simulationPresets}
+            differenceWithCurrentMonth={differenceWithCurrentMonth}
+            onSelectMonth={handleSelectSimulationMonth}
+            onNextMonth={handleNextSimulationMonth}
+            onPrevMonth={handlePrevSimulationMonth}
+            onResetToCurrentMonth={handleResetToCurrentMonth}
+          />
+
+          {/* 2. CARTE DU TOTAL DES CHARGES FIXES & STATS */}
           <FixedExpensesStats
-            totalFixedExpenses={totalFixedExpenses}
+            totalFixedExpenses={simulatedTotalFixedExpenses}
             activeCount={activeFixedExpenses.length}
             expiredCreditsCount={expiredCreditsCount}
             upcomingChargesCount={upcomingChargesCount}
             averageExpense={averageExpense}
             fixedExpenseRatio={fixedExpenseRatio}
+            isSimulating={isSimulating}
+            selectedMonthLabel={selectedMonthShort}
           />
 
-          {/* 2. LE TABLEAU DES CHARGES FIXES */}
+          {/* 3. LE TABLEAU DES CHARGES FIXES */}
           <Card className="bg-card rounded-3xl border border-border shadow-xs overflow-hidden">
             {/* EN-TÊTE DU TABLEAU */}
             <View className="flex-row justify-between items-center p-4 sm:p-5 border-b border-border">
@@ -111,7 +141,9 @@ export default function FixedExpensesScreen() {
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm sm:text-base font-bold text-foreground">
-                    Charges fixes & abonnements
+                    {isSimulating
+                      ? `Charges actives en ${selectedMonthShort}`
+                      : 'Charges fixes & abonnements'}
                   </Text>
                   <Text className="text-[11px] text-muted-foreground mt-0.5">
                     {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
@@ -154,7 +186,8 @@ export default function FixedExpensesScreen() {
                     key={item.id}
                     item={item}
                     isEven={index % 2 === 0}
-                    currentMonthStr={currentMonthStr}
+                    currentMonthStr={selectedMonthStr}
+                    baseMonthStr={currentMonthStr}
                     onAdvanceMonth={handleAdvanceMonth}
                     onEdit={openEditModal}
                     onDelete={handleDelete}
@@ -165,7 +198,7 @@ export default function FixedExpensesScreen() {
                 <View className="flex-row justify-between items-center px-4 sm:px-5 py-3.5 bg-muted/30 border-t border-border">
                   <View>
                     <Text className="text-xs font-black text-foreground uppercase tracking-wider">
-                      TOTAL DES CHARGES
+                      TOTAL DES CHARGES {isSimulating ? `(${selectedMonthShort})` : ''}
                     </Text>
                     <Text className="text-[11px] text-muted-foreground">
                       Arrondi unité • {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
@@ -173,10 +206,10 @@ export default function FixedExpensesScreen() {
                   </View>
                   <View className="items-end">
                     <Text className="text-lg sm:text-xl font-black text-foreground">
-                      {formatEuroRound(totalFixedExpenses)}
+                      {formatEuroRound(simulatedTotalFixedExpenses)}
                     </Text>
                     <Text className="text-[10px] sm:text-[11px] text-muted-foreground">
-                      Exact : {formatEuro(totalFixedExpenses)}
+                      Exact : {formatEuro(simulatedTotalFixedExpenses)}
                     </Text>
                   </View>
                 </View>

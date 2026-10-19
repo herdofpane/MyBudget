@@ -7,11 +7,16 @@ import {
   isChargeActiveInMonth,
   getChargeScheduleStatus,
   getMonthPresets,
+  getSimulationMonthPresets,
+  getMonthsDifference,
+  addMonthsToMonthStr,
+  formatMonthYear,
+  formatMonthYearFull,
   getTargetMonthPreviewStatus,
   TargetMonthPreview,
 } from '@/utils/fixed-expenses';
 import {
-  isCreditExpired,
+  isCreditExpiredInMonth,
   getCreditProgress,
   formatCreditEndDate,
 } from '@/utils/credit';
@@ -58,6 +63,55 @@ export function useFixedExpenses() {
   // Mois courant calculé au format YYYY-MM
   const currentMonthStr = useMemo(() => new Date().toISOString().slice(0, 7), []);
   const monthPresets = useMemo(() => getMonthPresets(), []);
+
+  // Mois sélectionné pour la simulation (par défaut le mois en cours)
+  const [selectedMonthStr, setSelectedMonthStr] = useState(currentMonthStr);
+
+  const selectedMonthOffset = useMemo(
+    () => getMonthsDifference(currentMonthStr, selectedMonthStr),
+    [currentMonthStr, selectedMonthStr]
+  );
+
+  const isSimulating = selectedMonthOffset > 0;
+
+  const simulationPresets = useMemo(
+    () => getSimulationMonthPresets(currentMonthStr, 13),
+    [currentMonthStr]
+  );
+
+  const selectedMonthFormatted = useMemo(
+    () => formatMonthYearFull(selectedMonthStr),
+    [selectedMonthStr]
+  );
+
+  const selectedMonthShort = useMemo(
+    () => formatMonthYear(selectedMonthStr),
+    [selectedMonthStr]
+  );
+
+  const handleSelectSimulationMonth = useCallback((m: string) => {
+    setSelectedMonthStr(m);
+  }, []);
+
+  const handleNextSimulationMonth = useCallback(() => {
+    setSelectedMonthStr((prev) => {
+      const offset = getMonthsDifference(currentMonthStr, prev);
+      if (offset >= 12) return prev;
+      return addMonthsToMonthStr(prev, 1);
+    });
+  }, [currentMonthStr]);
+
+  const handlePrevSimulationMonth = useCallback(() => {
+    setSelectedMonthStr((prev) => {
+      const offset = getMonthsDifference(currentMonthStr, prev);
+      if (offset <= 0) return prev;
+      return addMonthsToMonthStr(prev, -1);
+    });
+  }, [currentMonthStr]);
+
+  const handleResetToCurrentMonth = useCallback(() => {
+    setSelectedMonthStr(currentMonthStr);
+  }, [currentMonthStr]);
 
   // Champs de saisie du formulaire
   const [labelInput, setLabelInput] = useState('');
@@ -245,27 +299,37 @@ export function useFixedExpenses() {
   }, [deleteTarget, deleteFixedExpense]);
 
   const activeFixedExpenses = useMemo(
-    () => fixedExpensesList.filter((item) => isChargeActiveInMonth(item, currentMonthStr)),
-    [fixedExpensesList, currentMonthStr]
+    () => fixedExpensesList.filter((item) => isChargeActiveInMonth(item, selectedMonthStr, currentMonthStr)),
+    [fixedExpensesList, selectedMonthStr, currentMonthStr]
+  );
+
+  const simulatedTotalFixedExpenses = useMemo(
+    () => Math.round(activeFixedExpenses.reduce((sum, item) => sum + item.amount, 0) * 100) / 100,
+    [activeFixedExpenses]
   );
 
   const expiredCreditsCount = useMemo(
-    () => fixedExpensesList.filter(isCreditExpired).length,
-    [fixedExpensesList]
+    () => fixedExpensesList.filter((item) => isCreditExpiredInMonth(item, selectedMonthStr, currentMonthStr)).length,
+    [fixedExpensesList, selectedMonthStr, currentMonthStr]
   );
 
   const upcomingChargesCount = useMemo(
     () =>
       fixedExpensesList.filter((item) => {
-        const s = getChargeScheduleStatus(item, currentMonthStr);
+        const s = getChargeScheduleStatus(item, selectedMonthStr, currentMonthStr);
         return s.status === 'upcoming';
       }).length,
-    [fixedExpensesList, currentMonthStr]
+    [fixedExpensesList, selectedMonthStr, currentMonthStr]
   );
 
   const averageExpense = useMemo(
-    () => (activeFixedExpenses.length > 0 ? totalFixedExpenses / activeFixedExpenses.length : 0),
-    [activeFixedExpenses.length, totalFixedExpenses]
+    () => (activeFixedExpenses.length > 0 ? simulatedTotalFixedExpenses / activeFixedExpenses.length : 0),
+    [activeFixedExpenses.length, simulatedTotalFixedExpenses]
+  );
+
+  const differenceWithCurrentMonth = useMemo(
+    () => Math.round((simulatedTotalFixedExpenses - totalFixedExpenses) * 100) / 100,
+    [simulatedTotalFixedExpenses, totalFixedExpenses]
   );
 
   // Calculs dynamiques pour l'encart récapitulatif du crédit dans le modal
@@ -316,6 +380,19 @@ export function useFixedExpenses() {
     setFeedbackDialog,
     currentMonthStr,
     monthPresets,
+    // Simulation temporelle
+    selectedMonthStr,
+    selectedMonthOffset,
+    isSimulating,
+    simulationPresets,
+    selectedMonthFormatted,
+    selectedMonthShort,
+    simulatedTotalFixedExpenses,
+    differenceWithCurrentMonth,
+    handleSelectSimulationMonth,
+    handleNextSimulationMonth,
+    handlePrevSimulationMonth,
+    handleResetToCurrentMonth,
     // Form fields
     labelInput,
     setLabelInput,

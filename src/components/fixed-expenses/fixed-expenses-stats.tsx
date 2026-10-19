@@ -14,6 +14,8 @@ interface FixedExpensesStatsProps {
   upcomingChargesCount: number;
   averageExpense: number;
   fixedExpenseRatio: number;
+  isSimulating?: boolean;
+  selectedMonthLabel?: string;
 }
 
 export function FixedExpensesStats({
@@ -23,6 +25,8 @@ export function FixedExpensesStats({
   upcomingChargesCount,
   averageExpense,
   fixedExpenseRatio,
+  isSimulating = false,
+  selectedMonthLabel,
 }: FixedExpensesStatsProps) {
   return (
     <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-xs gap-3.5 sm:gap-4">
@@ -30,11 +34,20 @@ export function FixedExpensesStats({
         <View className="flex-1">
           <View className="flex-row items-center gap-2 mb-1">
             <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Total charges fixes
+              {isSimulating ? `Charges fixes • ${selectedMonthLabel}` : 'Total charges fixes'}
             </Text>
-            <Badge variant="outline" className="border-border bg-muted/30 px-1.5 py-0.5 rounded-full">
-              <Text className="text-[10px] text-muted-foreground font-semibold">
-                Arrondi unité
+            <Badge
+              variant="outline"
+              className={`px-1.5 py-0.5 rounded-full ${
+                isSimulating
+                  ? 'border-indigo-300 bg-indigo-50'
+                  : 'border-border bg-muted/30'
+              }`}>
+              <Text
+                className={`text-[10px] font-semibold ${
+                  isSimulating ? 'text-lavender font-bold' : 'text-muted-foreground'
+                }`}>
+                {isSimulating ? 'Simulé' : 'Arrondi unité'}
               </Text>
             </Badge>
           </View>
@@ -58,8 +71,10 @@ export function FixedExpensesStats({
       {expiredCreditsCount > 0 && (
         <View className="flex-row items-center bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 gap-2">
           <Ionicons name="shield-checkmark" size={15} color={colors.accent} />
-          <Text className="text-xs text-accentDark font-semibold flex-1">
-            {expiredCreditsCount} crédit{expiredCreditsCount > 1 ? 's' : ''} arrivé{expiredCreditsCount > 1 ? 's' : ''} à terme automatiquement exclu{expiredCreditsCount > 1 ? 's' : ''} du total
+          <Text className="text-xs font-semibold text-emerald-800 flex-1">
+            {isSimulating
+              ? `${expiredCreditsCount} crédit${expiredCreditsCount > 1 ? 's' : ''} soldé${expiredCreditsCount > 1 ? 's' : ''} d’ici ${selectedMonthLabel}`
+              : `${expiredCreditsCount} crédit${expiredCreditsCount > 1 ? 's' : ''} arrivé${expiredCreditsCount > 1 ? 's' : ''} à terme (imputation 0 €)`}
           </Text>
         </View>
       )}

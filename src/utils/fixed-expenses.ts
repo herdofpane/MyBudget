@@ -1,5 +1,5 @@
 import { FixedExpenseItem } from '@/types';
-import { isCreditExpired } from '@/utils/credit';
+import { isCreditExpired, isCreditExpiredInMonth } from '@/utils/credit';
 import { colors } from '@/theme/colors';
 
 /**
@@ -18,15 +18,38 @@ export function getCurrentMonthStr(): string {
 }
 
 /**
+ * Calcule la différence en mois entre deux chaînes YYYY-MM (monthB - monthA)
+ */
+export function getMonthsDifference(monthA: string, monthB: string): number {
+  if (!/^\d{4}-\d{2}$/.test(monthA) || !/^\d{4}-\d{2}$/.test(monthB)) return 0;
+  const [yA, mA] = monthA.split('-').map(Number);
+  const [yB, mB] = monthB.split('-').map(Number);
+  return (yB - yA) * 12 + (mB - mA);
+}
+
+/**
+ * Ajoute un nombre de mois à un mois YYYY-MM
+ */
+export function addMonthsToMonthStr(monthStr: string, monthsToAdd: number): string {
+  if (!/^\d{4}-\d{2}$/.test(monthStr)) return monthStr;
+  const [year, month] = monthStr.split('-').map(Number);
+  const d = new Date(year, month - 1 + monthsToAdd, 1);
+  const nextYear = d.getFullYear();
+  const nextMonth = String(d.getMonth() + 1).padStart(2, '0');
+  return `${nextYear}-${nextMonth}`;
+}
+
+/**
  * Détermine si une charge fixe est active pour le mois donné (par défaut, le mois courant).
  * Si inactive (charge à venir ou ponctuelle d'un autre mois ou crédit soldé), elle ne doit pas impacter le total.
  */
 export function isChargeActiveInMonth(
   item: FixedExpenseItem,
-  currentMonthStr: string = getCurrentMonthStr()
+  targetMonthStr: string = getCurrentMonthStr(),
+  baseMonthStr: string = getCurrentMonthStr()
 ): boolean {
-  // 1. Crédits échus / soldés
-  if (isCreditExpired(item)) {
+  // 1. Crédits échus / soldés au mois cible
+  if (isCreditExpiredInMonth(item, targetMonthStr, baseMonthStr)) {
     return false;
   }
 
@@ -36,12 +59,12 @@ export function isChargeActiveInMonth(
 
   // Si active à partir d'un mois précis
   if (activationType === 'starting_from' && targetMonth) {
-    return currentMonthStr >= targetMonth;
+    return targetMonthStr >= targetMonth;
   }
 
   // Si active uniquement sur un mois précis
   if (activationType === 'only_month' && targetMonth) {
-    return currentMonthStr === targetMonth;
+    return targetMonthStr === targetMonth;
   }
 
   return true;
@@ -64,15 +87,19 @@ export interface ChargeStatusInfo {
  */
 export function getChargeScheduleStatus(
   item: FixedExpenseItem,
-  currentMonthStr: string = getCurrentMonthStr()
+  targetMonthStr: string = getCurrentMonthStr(),
+  baseMonthStr: string = getCurrentMonthStr()
 ): ChargeStatusInfo {
-  // Crédit soldé
-  if (isCreditExpired(item)) {
+  // Crédit soldé au mois cible
+  if (isCreditExpiredInMonth(item, targetMonthStr, baseMonthStr)) {
+    const wasAlreadyExpired = isCreditExpired(item);
     return {
       status: 'credit_expired',
-      badgeLabel: 'Soldé',
+      badgeLabel: wasAlreadyExpired ? 'Soldé' : 'Soldé ce mois',
       isCounted: false,
-      description: 'Crédit entièrement remboursé',
+      description: wasAlreadyExpired
+        ? 'Crédit entièrement remboursé'
+        : `Ce crédit sera entièrement remboursé d'ici ${formatMonthYear(targetMonthStr)}`,
       badgeColor: colors.textMuted,
       badgeBg: '#F1F5F9',
       badgeBorder: '#CBD5E1',
@@ -84,7 +111,7 @@ export function getChargeScheduleStatus(
 
   // Active à partir de tel mois
   if (activationType === 'starting_from' && targetMonth) {
-    if (currentMonthStr < targetMonth) {
+    if (targetMonthStr < targetMonth) {
       return {
         status: 'upcoming',
         badgeLabel: `Dès ${formatMonthYear(targetMonth)}`,
@@ -99,7 +126,7 @@ export function getChargeScheduleStatus(
 
   // Active uniquement sur tel mois
   if (activationType === 'only_month' && targetMonth) {
-    if (currentMonthStr === targetMonth) {
+    if (targetMonthStr === targetMonth) {
       return {
         status: 'only_month_active',
         badgeLabel: `Ce mois (${formatMonthYear(targetMonth)})`,
@@ -109,7 +136,7 @@ export function getChargeScheduleStatus(
         badgeBg: '#FEF3C7',
         badgeBorder: '#FDE68A',
       };
-    } else if (currentMonthStr < targetMonth) {
+    } else if (targetMonthStr < targetMonth) {
       return {
         status: 'upcoming',
         badgeLabel: `Unique • ${formatMonthYear(targetMonth)}`,
@@ -194,6 +221,39 @@ export function getMonthPresets(): { value: string; label: string; fullLabel: st
     });
   }
 
+  return presets;
+}
+
+export interface SimulationMonthPreset {
+  value: string;
+  offset: number;
+  label: string;
+  fullLabel: string;
+}
+
+/**
+ * Génère les options de simulation temporelle (jusqu'à 12 mois dans le futur)
+ */
+export function getSimulationMonthPresets(
+  baseMonthStr: string = getCurrentMonthStr(),
+  count: number = 13
+): SimulationMonthPreset[] {
+  const presets: SimulationMonthPreset[] = [];
+  for (let i = 0; i < count; i++) {
+    const value = addMonthsToMonthStr(baseMonthStr, i);
+    let label = '';
+    if (i === 0) label = 'Ce mois';
+    else if (i === 1) label = '+1m (Prochain)';
+    else if (i === 12) label = '+12m (1 an)';
+    else label = `+${i}m`;
+
+    presets.push({
+      value,
+      offset: i,
+      label,
+      fullLabel: formatMonthYearFull(value),
+    });
+  }
   return presets;
 }
 

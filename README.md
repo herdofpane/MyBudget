@@ -29,12 +29,12 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
 ## ✨ Fonctionnalités Clés
 
 ### 1. 🏠 Tableau de Bord Accueil (FinTrack)
-- **Solde Global Consolidé** : Visualisation instantanée de votre patrimoine liquide total (Compte courant + Épargne).
-- **Reste à Vivre en Temps Réel** : Montant immédiatement disponible déduit des charges et des dépenses prévues.
-- **Compte à Rebours Mensuel** : Indication précise du nombre de jours restants jusqu'à la fin du mois pour mieux cadencer ses dépenses.
-- **Jauge Budgétaire Interactive** : Ratio de consommation budgétaire visuel et dynamique avec indicateurs de progression colorés.
-- **Mode Discrétion (Privacy Mode)** : Masquage en un clic de tous les montants monétaires (`***`) pour consulter son solde en toute sérénité dans les lieux publics.
-- **Édition Instantanée du Revenu** : Ajustez votre revenu net mensuel directement depuis l'en-tête avec sauvegarde automatique (initialisé à **0 € par défaut**, sans données fictives).
+- **Carte Héro Reste à Vivre** : Visualisation centrale et immédiate de votre reste à vivre net calculé en temps réel (Revenu − Charges fixes), avec raccourcis directs vers la simulation et l'échéancier.
+- **Double Affichage Monétaire & Arrondi à l'Unité** : Chaque indicateur clé (Reste à vivre, Compte courant, Épargne, Charges fixes) affiche simultanément son montant exact au centime près et son estimation arrondie à l'unité (`≈ X €`) pour une clarté visuelle et cognitive maximale.
+- **Duo de Comptes Découplé** : Répartition automatique en direct entre le **Compte Courant** (dépenses du quotidien) et le **Compte Épargne Klyro** (dérivé de la formule mathématique racine carrée).
+- **Mode Discrétion (Privacy Mode)** : Masquage en un clic de tous les montants monétaires (`•••• €`) pour consulter son solde en toute sérénité dans les lieux publics.
+- **Édition Instantanée du Revenu** : Ajustez votre revenu net mensuel directement depuis la carte dédiée avec sauvegarde automatique et fluide (initialisé à **0 € par défaut**, sans données fictives).
+- **Raccourcis Intelligents** : Navigation instantanée d'un tap vers les charges fixes, variables et le simulateur complet.
 
 ### 2. 📅 Échéancier des Charges Fixes & Amortissement de Crédits
 - **Détection Automatique Intelligente** : À la création comme en modification, la catégorie et l'icône sont déduites à 100% automatiquement dès la frappe du nom (*Loyer, EDF, Netflix, Navigo, Prêt...*), garantissant une saisie rapide et fluide sans sélection manuelle superflue.
@@ -46,6 +46,8 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
   - *Uniquement ce mois* : charges ponctuelles associées à une échéance unique.
 - **Pointage des Prélèvements** : Marquage en un tap du statut prélevé / en attente.
 - **Ratio d'Endettement Fixe** : Calcul automatique du pourcentage du revenu absorbé par les charges incompressibles.
+- **Simulation Temporelle Dynamique (M+1 à M+12)** : Sélecteur de mois interactif permettant d'anticiper en temps réel l'évolution de ses charges fixes sur les 12 prochains mois (recalcul immédiat des totaux, mise à jour des mensualités restantes, détection des crédits soldés et activation des charges différées).
+- **Double Affichage Statistique** : Synthèse affichant le total arrondi à l'unité et le montant exact correspondant.
 - **Initialisation Vierge** : Démarrage propre avec un carnet vierge de charges par défaut (zéro donnée fictive pré-remplie).
 
 ### 3. 🛒 Charges Variables & Lissage Pluriannuel
@@ -60,6 +62,7 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
   - Le **revenu mensuel** provient directement de la saisie instantanée sur l'écran d'accueil (`income`, **0 € par défaut**).
   - Le **total des charges fixes** provient directement de la somme réelle des charges fixes actives de votre échéancier (`totalFixedExpenses`).
   - Le **Total Nécessaire (Seuil de survie)** est **égal par défaut au montant total de vos charges variables** (`totalEstimatedVariable`), assurant une adéquation automatique et logique entre vos enveloppes réelles et vos paramètres de simulation, tout en restant librement modifiable si besoin.
+- **Double Lecture Exacte & Arrondie** : Les piliers Compte Courant, Épargne et Total Nécessaire présentent simultanément leurs valeurs exactes et arrondies.
 - **Indicateurs d'État & Réversibilité (Nielsen)** :
   - Badge dynamique précisant l'état du seuil : *« Par défaut (Charges variables) »* ou *« Personnalisé »*.
   - Bouton d'action rapide permettant de rétablir le seuil exact des charges variables en un seul tap.
@@ -100,6 +103,10 @@ MyBudget/
     │   └── details.tsx      # Écran Simulateur & détail des ventilations
     ├── components/          # Composants UI modulaires et réutilisables
     │   ├── ui/              # Composants atomiques (Card, Button, Badge, Input, Skeletons)
+    │   ├── home/            # Composants dédiés à l'accueil (Hero Reste à Vivre, Comptes, Revenu, Raccourcis)
+    │   ├── fixed-expenses/  # Composants charges fixes (Modal, Stats, Ligne de charge)
+    │   ├── variable-expenses/ # Composants charges variables (Modal, Stats, Jauges)
+    │   ├── details/         # Composants simulateur (Onglets, Bilan de synthèse, Contrôles)
     │   ├── confirm-dialog.tsx # Dialogues de confirmation et alertes accessibles
     │   └── navigation-header.tsx # En-têtes standardisés
     ├── constants/           # Règles métiers pures (formules, ratios, formatters monétaires)
