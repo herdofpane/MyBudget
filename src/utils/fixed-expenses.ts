@@ -3,22 +3,19 @@ import { isCreditExpired, isCreditExpiredInMonth } from '@/utils/credit';
 import { colors } from '@/theme/colors';
 
 /**
- * Utilitaires métiers pour la gestion des charges fixes (Couche 2 SOLID)
- * Gère la planification par mois (active à partir de tel mois, ou uniquement tel mois)
+ * Domain utility functions for fixed expense schedule calculations (SOLID Layer 2)
+ * Manages calendar scheduling (active from a given month, or exclusive to a target month)
  */
 
 /**
- * Renvoie le mois courant au format YYYY-MM (ex: "2026-10")
+ * Returns current calendar month in UTC format YYYY-MM (e.g., "2026-10")
  */
 export function getCurrentMonthStr(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  return `${year}-${month}`;
+  return new Date().toISOString().slice(0, 7);
 }
 
 /**
- * Calcule la différence en mois entre deux chaînes YYYY-MM (monthB - monthA)
+ * Calculates calendar months delta between two YYYY-MM strings (monthB - monthA)
  */
 export function getMonthsDifference(monthA: string, monthB: string): number {
   if (!/^\d{4}-\d{2}$/.test(monthA) || !/^\d{4}-\d{2}$/.test(monthB)) return 0;
@@ -28,41 +25,37 @@ export function getMonthsDifference(monthA: string, monthB: string): number {
 }
 
 /**
- * Ajoute un nombre de mois à un mois YYYY-MM
+ * Adds a specific number of months to a YYYY-MM formatted string using UTC
  */
 export function addMonthsToMonthStr(monthStr: string, monthsToAdd: number): string {
   if (!/^\d{4}-\d{2}$/.test(monthStr)) return monthStr;
   const [year, month] = monthStr.split('-').map(Number);
-  const d = new Date(year, month - 1 + monthsToAdd, 1);
-  const nextYear = d.getFullYear();
-  const nextMonth = String(d.getMonth() + 1).padStart(2, '0');
-  return `${nextYear}-${nextMonth}`;
+  const d = new Date(Date.UTC(year, month - 1 + monthsToAdd, 1));
+  return d.toISOString().slice(0, 7);
 }
 
 /**
- * Détermine si une charge fixe est active pour le mois donné (par défaut, le mois courant).
- * Si inactive (charge à venir ou ponctuelle d'un autre mois ou crédit soldé), elle ne doit pas impacter le total.
+ * Determines whether a fixed expense is active in a given month.
+ * Inactive items (future scheduled, completed one-time, or repaid credits) do not impact the total.
  */
 export function isChargeActiveInMonth(
   item: FixedExpenseItem,
   targetMonthStr: string = getCurrentMonthStr(),
   baseMonthStr: string = getCurrentMonthStr()
 ): boolean {
-  // 1. Crédits échus / soldés au mois cible
+  // 1. Credits already repaid by target month
   if (isCreditExpiredInMonth(item, targetMonthStr, baseMonthStr)) {
     return false;
   }
 
-  // 2. Vérification de la planification
+  // 2. Schedule verification
   const activationType = item.activationType || 'all';
   const targetMonth = item.targetMonth || item.startMonth;
 
-  // Si active à partir d'un mois précis
   if (activationType === 'starting_from' && targetMonth) {
     return targetMonthStr >= targetMonth;
   }
 
-  // Si active uniquement sur un mois précis
   if (activationType === 'only_month' && targetMonth) {
     return targetMonthStr === targetMonth;
   }
@@ -83,14 +76,14 @@ export interface ChargeStatusInfo {
 }
 
 /**
- * Calcule le statut détaillé de planification d'une charge fixe
+ * Computes detailed schedule status and visual badge metadata for a fixed expense
  */
 export function getChargeScheduleStatus(
   item: FixedExpenseItem,
   targetMonthStr: string = getCurrentMonthStr(),
   baseMonthStr: string = getCurrentMonthStr()
 ): ChargeStatusInfo {
-  // Crédit soldé au mois cible
+  // Credit repaid by target month
   if (isCreditExpiredInMonth(item, targetMonthStr, baseMonthStr)) {
     const wasAlreadyExpired = isCreditExpired(item);
     return {
@@ -109,7 +102,7 @@ export function getChargeScheduleStatus(
   const activationType = item.activationType || 'all';
   const targetMonth = item.targetMonth || item.startMonth;
 
-  // Active à partir de tel mois
+  // Active starting from specific month
   if (activationType === 'starting_from' && targetMonth) {
     if (targetMonthStr < targetMonth) {
       return {
@@ -124,7 +117,7 @@ export function getChargeScheduleStatus(
     }
   }
 
-  // Active uniquement sur tel mois
+  // Active exclusively on target month
   if (activationType === 'only_month' && targetMonth) {
     if (targetMonthStr === targetMonth) {
       return {
@@ -159,7 +152,7 @@ export function getChargeScheduleStatus(
     }
   }
 
-  // Charge standard récurrente
+  // Default recurring expense
   return {
     status: 'active',
     badgeLabel: 'Mensuelle',
@@ -172,52 +165,46 @@ export function getChargeScheduleStatus(
 }
 
 /**
- * Formate un mois YYYY-MM en texte lisible (ex: "2026-11" -> "Nov. 2026")
+ * Formats a YYYY-MM string into abbreviated display text (e.g., "2026-11" -> "Nov. 2026")
  */
 export function formatMonthYear(monthStr: string): string {
   if (!monthStr || !/^\d{4}-\d{2}$/.test(monthStr)) return monthStr || '';
   const [year, month] = monthStr.split('-').map(Number);
-  const d = new Date(year, month - 1, 1);
-  const formatted = d.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+  const d = new Date(Date.UTC(year, month - 1, 1));
+  const formatted = d.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric', timeZone: 'UTC' });
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
 /**
- * Formate un mois YYYY-MM en texte complet (ex: "2026-11" -> "Novembre 2026")
+ * Formats a YYYY-MM string into full display text (e.g., "2026-11" -> "Novembre 2026")
  */
 export function formatMonthYearFull(monthStr: string): string {
   if (!monthStr || !/^\d{4}-\d{2}$/.test(monthStr)) return monthStr || '';
   const [year, month] = monthStr.split('-').map(Number);
-  const d = new Date(year, month - 1, 1);
-  const formatted = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const d = new Date(Date.UTC(year, month - 1, 1));
+  const formatted = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
 /**
- * Génère les 6 prochains mois sous forme de présélections rapides
+ * Generates the upcoming 6 months as quick selection options
  */
 export function getMonthPresets(): { value: string; label: string; fullLabel: string }[] {
   const presets: { value: string; label: string; fullLabel: string }[] = [];
-  const now = new Date();
+  const currentMonth = getCurrentMonthStr();
 
   for (let i = 0; i < 6; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const value = `${year}-${month}`;
-    const full = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-    const fullCapitalized = full.charAt(0).toUpperCase() + full.slice(1);
+    const value = addMonthsToMonthStr(currentMonth, i);
+    const full = formatMonthYearFull(value);
 
-    let shortLabel = d.toLocaleDateString('fr-FR', { month: 'short' });
-    shortLabel = shortLabel.charAt(0).toUpperCase() + shortLabel.slice(1);
-
+    let shortLabel = formatMonthYear(value);
     if (i === 0) shortLabel = 'Ce mois';
     else if (i === 1) shortLabel = 'Mois prochain';
 
     presets.push({
       value,
       label: shortLabel,
-      fullLabel: fullCapitalized,
+      fullLabel: full,
     });
   }
 
@@ -232,7 +219,7 @@ export interface SimulationMonthPreset {
 }
 
 /**
- * Génère les options de simulation temporelle (jusqu'à 12 mois dans le futur)
+ * Generates forward timeline simulation presets up to count months
  */
 export function getSimulationMonthPresets(
   baseMonthStr: string = getCurrentMonthStr(),
@@ -264,7 +251,7 @@ export interface TargetMonthPreview {
 }
 
 /**
- * Explication pédagogique en temps réel du mois d'activation choisi (avec guard clauses)
+ * Explains scheduled expense activation rules using guard clauses
  */
 export function getTargetMonthPreviewStatus(
   isScheduled: boolean,

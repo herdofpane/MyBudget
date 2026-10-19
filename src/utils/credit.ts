@@ -1,30 +1,30 @@
 import { FixedExpenseItem } from '@/types';
 
 /**
- * Utilitaires métiers pour la gestion des crédits sur X mois
- * Couche 2 SOLID (Logique Métier pure et testable sans React)
+ * Domain utility functions for credit and installment tracking (SOLID Layer 2)
+ * Pure, deterministic functions testable without React dependencies.
  */
 
 /**
- * Calcule le nombre de mois restants pour un crédit
- * Si l'item n'est pas un crédit, renvoie Infinity
+ * Calculates remaining installments/months for a credit expense.
+ * Returns Infinity for non-credit items.
  */
 export function getCreditRemainingMonths(item: FixedExpenseItem): number {
   if (!item.isCredit || !item.durationMonths || item.durationMonths <= 0) {
     return Infinity;
   }
 
-  // 1. Si on a le nombre explicite de mensualités payées
+  // 1. Explicitly recorded paid installments count
   if (typeof item.paidMonthsCount === 'number') {
     return Math.max(0, item.durationMonths - item.paidMonthsCount);
   }
 
-  // 2. Si on a un mois de début au format YYYY-MM
+  // 2. Start month in YYYY-MM UTC format
   if (item.startMonth && /^\d{4}-\d{2}$/.test(item.startMonth)) {
     const [startYear, startMonthNum] = item.startMonth.split('-').map(Number);
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonthNum = now.getMonth() + 1; // 1 à 12
+    const currentYear = now.getUTCFullYear();
+    const currentMonthNum = now.getUTCMonth() + 1; // 1 to 12
 
     const elapsed = (currentYear - startYear) * 12 + (currentMonthNum - startMonthNum);
     const remaining = item.durationMonths - Math.max(0, elapsed);
@@ -35,7 +35,7 @@ export function getCreditRemainingMonths(item: FixedExpenseItem): number {
 }
 
 /**
- * Calcule la différence en mois entre deux dates au format YYYY-MM
+ * Calculates calendar months delta between two YYYY-MM formatted dates
  */
 function getMonthsOffset(fromMonth: string, toMonth: string): number {
   if (!/^\d{4}-\d{2}$/.test(fromMonth) || !/^\d{4}-\d{2}$/.test(toMonth)) return 0;
@@ -45,7 +45,7 @@ function getMonthsOffset(fromMonth: string, toMonth: string): number {
 }
 
 /**
- * Calcule le nombre de mois restants pour un crédit à un mois cible (YYYY-MM).
+ * Calculates remaining credit months as of a target month (YYYY-MM)
  */
 export function getCreditRemainingMonthsInMonth(
   item: FixedExpenseItem,
@@ -62,8 +62,7 @@ export function getCreditRemainingMonthsInMonth(
 }
 
 /**
- * Détermine si le crédit est arrivé à son terme (soldé / expiré)
- * Lorsque true, la charge ne doit plus impacter le total des charges fixes
+ * Determines whether a credit is fully repaid in the current month
  */
 export function isCreditExpired(item: FixedExpenseItem): boolean {
   if (!item.isCredit || !item.durationMonths || item.durationMonths <= 0) {
@@ -73,7 +72,7 @@ export function isCreditExpired(item: FixedExpenseItem): boolean {
 }
 
 /**
- * Détermine si le crédit est arrivé à son terme (soldé / expiré) à un mois donné
+ * Determines whether a credit is fully repaid as of a given target month
  */
 export function isCreditExpiredInMonth(
   item: FixedExpenseItem,
@@ -87,7 +86,7 @@ export function isCreditExpiredInMonth(
 }
 
 /**
- * Calcule la progression détaillée d'un crédit pour un mois cible donné
+ * Computes detailed installment progress for a given target month
  */
 export function getCreditProgressInMonth(
   item: FixedExpenseItem,
@@ -122,25 +121,26 @@ export function getCreditProgressInMonth(
 }
 
 /**
- * Calcule la progression détaillée d'un crédit pour le mois courant
+ * Computes detailed installment progress for the current month
  */
 export function getCreditProgress(item: FixedExpenseItem) {
   return getCreditProgressInMonth(item);
 }
 
 /**
- * Formate la date de fin estimée du crédit (ex: "Juin 2027")
+ * Formats estimated credit completion date in French locale (e.g. "Juin 2027")
  */
 export function formatCreditEndDate(item: FixedExpenseItem): string {
   if (!item.isCredit || !item.durationMonths) return '';
 
   const remaining = getCreditRemainingMonths(item);
-  const targetDate = new Date();
-  targetDate.setMonth(targetDate.getMonth() + remaining);
+  const now = new Date();
+  const targetDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + remaining, 1));
 
   const formatted = targetDate.toLocaleDateString('fr-FR', {
     month: 'long',
     year: 'numeric',
+    timeZone: 'UTC',
   });
 
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);

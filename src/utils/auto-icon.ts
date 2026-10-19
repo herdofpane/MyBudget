@@ -15,7 +15,7 @@ interface MatchRule {
 }
 
 /**
- * Normalise une chaîne de texte (minuscules, sans accents, sans ponctuation excessive)
+ * Normalizes text string (lowercase, stripped diacritics/accents, trimmed whitespace)
  */
 function normalizeText(text: string): string {
   return text
@@ -26,8 +26,7 @@ function normalizeText(text: string): string {
 }
 
 /**
- * Catalogue intelligent de détection d'icônes, couleurs et catégories
- * pour les charges fixes et variables.
+ * Intelligent categorization rules matching keywords to icons, colors, and category tags.
  */
 const MATCH_RULES: MatchRule[] = [
   // 1. ALIMENTATION & COURSES

@@ -42,6 +42,7 @@ export function HomeIncomeCard({
           keyboardType="decimal-pad"
           placeholder="0"
           placeholderTextColor={colors.textMuted}
+          accessibilityLabel="Montant du revenu mensuel net en euros"
           className="flex-1 text-lg font-black text-foreground border-0 bg-transparent shadow-none px-0 py-0.5 h-auto"
         />
         <Text className="text-xs font-bold text-muted-foreground ml-2">

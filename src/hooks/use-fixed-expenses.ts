@@ -30,9 +30,8 @@ export interface FeedbackDialogState {
 }
 
 /**
- * Custom Hook Métier (SOLID SRP - Couche Logique & Accès Données)
- * Isole l'intégralité du state, des calculs de crédit/planification et des opérations CRUD
- * pour l'écran des Charges Fixes.
+ * Domain custom hook (SOLID Layer 2) for Fixed Expenses screen.
+ * Isolates state, credit calculations, scheduling rules, and CRUD operations.
  */
 export function useFixedExpenses() {
   const {
@@ -48,21 +47,16 @@ export function useFixedExpenses() {
     setSelectedSimulationMonth: setSelectedMonthStr,
   } = useBudget();
 
-  // États de chargement des actions asynchrones
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // État du modal de suppression
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
-  // État du modal d'ajout / modification
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<FixedExpenseItem | null>(null);
 
-  // État des pop-ups d'alerte / validation
   const [feedbackDialog, setFeedbackDialog] = useState<FeedbackDialogState | null>(null);
 
-  // Mois courant calculé au format YYYY-MM
   const currentMonthStr = useMemo(() => new Date().toISOString().slice(0, 7), []);
   const monthPresets = useMemo(() => getMonthPresets(), []);
 
@@ -111,23 +105,23 @@ export function useFixedExpenses() {
     setSelectedMonthStr(currentMonthStr);
   }, [currentMonthStr, setSelectedMonthStr]);
 
-  // Champs de saisie du formulaire
+  // Form input states
   const [labelInput, setLabelInput] = useState('');
   const [amountInput, setAmountInput] = useState('');
   const [categoryInput, setCategoryInput] = useState<FixedCategoryType>('logement');
   const [iconInput, setIconInput] = useState('home-outline');
 
-  // Champs spécifiques aux crédits sur durée limitée (X mois)
+  // Credit-specific inputs
   const [isCreditInput, setIsCreditInput] = useState(false);
   const [durationInput, setDurationInput] = useState('12');
   const [paidMonthsInput, setPaidMonthsInput] = useState('0');
 
-  // Champs spécifiques à la planification du mois d'activation
+  // Schedule activation inputs
   const [isScheduledInput, setIsScheduledInput] = useState(false);
   const [activationTypeInput, setActivationTypeInput] = useState<FixedExpenseActivationType>('starting_from');
   const [targetMonthInput, setTargetMonthInput] = useState(currentMonthStr);
 
-  // Support touche Échap sur le Web pour fermer le modal de formulaire
+  // Web Escape key listener to close modal
   useEffect(() => {
     if (Platform.OS !== 'web' || !isModalVisible) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -137,7 +131,7 @@ export function useFixedExpenses() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isModalVisible]);
 
-  // Détection 100% automatique de l'icône et de la catégorie selon le libellé saisi
+  // Automatic icon and category detection on label typing
   const handleLabelChange = useCallback((text: string) => {
     setLabelInput(text);
     const detected = autoDetectExpenseMeta(text, 'autre');

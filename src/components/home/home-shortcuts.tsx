@@ -28,6 +28,8 @@ export function HomeShortcuts({
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onNavigateFixedExpenses}
+        accessibilityRole="button"
+        accessibilityLabel="Consulter et gérer les charges fixes"
         className="flex-1 bg-card rounded-2xl p-3.5 border border-border shadow-xs justify-between">
         <View className="flex-row items-center justify-between mb-2">
           <View className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 items-center justify-center">
@@ -55,6 +57,8 @@ export function HomeShortcuts({
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onNavigateVariableExpenses}
+        accessibilityRole="button"
+        accessibilityLabel="Consulter et gérer les dépenses variables"
         className="flex-1 bg-card rounded-2xl p-3.5 border border-border shadow-xs justify-between">
         <View className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 items-center justify-center mb-2">
           <Ionicons name="pie-chart-outline" size={16} color={colors.accent} />
@@ -68,6 +72,8 @@ export function HomeShortcuts({
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onNavigateDetails}
+        accessibilityRole="button"
+        accessibilityLabel="Accéder aux détails et simulations budgétaires"
         className="flex-1 bg-card rounded-2xl p-3.5 border border-border shadow-xs justify-between">
         <View className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 items-center justify-center mb-2">
           <MaterialCommunityIcons name="calculator-variant-outline" size={16} color={colors.primary} />

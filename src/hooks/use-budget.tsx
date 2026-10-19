@@ -40,7 +40,7 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
   const [selectedSimulationMonth, setSelectedSimulationMonth] = useState<string>(() => new Date().toISOString().slice(0, 7));
   const [isLoading, setIsLoading] = useState(true);
 
-  // Charger les données depuis le service de stockage dédié (Couche 3 SOLID)
+  // Initialize data from dedicated storage service (SOLID Layer 3)
   useEffect(() => {
     async function initData() {
       try {
@@ -50,7 +50,7 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
         setVariableCategories(state.variableCategories);
         setExpenseHistory(state.expenseHistory);
       } catch (err) {
-        console.warn('[BudgetProvider] Erreur initialisation budget:', err);
+        console.warn('[BudgetProvider] Failed to initialize budget state:', err);
       } finally {
         setIsLoading(false);
       }
@@ -58,7 +58,7 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
     initData();
   }, []);
 
-  // Déléguer la persistance au service sérialisé
+  // Delegate persistence to serialized storage service
   const persist = useCallback(
     async (
       newBudget: BudgetData,

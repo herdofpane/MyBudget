@@ -48,6 +48,8 @@ export function HomeHeader({
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={onTogglePrivate}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
             className="w-9 h-9 rounded-full bg-white/10 border border-white/15 items-center justify-center"
             accessibilityLabel="Masquer ou afficher les montants">
             <Ionicons
@@ -60,8 +62,10 @@ export function HomeHeader({
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={onOpenInfo}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
             className="w-9 h-9 rounded-full bg-white/10 border border-white/15 items-center justify-center"
-            accessibilityLabel="Notifications">
+            accessibilityLabel="Notifications et informations">
             <Ionicons name="notifications-outline" size={17} color="#ffffff" />
           </TouchableOpacity>
         </View>

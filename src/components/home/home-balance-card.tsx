@@ -58,6 +58,8 @@ export function HomeBalanceCard({
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={onNavigateDetails}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
               className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 items-center justify-center"
               accessibilityLabel="Voir les détails et simulations">
               <Ionicons name="bar-chart-outline" size={15} color={colors.accent} />
@@ -65,6 +67,8 @@ export function HomeBalanceCard({
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={onNavigateFixedExpenses}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
               className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 items-center justify-center"
               accessibilityLabel="Gérer les charges fixes">
               <Ionicons name="wallet-outline" size={15} color={colors.accent} />

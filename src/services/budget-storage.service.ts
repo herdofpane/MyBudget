@@ -21,28 +21,28 @@ export interface PersistedBudgetState {
 }
 
 /**
- * Service de stockage isolé (Couche 3 - Architecture SOLID)
- * Responsable unique de la persistance locale via AsyncStorage et de la sérialisation des I/O.
+ * Isolated storage service (SOLID Layer 3)
+ * Single responsibility: handles local persistence via AsyncStorage and serializes I/O writes.
  */
 class BudgetStorageService {
   private writeQueue: Promise<void> = Promise.resolve();
 
   /**
-   * Génère un identifiant unique robuste sans collision (Timestamp + Hash aléatoire)
+   * Generates a collision-resistant unique identifier (timestamp + random alphanumeric).
    */
   generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
-   * Identifiants des anciens mocks par défaut à purger si présents dans le stockage local
+   * Legacy mock IDs to purge if found in existing user storage.
    */
   private readonly legacyMockFixedIds = new Set(['1', '2', '3']);
   private readonly legacyMockVarIds = new Set(['v1', 'v2', 'v3', 'v4', 'v5', 'v6']);
   private readonly legacyMockHistoryIds = new Set(['h1', 'h2', 'h3']);
 
   /**
-   * Charge l'état budgétaire sauvegardé avec validation et valeurs par défaut
+   * Loads persisted budget state with sanitization and fallback defaults.
    */
   async loadState(): Promise<PersistedBudgetState> {
     try {
@@ -58,7 +58,7 @@ class BudgetStorageService {
 
       const parsed = JSON.parse(raw);
 
-      // Purger les anciennes données de test/démonstration
+      // Purge legacy test/demonstration mock items
       const fixedExpensesList: FixedExpenseItem[] = Array.isArray(parsed.fixedExpensesList)
         ? parsed.fixedExpensesList.filter(
             (item: FixedExpenseItem) =>
@@ -125,7 +125,7 @@ class BudgetStorageService {
         expenseHistory,
       };
 
-      // Si le stockage contenait les anciens mocks de charges fixes ou targetNecessary, resynchroniser immédiatement
+      // Resynchronize if legacy mock charges or default targetNecessary were detected
       if (
         (parsed.fixedExpensesList && parsed.fixedExpensesList.length !== fixedExpensesList.length) ||
         (parsed.variableCategories && parsed.variableCategories.length !== variableCategories.length) ||
@@ -139,7 +139,7 @@ class BudgetStorageService {
 
       return cleanedState;
     } catch (error) {
-      console.warn('[BudgetStorageService] Erreur lors du chargement des données:', error);
+      console.warn('[BudgetStorageService] Failed to load persisted state:', error);
       return {
         budget: DEFAULT_BUDGET,
         fixedExpensesList: DEFAULT_FIXED_EXPENSES,
@@ -150,16 +150,18 @@ class BudgetStorageService {
   }
 
   /**
-   * Sauvegarde l'état de manière sérialisée (Mutex / Queue) pour éviter les Race Conditions
+   * Serializes write operations to prevent file I/O race conditions.
    */
   async saveState(state: PersistedBudgetState): Promise<void> {
     this.writeQueue = this.writeQueue
-      .catch(() => {})
+      .catch((queueError) => {
+        console.warn('[BudgetStorageService] Previous write failed, continuing queue:', queueError);
+      })
       .then(async () => {
         try {
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         } catch (error) {
-          console.error('[BudgetStorageService] Erreur lors de la sauvegarde:', error);
+          console.error('[BudgetStorageService] Failed to save state:', error);
           throw error;
         }
       });

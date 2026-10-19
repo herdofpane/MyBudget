@@ -12,8 +12,8 @@ import {
 } from '@/utils/fixed-expenses';
 
 /**
- * Custom Hook Métier (Couche 2 SOLID) dédié à l'écran d'accueil Klyro
- * Découple totalement les calculs et le state métier du composant de rendu UI.
+ * Domain custom hook (SOLID Layer 2) dedicated to the Home screen.
+ * Decouples calculation and business logic from presentation.
  */
 export function useHomeSummary() {
   const {
@@ -27,10 +27,8 @@ export function useHomeSummary() {
     setSelectedSimulationMonth,
   } = useBudget();
 
-  // Mode privé (masquer les soldes)
   const [isPrivate, setIsPrivate] = useState(false);
 
-  // Pop-up d'explication pédagogique
   const [infoDialog, setInfoDialog] = useState<{
     visible: boolean;
     title: string;
@@ -38,10 +36,8 @@ export function useHomeSummary() {
     subtext?: string;
   } | null>(null);
 
-  // Mois courant au format YYYY-MM
   const currentMonthStr = useMemo(() => new Date().toISOString().slice(0, 7), []);
 
-  // Décalage du mois sélectionné par rapport au mois actuel (ex: 0 = actuel, 1 = M+1...)
   const selectedMonthOffset = useMemo(
     () => getMonthsDifference(currentMonthStr, selectedSimulationMonth),
     [currentMonthStr, selectedSimulationMonth]
@@ -49,7 +45,6 @@ export function useHomeSummary() {
 
   const isSimulating = selectedMonthOffset > 0;
 
-  // Présélections de simulation pour le carrousel horizontal (+0, +1, +2, +3, +6, +12)
   const simulationPresets = useMemo(
     () => getSimulationMonthPresets(currentMonthStr, 13),
     [currentMonthStr]
@@ -65,7 +60,6 @@ export function useHomeSummary() {
     [selectedSimulationMonth]
   );
 
-  // Actions de navigation temporelle
   const handleSelectSimulationMonth = useCallback(
     (m: string) => {
       setSelectedSimulationMonth(m);
@@ -89,13 +83,12 @@ export function useHomeSummary() {
     setSelectedSimulationMonth(currentMonthStr);
   }, [currentMonthStr, setSelectedSimulationMonth]);
 
-  // Valeur locale de l'input revenu direct (null = synchronisé avec budget.income)
   const [localIncome, setLocalIncome] = useState<string | null>(null);
 
   const incomeInput = localIncome !== null ? localIncome : (budget.income === 0 ? '' : budget.income.toString());
   const parsedIncome = Math.max(0, parseFloat(incomeInput.replace(',', '.')) || 0);
 
-  // Charges fixes actives pour le mois sélectionné (prend en compte crédits amortis et charges programmées)
+  // Filter fixed expenses active in the target simulation month
   const activeFixedExpenses = useMemo(
     () =>
       fixedExpensesList.filter((item) =>
@@ -109,63 +102,53 @@ export function useHomeSummary() {
     [activeFixedExpenses]
   );
 
-  // Reste à vivre actuel (ce mois-ci)
   const resteAVivre = useMemo(
     () => Math.round((parsedIncome - totalFixedExpenses) * 100) / 100,
     [parsedIncome, totalFixedExpenses]
   );
 
-  // Reste à vivre simulé (pour le mois sélectionné)
   const simulatedResteAVivre = useMemo(
     () => Math.round((parsedIncome - simulatedTotalFixedExpenses) * 100) / 100,
     [parsedIncome, simulatedTotalFixedExpenses]
   );
 
-  // Différence de reste à vivre par rapport au mois actuel (positif = plus de pouvoir d'achat)
   const differenceResteAVivre = useMemo(
     () => Math.round((simulatedResteAVivre - resteAVivre) * 100) / 100,
     [simulatedResteAVivre, resteAVivre]
   );
 
-  // Le seuil nécessaire est égal par défaut aux charges variables sauf personnalisation explicite
   const defaultNecessary = totalEstimatedVariable;
   const effectiveNecessary =
     budget.isCustomTargetNecessary && budget.targetNecessary !== undefined
       ? budget.targetNecessary
       : defaultNecessary;
 
-  // Épargne calculée (mois actuel)
   const epargneAmount = useMemo(
     () => computeSavings(resteAVivre, effectiveNecessary),
     [resteAVivre, effectiveNecessary]
   );
 
-  // Compte courant (mois actuel)
   const checkingAmount = useMemo(
     () => Math.max(0, Math.round((resteAVivre - epargneAmount) * 100) / 100),
     [resteAVivre, epargneAmount]
   );
 
-  // Épargne simulée (mois sélectionné)
   const simulatedEpargneAmount = useMemo(
     () => computeSavings(simulatedResteAVivre, effectiveNecessary),
     [simulatedResteAVivre, effectiveNecessary]
   );
 
-  // Compte courant simulé (mois sélectionné)
   const simulatedCheckingAmount = useMemo(
     () => Math.max(0, Math.round((simulatedResteAVivre - simulatedEpargneAmount) * 100) / 100),
     [simulatedResteAVivre, simulatedEpargneAmount]
   );
 
-  // Jours restants dans le mois
   const daysRemaining = useMemo(() => {
     const now = new Date();
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    return Math.max(1, lastDay - now.getDate());
+    const lastDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate();
+    return Math.max(1, lastDay - now.getUTCDate());
   }, []);
 
-  // Ratio des charges / dépenses par rapport au revenu
   const spendingRatio = useMemo(() => {
     if (parsedIncome <= 0) return 0;
     return Math.min(100, Math.round((simulatedTotalFixedExpenses / parsedIncome) * 100));
@@ -175,7 +158,6 @@ export function useHomeSummary() {
     return Math.max(0, 100 - spendingRatio);
   }, [spendingRatio]);
 
-  // Sauvegarde persistante du revenu dans le stockage local
   const persistIncomeValue = useCallback(
     async (val: number) => {
       const epargne = computeSavings(
@@ -199,7 +181,6 @@ export function useHomeSummary() {
     [budget, totalFixedExpenses, effectiveNecessary, saveBudget]
   );
 
-  // Sauvegarde automatique avec debounce lors de la frappe pour éviter toute perte en cas de rafraîchissement
   useEffect(() => {
     if (localIncome === null) return;
 
@@ -210,7 +191,6 @@ export function useHomeSummary() {
     return () => clearTimeout(timer);
   }, [localIncome, parsedIncome, persistIncomeValue]);
 
-  // Sauvegarde instantanée lors de la perte de focus ou de la soumission au clavier
   const handleBlurIncome = useCallback(async () => {
     if (localIncome !== null) {
       await persistIncomeValue(parsedIncome);
@@ -244,12 +224,10 @@ export function useHomeSummary() {
     isPrivate,
     incomeInput,
     parsedIncome,
-    // Données actuelles
     resteAVivre,
     epargneAmount,
     checkingAmount,
     totalFixedExpenses,
-    // Données de simulation du mois sélectionné
     selectedSimulationMonth,
     selectedMonthOffset,
     isSimulating,
@@ -261,12 +239,10 @@ export function useHomeSummary() {
     simulatedEpargneAmount,
     simulatedCheckingAmount,
     differenceResteAVivre,
-    // Handlers navigation temporelle
     handleSelectSimulationMonth,
     handleNextSimulationMonth,
     handlePrevSimulationMonth,
     handleResetToCurrentMonth,
-    // Métriques & ratios
     daysRemaining,
     spendingRatio,
     spendingRemainingPercentage,

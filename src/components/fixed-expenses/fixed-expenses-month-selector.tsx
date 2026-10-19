@@ -101,6 +101,8 @@ export function FixedExpensesMonthSelector({
             activeOpacity={0.7}
             disabled={isAtCurrent}
             onPress={onPrevMonth}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
             className={`w-8 h-8 rounded-full border items-center justify-center ${
               isAtCurrent
                 ? 'border-border/40 bg-muted/20 opacity-30'
@@ -114,6 +116,8 @@ export function FixedExpensesMonthSelector({
             activeOpacity={0.7}
             disabled={isAtMax}
             onPress={onNextMonth}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
             className={`w-8 h-8 rounded-full border items-center justify-center ${
               isAtMax
                 ? 'border-border/40 bg-muted/20 opacity-30'
@@ -137,6 +141,8 @@ export function FixedExpensesMonthSelector({
               key={preset.value}
               activeOpacity={0.75}
               onPress={() => onSelectMonth(preset.value)}
+              accessibilityRole="button"
+              accessibilityLabel={`Sélectionner le mois ${preset.fullLabel}`}
               className={`px-3 py-1.5 rounded-xl border flex-row items-center gap-1.5 ${
                 isSelected
                   ? 'bg-primary border-primary'
@@ -237,6 +243,9 @@ export function FixedExpensesMonthSelector({
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={onResetToCurrentMonth}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Réinitialiser au mois en cours"
             className="px-2.5 py-1 rounded-lg bg-card border border-indigo-300 flex-row items-center gap-1">
             <Ionicons name="refresh-outline" size={12} color={colors.lavender} />
             <Text className="text-[11px] font-bold text-lavender">Ce mois</Text>
