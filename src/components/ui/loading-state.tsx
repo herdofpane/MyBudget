@@ -7,6 +7,7 @@ import {
   Animated,
   ViewStyle,
   DimensionValue,
+  Platform,
 } from 'react-native';
 import { Colors } from '@/constants/theme';
 
@@ -18,7 +19,7 @@ export interface SkeletonProps {
 }
 
 /**
- * Bloc Skeleton avec pulsation d'opacité douce et organique
+ * Skeleton component with smooth, subtle opacity pulsing.
  */
 export function Skeleton({
   width = '100%',
@@ -34,12 +35,12 @@ export function Skeleton({
         Animated.timing(opacityAnim, {
           toValue: 0.85,
           duration: 900,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(opacityAnim, {
           toValue: 0.4,
           duration: 900,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ])
     );
