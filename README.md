@@ -34,7 +34,7 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
 - **Compte à Rebours Mensuel** : Indication précise du nombre de jours restants jusqu'à la fin du mois pour mieux cadencer ses dépenses.
 - **Jauge Budgétaire Interactive** : Ratio de consommation budgétaire visuel et dynamique avec indicateurs de progression colorés.
 - **Mode Discrétion (Privacy Mode)** : Masquage en un clic de tous les montants monétaires (`***`) pour consulter son solde en toute sérénité dans les lieux publics.
-- **Édition Instantanée du Revenu** : Ajustez votre revenu net mensuel directement depuis l'en-tête avec sauvegarde automatique.
+- **Édition Instantanée du Revenu** : Ajustez votre revenu net mensuel directement depuis l'en-tête avec sauvegarde automatique (initialisé à **0 € par défaut**, sans données fictives).
 
 ### 2. 📅 Échéancier des Charges Fixes & Amortissement de Crédits
 - **Détection Automatique Intelligente** : À la création comme en modification, la catégorie et l'icône sont déduites à 100% automatiquement dès la frappe du nom (*Loyer, EDF, Netflix, Navigo, Prêt...*), garantissant une saisie rapide et fluide sans sélection manuelle superflue.
@@ -57,11 +57,16 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
 
 ### 4. 🧮 Simulateur Budgétaire & Ventilation Mathématique (Calcul & Détail)
 - **Synchronisation Directe avec le Réel** :
-  - Le **revenu mensuel** provient directement de la saisie instantanée sur l'écran d'accueil (`income`).
+  - Le **revenu mensuel** provient directement de la saisie instantanée sur l'écran d'accueil (`income`, **0 € par défaut**).
   - Le **total des charges fixes** provient directement de la somme réelle des charges fixes actives de votre échéancier (`totalFixedExpenses`).
+  - Le **Total Nécessaire (Seuil de survie)** est **égal par défaut au montant total de vos charges variables** (`totalEstimatedVariable`), assurant une adéquation automatique et logique entre vos enveloppes réelles et vos paramètres de simulation, tout en restant librement modifiable si besoin.
+- **Indicateurs d'État & Réversibilité (Nielsen)** :
+  - Badge dynamique précisant l'état du seuil : *« Par défaut (Charges variables) »* ou *« Personnalisé »*.
+  - Bouton d'action rapide permettant de rétablir le seuil exact des charges variables en un seul tap.
+  - Liens rapides d'accès direct vers *Gérer mes charges fixes* et *Gérer mes charges variables* avec affichage de leurs totaux respectifs.
 - **Double Mode de Calcul** :
-  - **Mode Mensuel Récurrent** : Simulation sur la base du salaire régulier et des charges fixes réelles.
-  - **Mode Revenu Ponctuel (Extra)** : Ventilation d'une prime, d'un bonus ou d'une rentrée d'argent exceptionnelle.
+  - **Mode Mensuel Récurrent** : Simulation sur la base du salaire régulier, des charges fixes réelles et des charges variables.
+  - **Mode Revenu Ponctuel (Extra)** : Ventilation d'une prime, d'un bonus ou d'une rentrée d'argent exceptionnelle (initialisé à **0 € par défaut**).
 - **Ventilation du Nécessaire (Seuil de survie)** :
   - 🛒 *Courses & Entretien* : **49%**
   - 🚗 *Transports (Essence/Titres)* : **37%**
@@ -74,7 +79,7 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
 - **Algorithme d'Épargne Progressive** :  
   Formule mathématique exacte dérivée du modèle financier :
   $$\text{Épargne} = \max\left(0,\, \text{ResteÀVivre} - \sqrt{\text{ResteÀVivre} \times \text{Nécessaire}}\right)$$
-- **Bac à Sable Interactif** : Testez des ajustements de revenus et de charges sans modifier vos données tant que vous ne cliquez pas sur *Appliquer au budget réel*.
+- **Bac à Sable Interactif** : Testez des ajustements de revenus et de charges sans altérer vos données officielles tant que vous ne confirmez pas via *Appliquer comme budget officiel*.
 
 ---
 
