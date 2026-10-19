@@ -13,6 +13,8 @@ interface SimulationControlsCardProps {
   isMonthly: boolean;
   income: number;
   totalFixedExpenses: number;
+  totalEstimatedVariable?: number;
+  isNecessaryModifiedFromDefault?: boolean;
   monthlyNecessaryInput: string;
   oneTimeAmountInput: string;
   oneTimeNecessaryInput: string;
@@ -20,7 +22,9 @@ interface SimulationControlsCardProps {
   onReset: () => void;
   onNavigateHome: () => void;
   onNavigateFixedExpenses: () => void;
+  onNavigateVariableExpenses?: () => void;
   onChangeMonthlyNecessary: (val: string) => void;
+  onResetMonthlyNecessaryToDefault?: () => void;
   onChangeOneTimeAmount: (val: string) => void;
   onChangeOneTimeNecessary: (val: string) => void;
   onApplyBudget: () => void;
@@ -30,6 +34,8 @@ export function SimulationControlsCard({
   isMonthly,
   income,
   totalFixedExpenses,
+  totalEstimatedVariable = 0,
+  isNecessaryModifiedFromDefault = false,
   monthlyNecessaryInput,
   oneTimeAmountInput,
   oneTimeNecessaryInput,
@@ -37,7 +43,9 @@ export function SimulationControlsCard({
   onReset,
   onNavigateHome,
   onNavigateFixedExpenses,
+  onNavigateVariableExpenses,
   onChangeMonthlyNecessary,
+  onResetMonthlyNecessaryToDefault,
   onChangeOneTimeAmount,
   onChangeOneTimeNecessary,
   onApplyBudget,
@@ -53,7 +61,7 @@ export function SimulationControlsCard({
             <Text className="text-sm sm:text-base font-bold text-foreground">Zone pour modifier le calcul</Text>
             <Text className="text-[11px] text-muted-foreground" numberOfLines={1}>
               {isMonthly
-                ? 'Revenu (Accueil), Charges fixes et Seuil nécessaire'
+                ? 'Revenu, Charges fixes et Seuil nécessaire (Charges variables)'
                 : 'Montant ponctuel et Nécessaire'}
             </Text>
           </View>
@@ -127,23 +135,45 @@ export function SimulationControlsCard({
 
             {/* 3. TOTAL NÉCESSAIRE */}
             <View>
-              <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-xs font-bold text-foreground">Total Nécessaire (Seuil survie) (€)</Text>
-                <Badge variant="outline" className="border-border bg-muted/40 px-1.5 py-0 rounded">
-                  <Text className="text-[10px] font-semibold text-muted-foreground">Paramètre de calcul</Text>
-                </Badge>
+              <View className="flex-row items-center justify-between mb-1.5 flex-wrap gap-1">
+                <View className="flex-row items-center gap-1.5">
+                  <Ionicons name="pie-chart-outline" size={14} color="#D97706" />
+                  <Text className="text-xs font-bold text-foreground">Total Nécessaire (Seuil survie) (€)</Text>
+                </View>
+                {isNecessaryModifiedFromDefault ? (
+                  <Badge variant="outline" className="border-indigo-200 bg-indigo-50 px-1.5 py-0.5 rounded">
+                    <Text className="text-[10px] font-semibold text-lavender">Personnalisé</Text>
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="border-amber-200 bg-amber-50 px-1.5 py-0.5 rounded">
+                    <Text className="text-[10px] font-semibold text-amber-700">Par défaut (Charges variables)</Text>
+                  </Badge>
+                )}
               </View>
               <Input
                 value={monthlyNecessaryInput}
                 onChangeText={(v) => onChangeMonthlyNecessary(v.replace(/[^0-9.,]/g, ''))}
                 keyboardType="decimal-pad"
-                placeholder="123"
+                placeholder={totalEstimatedVariable.toString()}
                 placeholderTextColor={colors.textMuted}
                 className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
               />
-              <Text className="text-[10px] text-muted-foreground mt-1">
-                Ajustez le montant nécessaire pour observer l&apos;impact sur la répartition et l&apos;épargne.
-              </Text>
+              <View className="mt-1.5 gap-1">
+                <Text className="text-[10px] text-muted-foreground">
+                  Égal par défaut au montant de vos charges variables ({formatEuro(totalEstimatedVariable)}/mois), mais modifiable librement pour simuler un autre seuil.
+                </Text>
+                {isNecessaryModifiedFromDefault && onResetMonthlyNecessaryToDefault && (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={onResetMonthlyNecessaryToDefault}
+                    className="self-start flex-row items-center gap-1 mt-0.5 px-2 py-1 rounded-md bg-amber-50 border border-amber-200">
+                    <Ionicons name="refresh-outline" size={12} color="#D97706" />
+                    <Text className="text-[10px] font-semibold text-amber-700">
+                      Rétablir le montant des charges variables ({formatEuro(totalEstimatedVariable)})
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           </>
         ) : (
@@ -155,7 +185,7 @@ export function SimulationControlsCard({
                 value={oneTimeAmountInput}
                 onChangeText={(v) => onChangeOneTimeAmount(v.replace(/[^0-9.,]/g, ''))}
                 keyboardType="decimal-pad"
-                placeholder="566.17"
+                placeholder="0"
                 placeholderTextColor={colors.textMuted}
                 className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
               />
@@ -168,7 +198,7 @@ export function SimulationControlsCard({
                 value={oneTimeNecessaryInput}
                 onChangeText={(v) => onChangeOneTimeNecessary(v.replace(/[^0-9.,]/g, ''))}
                 keyboardType="decimal-pad"
-                placeholder="198.16"
+                placeholder="0"
                 placeholderTextColor={colors.textMuted}
                 className="bg-muted/40 border-border rounded-xl px-3.5 py-2 text-sm sm:text-base font-bold text-foreground h-11"
               />

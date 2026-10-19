@@ -10,6 +10,7 @@ import { NavigationHeader } from '@/components/navigation-header';
 import { AppDialog } from '@/components/confirm-dialog';
 import { DetailsSkeleton } from '@/components/ui/loading-state';
 import { colors } from '@/theme/colors';
+import { formatEuro } from '@/constants/formatters';
 
 import { useDetailsSimulation } from '@/hooks/use-details-simulation';
 import {
@@ -22,6 +23,9 @@ export default function DetailsScreen() {
   const {
     budget,
     totalFixedExpenses,
+    totalEstimatedVariable,
+    isNecessaryModifiedFromDefault,
+    resetMonthlyNecessaryToDefault,
     isLoading,
     isSaving,
     setActiveTab,
@@ -87,6 +91,8 @@ export default function DetailsScreen() {
             isMonthly={isMonthly}
             income={budget.income}
             totalFixedExpenses={totalFixedExpenses}
+            totalEstimatedVariable={totalEstimatedVariable}
+            isNecessaryModifiedFromDefault={isNecessaryModifiedFromDefault}
             monthlyNecessaryInput={monthlyNecessaryInput}
             oneTimeAmountInput={oneTimeAmountInput}
             oneTimeNecessaryInput={oneTimeNecessaryInput}
@@ -94,25 +100,50 @@ export default function DetailsScreen() {
             onReset={() => setShowResetDialog(true)}
             onNavigateHome={() => router.push('/')}
             onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
+            onNavigateVariableExpenses={() => router.push('/variable-expenses')}
             onChangeMonthlyNecessary={setOverrideMonthlyNecessary}
+            onResetMonthlyNecessaryToDefault={resetMonthlyNecessaryToDefault}
             onChangeOneTimeAmount={setOverrideOneTimeAmount}
             onChangeOneTimeNecessary={setOverrideOneTimeNecessary}
             onApplyBudget={handleApplyBudget}
           />
 
-          {/* 4. LIEN VERS CHARGES FIXES */}
-          <TouchableOpacity
-            onPress={() => router.push('/fixed-expenses')}
-            activeOpacity={0.8}
-            className="flex-row items-center justify-between bg-card rounded-2xl p-3.5 sm:p-4 border border-border shadow-xs">
-            <View className="flex-row items-center gap-3">
-              <View className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
-                <Ionicons name="calendar-outline" size={18} color={colors.lavender} />
+          {/* 4. LIENS RAPIDES VERS LES CHARGES */}
+          <View className="gap-2.5">
+            {/* LIEN CHARGES FIXES */}
+            <TouchableOpacity
+              onPress={() => router.push('/fixed-expenses')}
+              activeOpacity={0.8}
+              className="flex-row items-center justify-between bg-card rounded-2xl p-3.5 sm:p-4 border border-border shadow-xs">
+              <View className="flex-row items-center gap-3">
+                <View className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center">
+                  <Ionicons name="calendar-outline" size={18} color={colors.lavender} />
+                </View>
+                <View>
+                  <Text className="text-sm font-bold text-foreground">Gérer mes charges fixes</Text>
+                  <Text className="text-[11px] text-muted-foreground">{formatEuro(totalFixedExpenses)} / mois</Text>
+                </View>
               </View>
-              <Text className="text-sm font-bold text-foreground">Gérer mes charges fixes</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-          </TouchableOpacity>
+              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+            </TouchableOpacity>
+
+            {/* LIEN CHARGES VARIABLES */}
+            <TouchableOpacity
+              onPress={() => router.push('/variable-expenses')}
+              activeOpacity={0.8}
+              className="flex-row items-center justify-between bg-card rounded-2xl p-3.5 sm:p-4 border border-border shadow-xs">
+              <View className="flex-row items-center gap-3">
+                <View className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 justify-center items-center">
+                  <Ionicons name="pie-chart-outline" size={18} color="#D97706" />
+                </View>
+                <View>
+                  <Text className="text-sm font-bold text-foreground">Gérer mes charges variables</Text>
+                  <Text className="text-[11px] text-muted-foreground">{formatEuro(totalEstimatedVariable)} / mois</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       )}
 
@@ -123,8 +154,8 @@ export default function DetailsScreen() {
         title="Restaurer le tableur standard ?"
         message={
           isMonthly
-            ? 'Cela réinitialisera le Seuil nécessaire au montant par défaut (123 €).'
-            : 'Cela réinitialisera le Revenu ponctuel (566,17 €) et le Seuil nécessaire (198,16 €).'
+            ? `Cela réinitialisera le Seuil nécessaire au montant par défaut (${formatEuro(totalEstimatedVariable)}, égal à vos charges variables).`
+            : 'Cela réinitialisera le Revenu ponctuel et son Seuil nécessaire à 0 €.'
         }
         subtext="Vos modifications non appliquées seront perdues."
         confirmLabel="Restaurer"

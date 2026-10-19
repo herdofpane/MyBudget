@@ -97,12 +97,33 @@ class BudgetStorageService {
       const sumFixed = fixedExpensesList.reduce((sum, item) => sum + (item.amount || 0), 0);
       const cleanedFixedExpenses = sumFixed > 0 ? Math.round(sumFixed * 100) / 100 : 0;
 
+      // Migration / nettoyage : réinitialiser les anciens revenus mock (977 € ou 566.17 €) à 0 par défaut
+      const isLegacyIncome = parsed.budget?.income === 977;
+      const isLegacyOneTime = parsed.budget?.oneTimeIncome?.amount === 566.17;
+
+      const isCustomTargetNecessary =
+        parsed.budget?.isCustomTargetNecessary === true &&
+        parsed.budget?.targetNecessary !== 123;
+
       const budget: BudgetData = parsed.budget
         ? {
             ...DEFAULT_BUDGET,
             ...parsed.budget,
+            income: isLegacyIncome ? 0 : (parsed.budget.income ?? 0),
+            checkingAccount:
+              isLegacyIncome && parsed.budget.checkingAccount === 977
+                ? 0
+                : (parsed.budget.checkingAccount ?? 0),
             fixedExpenses:
               parsed.budget.fixedExpenses === 61.73 ? cleanedFixedExpenses : (parsed.budget.fixedExpenses ?? cleanedFixedExpenses),
+            targetNecessary:
+              parsed.budget.targetNecessary === 123 && !parsed.budget.isCustomTargetNecessary
+                ? 0
+                : (parsed.budget.targetNecessary ?? 0),
+            isCustomTargetNecessary,
+            oneTimeIncome: isLegacyOneTime
+              ? DEFAULT_BUDGET.oneTimeIncome
+              : (parsed.budget.oneTimeIncome ?? DEFAULT_BUDGET.oneTimeIncome),
           }
         : DEFAULT_BUDGET;
 
@@ -117,7 +138,12 @@ class BudgetStorageService {
       if (
         (parsed.fixedExpensesList && parsed.fixedExpensesList.length !== fixedExpensesList.length) ||
         (parsed.variableCategories && parsed.variableCategories.length !== variableCategories.length) ||
-        (parsed.budget && parsed.budget.fixedExpenses === 61.73)
+        (parsed.budget && (
+          parsed.budget.fixedExpenses === 61.73 ||
+          isLegacyIncome ||
+          isLegacyOneTime ||
+          (parsed.budget.targetNecessary === 123 && !parsed.budget.isCustomTargetNecessary)
+        ))
       ) {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedState));
       }

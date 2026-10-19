@@ -20,6 +20,7 @@ export function useDetailsSimulation() {
   const {
     budget,
     totalFixedExpenses,
+    totalEstimatedVariable,
     saveBudget,
     isLoading,
   } = useBudget();
@@ -37,16 +38,32 @@ export function useDetailsSimulation() {
   // --- VALEURS DE SIMULATION ---
   // Le revenu mensuel provient directement de l'accueil (budget.income)
   // Les charges fixes proviennent du total calculé de la page charges fixes (totalFixedExpenses)
-  // Seul le seuil nécessaire est ajustable pour simuler la ventilation et l'épargne
+  // Le seuil nécessaire est égal par défaut au montant des charges variables (totalEstimatedVariable),
+  // mais peut être modifié librement pour simuler une autre hypothèse de calcul.
+  const defaultMonthlyNecessary = totalEstimatedVariable;
+  const effectiveMonthlyNecessary =
+    budget.isCustomTargetNecessary && budget.targetNecessary !== undefined
+      ? budget.targetNecessary
+      : defaultMonthlyNecessary;
+
   const [overrideMonthlyNecessary, setOverrideMonthlyNecessary] = useState<string | null>(null);
 
   const [overrideOneTimeAmount, setOverrideOneTimeAmount] = useState<string | null>(null);
   const [overrideOneTimeNecessary, setOverrideOneTimeNecessary] = useState<string | null>(null);
 
-  const monthlyNecessaryInput = overrideMonthlyNecessary ?? (budget.targetNecessary || 123).toString();
+  const monthlyNecessaryInput =
+    overrideMonthlyNecessary !== null
+      ? overrideMonthlyNecessary
+      : effectiveMonthlyNecessary.toString();
 
-  const oneTimeAmountInput = overrideOneTimeAmount ?? (budget.oneTimeIncome?.amount || 566.17).toString();
-  const oneTimeNecessaryInput = overrideOneTimeNecessary ?? (budget.oneTimeIncome?.necessary || 198.16).toString();
+  const oneTimeAmountInput =
+    overrideOneTimeAmount !== null
+      ? overrideOneTimeAmount
+      : (budget.oneTimeIncome?.amount ?? 0).toString();
+  const oneTimeNecessaryInput =
+    overrideOneTimeNecessary !== null
+      ? overrideOneTimeNecessary
+      : (budget.oneTimeIncome?.necessary ?? 0).toString();
 
   // --- CALCULS MENSUELS ---
   // Le revenu mensuel vient directement de l'input d'accueil
@@ -55,12 +72,20 @@ export function useDetailsSimulation() {
   const parsedMonthlyFixed = totalFixedExpenses;
   const parsedMonthlyNecessary = Math.max(0, parseFloat(monthlyNecessaryInput.replace(',', '.')) || 0);
 
+  // Différence avec le montant par défaut des charges variables
+  const isNecessaryModifiedFromDefault = Math.abs(parsedMonthlyNecessary - defaultMonthlyNecessary) > 0.001;
+
   // Reste à vivre = Revenu mensuel (Accueil) - Charges fixes (Total page Charges Fixes)
   const monthlyResteAVivre = Math.round((parsedMonthlyIncome - parsedMonthlyFixed) * 100) / 100;
   // Épargne calculée : Reste à vivre - √(Reste à vivre × Nécessaire)
   const monthlyEpargne = computeSavings(monthlyResteAVivre, parsedMonthlyNecessary);
   // Compte courant calculé : Reste à vivre - Épargne = √(Reste à vivre × Nécessaire)
   const monthlyChecking = Math.max(0, Math.round((monthlyResteAVivre - monthlyEpargne) * 100) / 100);
+
+  // Réinitialiser la saisie locale sur le montant des charges variables par défaut
+  const resetMonthlyNecessaryToDefault = useCallback(() => {
+    setOverrideMonthlyNecessary(defaultMonthlyNecessary.toString());
+  }, [defaultMonthlyNecessary]);
 
   // --- CALCULS PONCTUELS ---
   const parsedOneTimeAmount = Math.max(0, parseFloat(oneTimeAmountInput.replace(',', '.')) || 0);
@@ -84,11 +109,13 @@ export function useDetailsSimulation() {
     setIsSaving(true);
     try {
       if (isMonthly) {
+        const isCustom = Math.abs(parsedMonthlyNecessary - defaultMonthlyNecessary) > 0.001;
         await saveBudget({
           ...budget,
           income: parsedMonthlyIncome,
           fixedExpenses: parsedMonthlyFixed,
           targetNecessary: parsedMonthlyNecessary,
+          isCustomTargetNecessary: isCustom,
           savingsAccount: monthlyEpargne,
           checkingAccount: monthlyChecking,
         });
@@ -134,13 +161,14 @@ export function useDetailsSimulation() {
     }
   }, [
     isMonthly,
-    parsedMonthlyIncome,
-    parsedMonthlyFixed,
     parsedMonthlyNecessary,
-    monthlyEpargne,
-    monthlyChecking,
+    defaultMonthlyNecessary,
     saveBudget,
     budget,
+    parsedMonthlyIncome,
+    parsedMonthlyFixed,
+    monthlyEpargne,
+    monthlyChecking,
     parsedOneTimeAmount,
     parsedOneTimeNecessary,
     oneTimeEpargne,
@@ -148,12 +176,30 @@ export function useDetailsSimulation() {
   ]);
 
   // Exécution de la réinitialisation confirmée
-  const executeReset = useCallback(() => {
+  const executeReset = useCallback(async () => {
     if (isMonthly) {
-      setOverrideMonthlyNecessary('123');
+      setOverrideMonthlyNecessary(null);
+      await saveBudget({
+        ...budget,
+        targetNecessary: defaultMonthlyNecessary,
+        isCustomTargetNecessary: false,
+        savingsAccount: computeSavings(monthlyResteAVivre, defaultMonthlyNecessary),
+        checkingAccount: Math.max(
+          0,
+          Math.round((monthlyResteAVivre - computeSavings(monthlyResteAVivre, defaultMonthlyNecessary)) * 100) / 100
+        ),
+      });
     } else {
-      setOverrideOneTimeAmount('566.17');
-      setOverrideOneTimeNecessary('198.16');
+      setOverrideOneTimeAmount('0');
+      setOverrideOneTimeNecessary('0');
+      await saveBudget({
+        ...budget,
+        oneTimeIncome: {
+          amount: 0,
+          necessary: 0,
+          savings: 0,
+        },
+      });
     }
     setShowResetDialog(false);
     setFeedbackDialog({
@@ -161,14 +207,18 @@ export function useDetailsSimulation() {
       type: 'info',
       title: 'Valeurs restaurées',
       message: isMonthly
-        ? 'Le seuil nécessaire par défaut (123 €) a été réappliqué.'
-        : 'Les paramètres du tableur standard ont été réappliqués dans les champs.',
+        ? `Le seuil nécessaire par défaut (${formatEuro(defaultMonthlyNecessary)}, égal à vos charges variables) a été réappliqué.`
+        : 'Le revenu ponctuel par défaut (0 €) a été réappliqué dans les champs.',
     });
-  }, [isMonthly]);
+  }, [isMonthly, defaultMonthlyNecessary, budget, monthlyResteAVivre, saveBudget]);
 
   return {
     budget,
     totalFixedExpenses,
+    totalEstimatedVariable,
+    defaultMonthlyNecessary,
+    isNecessaryModifiedFromDefault,
+    resetMonthlyNecessaryToDefault,
     isLoading,
     isSaving,
     activeTab,

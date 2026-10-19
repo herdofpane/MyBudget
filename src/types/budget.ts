@@ -14,19 +14,20 @@ export interface FacultativeBreakdown {
 }
 
 export interface OneTimeIncomeData {
-  amount: number;       // Montant ponctuel reçu (ex : 566.17)
-  necessary: number;    // Seuil de survie / nécessaire (ex : 198.16)
-  facultative?: number; // Budget plaisir / facultatif optionnel (ex : 136.79)
-  savings: number;      // Épargne (ex : 231.22)
+  amount: number;       // Montant ponctuel reçu (par défaut : 0 €)
+  necessary: number;    // Seuil de survie / nécessaire (par défaut : 0 €)
+  facultative?: number; // Budget plaisir / facultatif optionnel
+  savings: number;      // Épargne calculée
 }
 
 export interface BudgetData {
-  income: number;             // Revenu mensuel net (ex : 977 €)
+  income: number;             // Revenu mensuel net (par défaut : 0 €)
   fixedExpenses: number;      // Somme des charges fixes (ex : 0 €)
-  checkingAccount: number;    // Montant compte courant
-  savingsAccount: number;     // Montant épargne
-  targetNecessary?: number;   // Montant nécessaire / seuil survie (ex : 78.16 ou 123 €)
-  targetFacultative?: number; // Montant plaisir / facultatif (ex : 130 ou 837.11 €)
+  checkingAccount: number;    // Montant compte courant (par défaut : 0 €)
+  savingsAccount: number;     // Montant épargne (par défaut : 0 €)
+  targetNecessary?: number;   // Montant nécessaire / seuil survie (ex : charges variables ou personnalisé)
+  isCustomTargetNecessary?: boolean; // Indique si le seuil nécessaire a été personnalisé par l'utilisateur
+  targetFacultative?: number; // Montant plaisir / facultatif
   oneTimeIncome?: OneTimeIncomeData;
 }
 

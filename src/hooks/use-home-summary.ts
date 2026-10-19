@@ -11,6 +11,7 @@ export function useHomeSummary() {
   const {
     budget,
     totalFixedExpenses,
+    totalEstimatedVariable,
     saveBudget,
     isLoading,
   } = useBudget();
@@ -29,7 +30,7 @@ export function useHomeSummary() {
   // Valeur locale de l'input revenu direct (null = valeur officielle)
   const [localIncome, setLocalIncome] = useState<string | null>(null);
 
-  const incomeInput = localIncome !== null ? localIncome : budget.income.toString();
+  const incomeInput = localIncome !== null ? localIncome : (budget.income === 0 ? '' : budget.income.toString());
   const parsedIncome = Math.max(0, parseFloat(incomeInput.replace(',', '.')) || 0);
 
   // Reste à vivre = Revenu - Charges fixes
@@ -38,10 +39,17 @@ export function useHomeSummary() {
     [parsedIncome, totalFixedExpenses]
   );
 
+  // Le seuil nécessaire est égal par défaut aux charges variables sauf personnalisation explicite
+  const defaultNecessary = totalEstimatedVariable;
+  const effectiveNecessary =
+    budget.isCustomTargetNecessary && budget.targetNecessary !== undefined
+      ? budget.targetNecessary
+      : defaultNecessary;
+
   // Épargne calculée = formule Klyro : resteAVivre - √(resteAVivre * totalNecessaire)
   const epargneAmount = useMemo(
-    () => computeSavings(resteAVivre, budget.targetNecessary || 123),
-    [resteAVivre, budget.targetNecessary]
+    () => computeSavings(resteAVivre, effectiveNecessary),
+    [resteAVivre, effectiveNecessary]
   );
 
   // Compte courant = Reste à vivre - Épargne
@@ -67,25 +75,21 @@ export function useHomeSummary() {
     return Math.max(0, 100 - spendingRatio);
   }, [spendingRatio]);
 
-  // Sauvegarde automatique lors du blur
+  // Sauvegarde automatique lors du blur (permettant également la sauvegarde d'un revenu à 0 €)
   const handleBlurIncome = useCallback(async () => {
-    if (parsedIncome <= 0) {
-      setLocalIncome(null);
-      return;
-    }
-
     try {
       await saveBudget({
         ...budget,
         income: parsedIncome,
         fixedExpenses: totalFixedExpenses,
+        targetNecessary: effectiveNecessary,
         savingsAccount: epargneAmount,
         checkingAccount: checkingAmount,
       });
     } finally {
       setLocalIncome(null);
     }
-  }, [parsedIncome, saveBudget, budget, totalFixedExpenses, epargneAmount, checkingAmount]);
+  }, [parsedIncome, saveBudget, budget, totalFixedExpenses, effectiveNecessary, epargneAmount, checkingAmount]);
 
   const togglePrivate = useCallback(() => {
     setIsPrivate((prev) => !prev);

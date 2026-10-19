@@ -10,17 +10,18 @@ import {
 
 // Données initiales du budget (synchronisées avec le modèle mensuel et ponctuel)
 export const DEFAULT_BUDGET: BudgetData = {
-  income: 977,
+  income: 0,
   fixedExpenses: 0,
-  checkingAccount: 977,
+  checkingAccount: 0,
   savingsAccount: 0,
-  targetNecessary: 123,
-  targetFacultative: 130,
+  targetNecessary: 0,
+  isCustomTargetNecessary: false,
+  targetFacultative: 0,
   oneTimeIncome: {
-    amount: 566.17,
-    necessary: 198.16,
-    facultative: 136.79,
-    savings: 231.22,
+    amount: 0,
+    necessary: 0,
+    facultative: 0,
+    savings: 0,
   },
 };
 
