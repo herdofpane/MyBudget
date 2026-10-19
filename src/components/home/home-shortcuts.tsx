@@ -7,6 +7,7 @@ import { colors } from '@/theme/colors';
 interface HomeShortcutsProps {
   fixedExpensesFormatted: string;
   fixedExpensesRoundFormatted?: string;
+  isSimulating?: boolean;
   onNavigateFixedExpenses: () => void;
   onNavigateVariableExpenses: () => void;
   onNavigateDetails: () => void;
@@ -15,6 +16,7 @@ interface HomeShortcutsProps {
 export function HomeShortcuts({
   fixedExpensesFormatted,
   fixedExpensesRoundFormatted,
+  isSimulating,
   onNavigateFixedExpenses,
   onNavigateVariableExpenses,
   onNavigateDetails,
@@ -27,8 +29,17 @@ export function HomeShortcuts({
         activeOpacity={0.8}
         onPress={onNavigateFixedExpenses}
         className="flex-1 bg-card rounded-2xl p-3.5 border border-border shadow-xs justify-between">
-        <View className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 items-center justify-center mb-2">
-          <Ionicons name="calendar-outline" size={16} color={colors.lavender} />
+        <View className="flex-row items-center justify-between mb-2">
+          <View className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 items-center justify-center">
+            <Ionicons name="calendar-outline" size={16} color={colors.lavender} />
+          </View>
+          {isSimulating && (
+            <View className="bg-indigo-50 border border-indigo-200 px-1 py-0.2 rounded">
+              <Text className="text-[8px] font-extrabold text-lavender uppercase">
+                Simulé
+              </Text>
+            </View>
+          )}
         </View>
         <Text className="text-xs font-bold text-foreground">Charges Fixes</Text>
         <Text className="text-[11px] text-muted-foreground mt-0.5 font-semibold">

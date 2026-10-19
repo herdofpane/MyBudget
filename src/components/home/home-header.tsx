@@ -6,14 +6,28 @@ import { colors } from '@/theme/colors';
 
 interface HomeHeaderProps {
   isPrivate: boolean;
+  selectedMonthFormatted?: string;
+  isSimulating?: boolean;
+  simulationOffset?: number;
   onTogglePrivate: () => void;
   onOpenInfo: () => void;
 }
 
-export function HomeHeader({ isPrivate, onTogglePrivate, onOpenInfo }: HomeHeaderProps) {
+export function HomeHeader({
+  isPrivate,
+  selectedMonthFormatted,
+  isSimulating,
+  simulationOffset,
+  onTogglePrivate,
+  onOpenInfo,
+}: HomeHeaderProps) {
   const currentMonthYear = new Date()
     .toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
     .toUpperCase();
+
+  const displayMonth = selectedMonthFormatted
+    ? selectedMonthFormatted.toUpperCase()
+    : currentMonthYear;
 
   return (
     <View className="bg-primary px-4 sm:px-6 pt-3 pb-8 rounded-b-[36px] shadow-md">
@@ -53,10 +67,19 @@ export function HomeHeader({ isPrivate, onTogglePrivate, onOpenInfo }: HomeHeade
         </View>
       </View>
 
-      {/* MESSAGE D'ACCUEIL SUBTIL */}
-      <Text className="text-xs font-medium text-slate-300">
-        {`VUE D'ENSEMBLE BUDGÉTAIRE • ${currentMonthYear}`}
-      </Text>
+      {/* MESSAGE D'ACCUEIL SUBTIL AVEC BADGE SIMULATION */}
+      <View className="flex-row items-center gap-2 flex-wrap">
+        <Text className="text-xs font-medium text-slate-300">
+          {`VUE D'ENSEMBLE BUDGÉTAIRE • ${displayMonth}`}
+        </Text>
+        {isSimulating && simulationOffset !== undefined && (
+          <View className="bg-indigo-500/30 border border-indigo-400/50 px-1.5 py-0.5 rounded">
+            <Text className="text-[10px] font-bold text-indigo-200">
+              M+{simulationOffset}
+            </Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 }

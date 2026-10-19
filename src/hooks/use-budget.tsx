@@ -37,6 +37,7 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
   const [fixedExpensesList, setFixedExpensesList] = useState<FixedExpenseItem[]>(DEFAULT_FIXED_EXPENSES);
   const [variableCategories, setVariableCategories] = useState<VariableCategory[]>(DEFAULT_VARIABLE_CATEGORIES);
   const [expenseHistory, setExpenseHistory] = useState<ExpenseRecord[]>(DEFAULT_EXPENSE_HISTORY);
+  const [selectedSimulationMonth, setSelectedSimulationMonth] = useState<string>(() => new Date().toISOString().slice(0, 7));
   const [isLoading, setIsLoading] = useState(true);
 
   // Charger les données depuis le service de stockage dédié (Couche 3 SOLID)
@@ -308,6 +309,8 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
       deleteVariableCategory,
       addExpenseToCategory,
       resetMonthStatus,
+      selectedSimulationMonth,
+      setSelectedSimulationMonth,
     }),
     [
       budget,
@@ -339,6 +342,8 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
       deleteVariableCategory,
       addExpenseToCategory,
       resetMonthStatus,
+      selectedSimulationMonth,
+      setSelectedSimulationMonth,
     ]
   );
 

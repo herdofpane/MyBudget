@@ -8,6 +8,8 @@ import { colors } from '@/theme/colors';
 interface HomeBalanceCardProps {
   resteAVivreFormatted: string;
   resteAVivreRoundFormatted?: string;
+  isSimulating?: boolean;
+  selectedMonthLabel?: string;
   onNavigateDetails: () => void;
   onNavigateFixedExpenses: () => void;
 }
@@ -15,6 +17,8 @@ interface HomeBalanceCardProps {
 export function HomeBalanceCard({
   resteAVivreFormatted,
   resteAVivreRoundFormatted,
+  isSimulating,
+  selectedMonthLabel,
   onNavigateDetails,
   onNavigateFixedExpenses,
 }: HomeBalanceCardProps) {
@@ -25,9 +29,18 @@ export function HomeBalanceCard({
       <View>
         <View className="flex-row justify-between items-start">
           <View className="flex-1 mr-2">
-            <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Reste à vivre
-            </Text>
+            <View className="flex-row items-center gap-2">
+              <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {isSimulating ? 'Reste à vivre simulé' : 'Reste à vivre'}
+              </Text>
+              {isSimulating && selectedMonthLabel && (
+                <View className="bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded">
+                  <Text className="text-[9px] font-extrabold text-lavender uppercase">
+                    {selectedMonthLabel}
+                  </Text>
+                </View>
+              )}
+            </View>
             <View className="flex-row items-baseline gap-2 flex-wrap mt-1">
               <Text className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
                 {resteAVivreFormatted}

@@ -15,6 +15,7 @@ interface FixedExpensesMonthSelectorProps {
   isSimulating: boolean;
   simulationPresets: SimulationMonthPreset[];
   differenceWithCurrentMonth: number;
+  impactType?: 'charges' | 'resteAVivre';
   onSelectMonth: (monthStr: string) => void;
   onNextMonth: () => void;
   onPrevMonth: () => void;
@@ -28,6 +29,7 @@ export function FixedExpensesMonthSelector({
   isSimulating,
   simulationPresets,
   differenceWithCurrentMonth,
+  impactType = 'charges',
   onSelectMonth,
   onNextMonth,
   onPrevMonth,
@@ -39,6 +41,16 @@ export function FixedExpensesMonthSelector({
   // Filtrer les présélections clés pour les pills horizontaux (+0, +1, +2, +3, +6, +12)
   const quickOffsets = [0, 1, 2, 3, 6, 12];
   const quickPresets = simulationPresets.filter((p) => quickOffsets.includes(p.offset));
+
+  const isResteAVivreMode = impactType === 'resteAVivre';
+  // Pour le reste à vivre, differenceWithCurrentMonth > 0 est positif/vert (plus d'argent pour vivre).
+  // Pour les charges, differenceWithCurrentMonth < 0 est positif/vert (moins de charges).
+  const isPositiveImpact = isResteAVivreMode
+    ? differenceWithCurrentMonth > 0
+    : differenceWithCurrentMonth < 0;
+  const isNegativeImpact = isResteAVivreMode
+    ? differenceWithCurrentMonth < 0
+    : differenceWithCurrentMonth > 0;
 
   return (
     <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-xs gap-3.5">
@@ -147,41 +159,73 @@ export function FixedExpensesMonthSelector({
           <View className="flex-1 mr-2 flex-row items-center gap-2">
             <Ionicons
               name={
-                differenceWithCurrentMonth < 0
-                  ? 'trending-down'
-                  : differenceWithCurrentMonth > 0
-                  ? 'trending-up'
+                isPositiveImpact
+                  ? isResteAVivreMode
+                    ? 'trending-up'
+                    : 'trending-down'
+                  : isNegativeImpact
+                  ? isResteAVivreMode
+                    ? 'trending-down'
+                    : 'trending-up'
                   : 'swap-horizontal'
               }
               size={16}
               color={
-                differenceWithCurrentMonth < 0
+                isPositiveImpact
                   ? colors.accent
-                  : differenceWithCurrentMonth > 0
+                  : isNegativeImpact
                   ? '#D97706'
                   : colors.textMuted
               }
             />
             <View className="flex-1">
               <Text className="text-xs font-bold text-foreground">
-                {differenceWithCurrentMonth < 0 && (
-                  <Text className="text-accent">
-                    {formatEuro(differenceWithCurrentMonth)} de charges en moins
-                  </Text>
-                )}
-                {differenceWithCurrentMonth > 0 && (
-                  <Text className="text-amber-800">
-                    +{formatEuro(differenceWithCurrentMonth)} de charges en plus
-                  </Text>
-                )}
-                {differenceWithCurrentMonth === 0 && (
-                  <Text className="text-muted-foreground">
-                    Même total que ce mois-ci
-                  </Text>
+                {isResteAVivreMode ? (
+                  <>
+                    {differenceWithCurrentMonth > 0 && (
+                      <Text className="text-accent">
+                        +{formatEuro(differenceWithCurrentMonth)} de reste à vivre en plus
+                      </Text>
+                    )}
+                    {differenceWithCurrentMonth < 0 && (
+                      <Text className="text-amber-800">
+                        {formatEuro(differenceWithCurrentMonth)} de reste à vivre en moins
+                      </Text>
+                    )}
+                    {differenceWithCurrentMonth === 0 && (
+                      <Text className="text-muted-foreground">
+                        Reste à vivre identique à ce mois-ci
+                      </Text>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {differenceWithCurrentMonth < 0 && (
+                      <Text className="text-accent">
+                        {formatEuro(differenceWithCurrentMonth)} de charges en moins
+                      </Text>
+                    )}
+                    {differenceWithCurrentMonth > 0 && (
+                      <Text className="text-amber-800">
+                        +{formatEuro(differenceWithCurrentMonth)} de charges en plus
+                      </Text>
+                    )}
+                    {differenceWithCurrentMonth === 0 && (
+                      <Text className="text-muted-foreground">
+                        Même total que ce mois-ci
+                      </Text>
+                    )}
+                  </>
                 )}
               </Text>
               <Text className="text-[10px] text-muted-foreground" numberOfLines={1}>
-                {differenceWithCurrentMonth < 0
+                {isResteAVivreMode
+                  ? differenceWithCurrentMonth > 0
+                    ? 'Grâce aux crédits amortis ou charges terminées'
+                    : differenceWithCurrentMonth < 0
+                    ? 'Suite à l’activation de nouvelles charges programmées'
+                    : 'Aucun changement de charge programmé d’ici là'
+                  : differenceWithCurrentMonth < 0
                   ? 'Amortissement de crédits soldés d’ici cette date'
                   : differenceWithCurrentMonth > 0
                   ? 'Activation de nouvelles charges différées'

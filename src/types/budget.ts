@@ -127,4 +127,6 @@ export interface BudgetContextType {
   deleteVariableCategory: (id: string) => Promise<void>;
   addExpenseToCategory: (categoryId: string, amount: number, label: string) => Promise<void>;
   resetMonthStatus: () => Promise<void>;
+  selectedSimulationMonth: string;
+  setSelectedSimulationMonth: (month: string) => void;
 }

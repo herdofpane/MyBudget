@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { AppDialog } from '@/components/confirm-dialog';
 import { HomeSkeleton } from '@/components/ui/loading-state';
 import { useHomeSummary } from '@/hooks/use-home-summary';
+import { FixedExpensesMonthSelector } from '@/components/fixed-expenses/fixed-expenses-month-selector';
 import {
   HomeHeader,
   HomeBalanceCard,
@@ -20,10 +21,23 @@ export default function HomeScreen() {
     isLoading,
     isPrivate,
     incomeInput,
-    resteAVivre,
-    epargneAmount,
-    checkingAmount,
-    totalFixedExpenses,
+    // Données de simulation du mois sélectionné
+    selectedSimulationMonth,
+    selectedMonthOffset,
+    isSimulating,
+    simulationPresets,
+    selectedMonthFormatted,
+    simulatedTotalFixedExpenses,
+    simulatedResteAVivre,
+    simulatedEpargneAmount,
+    simulatedCheckingAmount,
+    differenceResteAVivre,
+    // Handlers navigation temporelle
+    handleSelectSimulationMonth,
+    handleNextSimulationMonth,
+    handlePrevSimulationMonth,
+    handleResetToCurrentMonth,
+    // Dialogs & inputs
     infoDialog,
     setInfoDialog,
     setLocalIncome,
@@ -44,9 +58,12 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerClassName="pb-[120px] w-full max-w-[860px] self-center">
 
-          {/* 1. TOP BAR SUR FOND BLEU NUIT */}
+          {/* 1. TOP BAR SUR FOND BLEU NUIT AVEC INDICATEUR DU MOIS */}
           <HomeHeader
             isPrivate={isPrivate}
+            selectedMonthFormatted={selectedMonthFormatted}
+            isSimulating={isSimulating}
+            simulationOffset={selectedMonthOffset}
             onTogglePrivate={togglePrivate}
             onOpenInfo={() =>
               setInfoDialog({
@@ -62,23 +79,40 @@ export default function HomeScreen() {
 
           {/* CONTENU PRINCIPAL DÉCALÉ VERS LE HAUT SUR LE BANDEAU BLEU NUIT */}
           <View className="px-3.5 sm:px-4 -mt-5 gap-3.5 sm:gap-4">
-            {/* 2. CARTE HÉROS DU RESTE À VIVRE */}
+            {/* 2. SÉLECTEUR & SIMULATEUR DE MOIS AVANCÉ */}
+            <FixedExpensesMonthSelector
+              selectedMonthStr={selectedSimulationMonth}
+              selectedMonthOffset={selectedMonthOffset}
+              selectedMonthFormatted={selectedMonthFormatted}
+              isSimulating={isSimulating}
+              simulationPresets={simulationPresets}
+              differenceWithCurrentMonth={differenceResteAVivre}
+              impactType="resteAVivre"
+              onSelectMonth={handleSelectSimulationMonth}
+              onNextMonth={handleNextSimulationMonth}
+              onPrevMonth={handlePrevSimulationMonth}
+              onResetToCurrentMonth={handleResetToCurrentMonth}
+            />
+
+            {/* 3. CARTE HÉROS DU RESTE À VIVRE (DYNAMIQUE SELON LE MOIS CHOISI) */}
             <HomeBalanceCard
-              resteAVivreFormatted={renderMoney(resteAVivre)}
-              resteAVivreRoundFormatted={renderMoneyRound(resteAVivre)}
+              resteAVivreFormatted={renderMoney(simulatedResteAVivre)}
+              resteAVivreRoundFormatted={renderMoneyRound(simulatedResteAVivre)}
+              isSimulating={isSimulating}
+              selectedMonthLabel={isSimulating ? `M+${selectedMonthOffset}` : undefined}
               onNavigateDetails={() => router.push('/details')}
               onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
             />
 
-            {/* 3. DUO DES 2 COMPTES : COURANT & ÉPARGNE */}
+            {/* 4. DUO DES 2 COMPTES : COURANT & ÉPARGNE */}
             <HomeAccountsCard
-              checkingFormatted={renderMoney(checkingAmount)}
-              checkingRoundFormatted={renderMoneyRound(checkingAmount)}
-              epargneFormatted={renderMoney(epargneAmount)}
-              epargneRoundFormatted={renderMoneyRound(epargneAmount)}
+              checkingFormatted={renderMoney(simulatedCheckingAmount)}
+              checkingRoundFormatted={renderMoneyRound(simulatedCheckingAmount)}
+              epargneFormatted={renderMoney(simulatedEpargneAmount)}
+              epargneRoundFormatted={renderMoneyRound(simulatedEpargneAmount)}
             />
 
-            {/* 4. ÉDITION DIRECTE DU REVENU */}
+            {/* 5. ÉDITION DIRECTE DU REVENU */}
             <HomeIncomeCard
               incomeInput={incomeInput}
               onIncomeChange={setLocalIncome}
@@ -86,10 +120,11 @@ export default function HomeScreen() {
               onSubmitEditing={handleBlurIncome}
             />
 
-            {/* 5. RACCOURCIS RAPIDES VERS LES AUTRES ÉCRANS */}
+            {/* 6. RACCOURCIS RAPIDES VERS LES AUTRES ÉCRANS */}
             <HomeShortcuts
-              fixedExpensesFormatted={renderMoney(totalFixedExpenses)}
-              fixedExpensesRoundFormatted={renderMoneyRound(totalFixedExpenses)}
+              fixedExpensesFormatted={renderMoney(simulatedTotalFixedExpenses)}
+              fixedExpensesRoundFormatted={renderMoneyRound(simulatedTotalFixedExpenses)}
+              isSimulating={isSimulating}
               onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
               onNavigateVariableExpenses={() => router.push('/variable-expenses')}
               onNavigateDetails={() => router.push('/details')}

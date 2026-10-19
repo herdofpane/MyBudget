@@ -44,6 +44,8 @@ export function useFixedExpenses() {
     deleteFixedExpense,
     advanceCreditMonth,
     isLoading,
+    selectedSimulationMonth: selectedMonthStr,
+    setSelectedSimulationMonth: setSelectedMonthStr,
   } = useBudget();
 
   // États de chargement des actions asynchrones
@@ -63,9 +65,6 @@ export function useFixedExpenses() {
   // Mois courant calculé au format YYYY-MM
   const currentMonthStr = useMemo(() => new Date().toISOString().slice(0, 7), []);
   const monthPresets = useMemo(() => getMonthPresets(), []);
-
-  // Mois sélectionné pour la simulation (par défaut le mois en cours)
-  const [selectedMonthStr, setSelectedMonthStr] = useState(currentMonthStr);
 
   const selectedMonthOffset = useMemo(
     () => getMonthsDifference(currentMonthStr, selectedMonthStr),
@@ -89,29 +88,28 @@ export function useFixedExpenses() {
     [selectedMonthStr]
   );
 
-  const handleSelectSimulationMonth = useCallback((m: string) => {
-    setSelectedMonthStr(m);
-  }, []);
+  const handleSelectSimulationMonth = useCallback(
+    (m: string) => {
+      setSelectedMonthStr(m);
+    },
+    [setSelectedMonthStr]
+  );
 
   const handleNextSimulationMonth = useCallback(() => {
-    setSelectedMonthStr((prev) => {
-      const offset = getMonthsDifference(currentMonthStr, prev);
-      if (offset >= 12) return prev;
-      return addMonthsToMonthStr(prev, 1);
-    });
-  }, [currentMonthStr]);
+    const offset = getMonthsDifference(currentMonthStr, selectedMonthStr);
+    if (offset >= 12) return;
+    setSelectedMonthStr(addMonthsToMonthStr(selectedMonthStr, 1));
+  }, [currentMonthStr, selectedMonthStr, setSelectedMonthStr]);
 
   const handlePrevSimulationMonth = useCallback(() => {
-    setSelectedMonthStr((prev) => {
-      const offset = getMonthsDifference(currentMonthStr, prev);
-      if (offset <= 0) return prev;
-      return addMonthsToMonthStr(prev, -1);
-    });
-  }, [currentMonthStr]);
+    const offset = getMonthsDifference(currentMonthStr, selectedMonthStr);
+    if (offset <= 0) return;
+    setSelectedMonthStr(addMonthsToMonthStr(selectedMonthStr, -1));
+  }, [currentMonthStr, selectedMonthStr, setSelectedMonthStr]);
 
   const handleResetToCurrentMonth = useCallback(() => {
     setSelectedMonthStr(currentMonthStr);
-  }, [currentMonthStr]);
+  }, [currentMonthStr, setSelectedMonthStr]);
 
   // Champs de saisie du formulaire
   const [labelInput, setLabelInput] = useState('');
