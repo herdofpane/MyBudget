@@ -29,9 +29,15 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
 ## ✨ Fonctionnalités Clés
 
 ### 1. 🏠 Tableau de Bord Accueil (FinTrack)
-- **Carte Héro Reste à Vivre** : Visualisation centrale et immédiate de votre reste à vivre net calculé en temps réel (Revenu − Charges fixes), avec raccourcis directs vers la simulation et l'échéancier.
+- **Sélecteur Temporel & Simulation Dynamique de l'Accueil (M+1 à M+12)** : Intégration en tête d'accueil du simulateur mensuel interactif permettant d'anticiper en temps réel votre budget futur (navigation pas à pas `<` / `>` et raccourcis rapides `Ce mois`, `+1m`, `+2m`, `+3m`, `+6m`, `+12m`).
+- **Recalcul Dynamique des Piliers Budgétaires** :
+  - **Reste à vivre projeté** : Recalculé selon les charges fixes réelles du mois futur (crédits amortis déduits, charges futures programmées prises en compte).
+  - **Duo de Comptes Prévisionnel** : Ajustement automatique en direct du **Compte Courant** et du **Compte Épargne Klyro** (dérivé de la formule mathématique racine carrée).
+  - **Raccourci Charges Fixes** : Affiche le montant projeté des charges avec un badge `Simulé`.
+- **Encart d'Impact du Pouvoir d'Achat** : Visualisation immédiate du gain en reste à vivre (`+X € de reste à vivre en plus` grâce aux crédits qui arrivent à échéance).
+- **Synchronisation Globale Accueil ↔ Charges Fixes** : Le mois sélectionné est partagé dans le contexte applicatif : choisir un mois futur sur l'accueil synchronise instantanément la vue des charges fixes (et inversement).
+- **Carte Héro Reste à Vivre** : Visualisation centrale et immédiate de votre reste à vivre avec badge `M+X` en mode simulation, et raccourcis directs vers la simulation approfondie et l'échéancier.
 - **Double Affichage Monétaire & Arrondi à l'Unité** : Chaque indicateur clé (Reste à vivre, Compte courant, Épargne, Charges fixes) affiche simultanément son montant exact au centime près et son estimation arrondie à l'unité (`≈ X €`) pour une clarté visuelle et cognitive maximale.
-- **Duo de Comptes Découplé** : Répartition automatique en direct entre le **Compte Courant** (dépenses du quotidien) et le **Compte Épargne Klyro** (dérivé de la formule mathématique racine carrée).
 - **Mode Discrétion (Privacy Mode)** : Masquage en un clic de tous les montants monétaires (`•••• €`) pour consulter son solde en toute sérénité dans les lieux publics.
 - **Édition Instantanée du Revenu** : Ajustez votre revenu net mensuel directement depuis la carte dédiée avec sauvegarde automatique et fluide (initialisé à **0 € par défaut**, sans données fictives).
 - **Raccourcis Intelligents** : Navigation instantanée d'un tap vers les charges fixes, variables et le simulateur complet.
