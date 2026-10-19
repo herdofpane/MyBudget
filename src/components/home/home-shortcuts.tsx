@@ -6,6 +6,7 @@ import { colors } from '@/theme/colors';
 
 interface HomeShortcutsProps {
   fixedExpensesFormatted: string;
+  fixedExpensesRoundFormatted?: string;
   onNavigateFixedExpenses: () => void;
   onNavigateVariableExpenses: () => void;
   onNavigateDetails: () => void;
@@ -13,10 +14,13 @@ interface HomeShortcutsProps {
 
 export function HomeShortcuts({
   fixedExpensesFormatted,
+  fixedExpensesRoundFormatted,
   onNavigateFixedExpenses,
   onNavigateVariableExpenses,
   onNavigateDetails,
 }: HomeShortcutsProps) {
+  const isMasked = fixedExpensesFormatted.includes('•');
+
   return (
     <View className="flex-row gap-2.5">
       <TouchableOpacity
@@ -27,9 +31,14 @@ export function HomeShortcuts({
           <Ionicons name="calendar-outline" size={16} color={colors.lavender} />
         </View>
         <Text className="text-xs font-bold text-foreground">Charges Fixes</Text>
-        <Text className="text-[11px] text-muted-foreground mt-0.5">
+        <Text className="text-[11px] text-muted-foreground mt-0.5 font-semibold">
           -{fixedExpensesFormatted}
         </Text>
+        {!isMasked && fixedExpensesRoundFormatted && (
+          <Text className="text-[10px] text-muted-foreground/80 font-medium">
+            ≈ -{fixedExpensesRoundFormatted}
+          </Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity

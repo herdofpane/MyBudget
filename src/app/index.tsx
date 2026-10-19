@@ -30,9 +30,8 @@ export default function HomeScreen() {
     handleBlurIncome,
     togglePrivate,
     renderMoney,
+    renderMoneyRound,
   } = useHomeSummary();
-
-  const totalBalance = checkingAmount + epargneAmount;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
@@ -63,10 +62,10 @@ export default function HomeScreen() {
 
           {/* CONTENU PRINCIPAL DÉCALÉ VERS LE HAUT SUR LE BANDEAU BLEU NUIT */}
           <View className="px-3.5 sm:px-4 -mt-5 gap-3.5 sm:gap-4">
-            {/* 2. CARTE HÉROS DU TOTAL BALANCE */}
+            {/* 2. CARTE HÉROS DU RESTE À VIVRE */}
             <HomeBalanceCard
-              totalBalanceFormatted={renderMoney(totalBalance)}
               resteAVivreFormatted={renderMoney(resteAVivre)}
+              resteAVivreRoundFormatted={renderMoneyRound(resteAVivre)}
               onNavigateDetails={() => router.push('/details')}
               onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
             />
@@ -74,7 +73,9 @@ export default function HomeScreen() {
             {/* 3. DUO DES 2 COMPTES : COURANT & ÉPARGNE */}
             <HomeAccountsCard
               checkingFormatted={renderMoney(checkingAmount)}
+              checkingRoundFormatted={renderMoneyRound(checkingAmount)}
               epargneFormatted={renderMoney(epargneAmount)}
+              epargneRoundFormatted={renderMoneyRound(epargneAmount)}
             />
 
             {/* 4. ÉDITION DIRECTE DU REVENU */}
@@ -88,6 +89,7 @@ export default function HomeScreen() {
             {/* 5. RACCOURCIS RAPIDES VERS LES AUTRES ÉCRANS */}
             <HomeShortcuts
               fixedExpensesFormatted={renderMoney(totalFixedExpenses)}
+              fixedExpensesRoundFormatted={renderMoneyRound(totalFixedExpenses)}
               onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
               onNavigateVariableExpenses={() => router.push('/variable-expenses')}
               onNavigateDetails={() => router.push('/details')}

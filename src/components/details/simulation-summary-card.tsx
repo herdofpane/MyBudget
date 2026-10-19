@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { Badge } from '@/components/ui/badge';
 import { colors } from '@/theme/colors';
-import { formatEuro, formatPercent } from '@/constants/formatters';
+import { formatEuro, formatEuroRound, formatPercent } from '@/constants/formatters';
 
 interface SimulationSummaryCardProps {
   isMonthly: boolean;
@@ -50,12 +50,17 @@ export function SimulationSummaryCard({
               <Ionicons name="card-outline" size={12} color={colors.accentDark} />
               <Text className="text-[10px] sm:text-[11px] font-bold text-accentDark">Compte Courant</Text>
             </Badge>
-            <Text
-              className="text-lg sm:text-xl font-black text-accentDark my-1"
-              numberOfLines={1}
-              adjustsFontSizeToFit>
-              {formatEuro(currentChecking)}
-            </Text>
+            <View className="my-1">
+              <Text
+                className="text-lg sm:text-xl font-black text-accentDark"
+                numberOfLines={1}
+                adjustsFontSizeToFit>
+                {formatEuro(currentChecking)}
+              </Text>
+              <Text className="text-[11px] font-semibold text-emerald-800/70">
+                ≈ {formatEuroRound(currentChecking)}
+              </Text>
+            </View>
             <View className="flex-row items-center justify-between gap-1 flex-wrap">
               <Text className="text-[10px] sm:text-[11px] text-emerald-700/80 font-medium">Dépenses de vie</Text>
               <Badge variant="secondary" className="bg-emerald-100/70 border-0 px-1 py-0.2 rounded">
@@ -72,14 +77,19 @@ export function SimulationSummaryCard({
               <Ionicons name="sparkles-outline" size={12} color={colors.lavender} />
               <Text className="text-[10px] sm:text-[11px] font-bold text-lavender">Épargne</Text>
             </Badge>
-            <Text
-              className={`text-lg sm:text-xl font-black my-1 ${
-                currentEpargne >= 0 ? 'text-lavender' : 'text-danger'
-              }`}
-              numberOfLines={1}
-              adjustsFontSizeToFit>
-              {currentEpargne >= 0 ? '+' : ''}{formatEuro(currentEpargne)}
-            </Text>
+            <View className="my-1">
+              <Text
+                className={`text-lg sm:text-xl font-black ${
+                  currentEpargne >= 0 ? 'text-lavender' : 'text-danger'
+                }`}
+                numberOfLines={1}
+                adjustsFontSizeToFit>
+                {currentEpargne >= 0 ? '+' : ''}{formatEuro(currentEpargne)}
+              </Text>
+              <Text className="text-[11px] font-semibold text-indigo-700/70">
+                ≈ {currentEpargne >= 0 ? '+' : ''}{formatEuroRound(currentEpargne)}
+              </Text>
+            </View>
             <View className="flex-row items-center justify-between gap-1 flex-wrap">
               <Text className="text-[10px] sm:text-[11px] text-indigo-700/80 font-medium">Épargne Klyro</Text>
               <Badge variant="secondary" className="bg-indigo-100/70 border-0 px-1 py-0.2 rounded">
@@ -102,9 +112,14 @@ export function SimulationSummaryCard({
               <Text className="text-[10px] text-muted-foreground">Seuil de survie minimum</Text>
             </View>
           </View>
-          <Text className="text-xs sm:text-sm font-black text-foreground">
-            {formatEuro(currentNecessary)}
-          </Text>
+          <View className="items-end">
+            <Text className="text-xs sm:text-sm font-black text-foreground">
+              {formatEuro(currentNecessary)}
+            </Text>
+            <Text className="text-[10px] font-semibold text-muted-foreground">
+              ≈ {formatEuroRound(currentNecessary)}
+            </Text>
+          </View>
         </View>
       </View>
 

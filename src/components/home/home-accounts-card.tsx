@@ -8,13 +8,20 @@ import { colors } from '@/theme/colors';
 
 interface HomeAccountsCardProps {
   checkingFormatted: string;
+  checkingRoundFormatted?: string;
   epargneFormatted: string;
+  epargneRoundFormatted?: string;
 }
 
 export function HomeAccountsCard({
   checkingFormatted,
+  checkingRoundFormatted,
   epargneFormatted,
+  epargneRoundFormatted,
 }: HomeAccountsCardProps) {
+  const isCheckingMasked = checkingFormatted.includes('•');
+  const isEpargneMasked = epargneFormatted.includes('•');
+
   return (
     <View className="flex-row gap-2.5 sm:gap-3.5">
       {/* COMPTE COURANT */}
@@ -28,9 +35,16 @@ export function HomeAccountsCard({
             </Badge>
             <Ionicons name="card-outline" size={15} color={colors.accent} />
           </View>
-          <Text className="text-xl sm:text-2xl font-black text-foreground tracking-tight my-0.5">
-            {checkingFormatted}
-          </Text>
+          <View className="my-0.5">
+            <Text className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+              {checkingFormatted}
+            </Text>
+            {!isCheckingMasked && checkingRoundFormatted && (
+              <Text className="text-xs font-semibold text-muted-foreground mt-0.5">
+                ≈ {checkingRoundFormatted}
+              </Text>
+            )}
+          </View>
         </View>
         <View className="pt-2 mt-2 border-t border-slate-100">
           <Text className="text-xs font-bold text-foreground">Dépenses de vie</Text>
@@ -51,9 +65,16 @@ export function HomeAccountsCard({
             </Badge>
             <Ionicons name="sparkles-outline" size={15} color={colors.lavender} />
           </View>
-          <Text className="text-xl sm:text-2xl font-black text-foreground tracking-tight my-0.5">
-            {epargneFormatted}
-          </Text>
+          <View className="my-0.5">
+            <Text className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+              {epargneFormatted}
+            </Text>
+            {!isEpargneMasked && epargneRoundFormatted && (
+              <Text className="text-xs font-semibold text-muted-foreground mt-0.5">
+                ≈ {epargneRoundFormatted}
+              </Text>
+            )}
+          </View>
         </View>
         <View className="pt-2 mt-2 border-t border-slate-100">
           <Text className="text-xs font-bold text-foreground">Épargne Klyro</Text>
