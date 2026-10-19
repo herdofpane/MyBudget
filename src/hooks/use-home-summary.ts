@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useBudget } from '@/hooks/use-budget';
 import { computeSavings } from '@/constants/breakdown';
 import { formatEuro, formatEuroRound } from '@/constants/formatters';
@@ -27,7 +27,7 @@ export function useHomeSummary() {
     subtext?: string;
   } | null>(null);
 
-  // Valeur locale de l'input revenu direct (null = valeur officielle)
+  // Valeur locale de l'input revenu direct (null = synchronisé avec budget.income)
   const [localIncome, setLocalIncome] = useState<string | null>(null);
 
   const incomeInput = localIncome !== null ? localIncome : (budget.income === 0 ? '' : budget.income.toString());
@@ -75,21 +75,48 @@ export function useHomeSummary() {
     return Math.max(0, 100 - spendingRatio);
   }, [spendingRatio]);
 
-  // Sauvegarde automatique lors du blur (permettant également la sauvegarde d'un revenu à 0 €)
-  const handleBlurIncome = useCallback(async () => {
-    try {
+  // Sauvegarde persistante du revenu dans le stockage local
+  const persistIncomeValue = useCallback(
+    async (val: number) => {
+      const epargne = computeSavings(
+        Math.round((val - totalFixedExpenses) * 100) / 100,
+        effectiveNecessary
+      );
+      const checking = Math.max(
+        0,
+        Math.round(((val - totalFixedExpenses) - epargne) * 100) / 100
+      );
+
       await saveBudget({
         ...budget,
-        income: parsedIncome,
+        income: val,
         fixedExpenses: totalFixedExpenses,
         targetNecessary: effectiveNecessary,
-        savingsAccount: epargneAmount,
-        checkingAccount: checkingAmount,
+        savingsAccount: epargne,
+        checkingAccount: checking,
       });
-    } finally {
+    },
+    [budget, totalFixedExpenses, effectiveNecessary, saveBudget]
+  );
+
+  // Sauvegarde automatique avec debounce lors de la frappe pour éviter toute perte en cas de rafraîchissement
+  useEffect(() => {
+    if (localIncome === null) return;
+
+    const timer = setTimeout(() => {
+      persistIncomeValue(parsedIncome);
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, [localIncome, parsedIncome, persistIncomeValue]);
+
+  // Sauvegarde instantanée lors de la perte de focus ou de la soumission au clavier
+  const handleBlurIncome = useCallback(async () => {
+    if (localIncome !== null) {
+      await persistIncomeValue(parsedIncome);
       setLocalIncome(null);
     }
-  }, [parsedIncome, saveBudget, budget, totalFixedExpenses, effectiveNecessary, epargneAmount, checkingAmount]);
+  }, [localIncome, parsedIncome, persistIncomeValue]);
 
   const togglePrivate = useCallback(() => {
     setIsPrivate((prev) => !prev);

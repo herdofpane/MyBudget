@@ -82,6 +82,7 @@ export default function HomeScreen() {
               incomeInput={incomeInput}
               onIncomeChange={setLocalIncome}
               onIncomeBlur={handleBlurIncome}
+              onSubmitEditing={handleBlurIncome}
             />
 
             {/* 5. RACCOURCIS RAPIDES VERS LES AUTRES ÉCRANS */}

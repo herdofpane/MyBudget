@@ -11,12 +11,14 @@ interface HomeIncomeCardProps {
   incomeInput: string;
   onIncomeChange: (val: string) => void;
   onIncomeBlur: () => void;
+  onSubmitEditing?: () => void;
 }
 
 export function HomeIncomeCard({
   incomeInput,
   onIncomeChange,
   onIncomeBlur,
+  onSubmitEditing,
 }: HomeIncomeCardProps) {
   return (
     <Card className="bg-card rounded-2xl p-4 border border-border shadow-xs">
@@ -35,6 +37,8 @@ export function HomeIncomeCard({
           value={incomeInput}
           onChangeText={onIncomeChange}
           onBlur={onIncomeBlur}
+          onSubmitEditing={onSubmitEditing}
+          returnKeyType="done"
           keyboardType="decimal-pad"
           placeholder="0"
           placeholderTextColor={colors.textMuted}
