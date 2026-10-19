@@ -3,5 +3,16 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+  },
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    { "text": "Write the commit message in English." },
+    {
+      "text": "Follow the Conventional Commits specification (e.g., feat:, fix:, chore:, refactor:)."
+    },
+    { "text": "Keep the first line under 72 characters." },
+    { "text": "Do not end the first line with a period." },
+    {
+      "text": "Use the imperative mood in the title (e.g., 'add' instead of 'added' or 'adds')."
+    }
+  ]
 }
