@@ -1,9 +1,8 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@/components/ui/text';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { colors } from '@/theme/colors';
 import { CATEGORY_CONFIG } from '@/data';
 import { formatEuro } from '@/constants/formatters';
@@ -42,27 +41,27 @@ export function FixedExpenseRow({
 
   return (
     <View
-      className={`flex-row items-center px-3.5 sm:px-4 py-3 border-b border-border/60 ${
+      className={`flex-row items-center px-3.5 sm:px-4 py-3 border-b border-slate-100 ${
         isExpired
-          ? 'bg-slate-50/70 opacity-60'
+          ? 'bg-slate-50/60 opacity-60'
           : isNotCounted
-          ? 'bg-muted/20 opacity-75'
+          ? 'bg-slate-50/80 opacity-75'
           : isEven
           ? 'bg-card'
-          : 'bg-muted/10'
+          : 'bg-slate-50/40'
       }`}>
-      {/* COLONNE 1 : CHARGE & CATÉGORIE & CRÉDIT */}
-      <View className="flex-1 flex-row items-center gap-2.5 pr-2">
+      {/* COLONNE 1 : SQUIRCLE D'ICÔNE & INTITULÉ DE LA CHARGE (APPLE HIG) */}
+      <View className="flex-1 flex-row items-center gap-3 pr-2">
         <View
-          className="w-8 h-8 rounded-lg justify-center items-center shrink-0"
+          className="w-10 h-10 rounded-2xl justify-center items-center shrink-0 border border-black/[0.04] shadow-2xs"
           style={{ backgroundColor: cat.bg }}>
-          <Ionicons name={(item.icon || cat.icon) as any} size={16} color={cat.color} />
+          <Ionicons name={(item.icon || cat.icon) as any} size={18} color={cat.color} />
         </View>
         <View className="flex-1">
           <View className="flex-row items-center gap-1.5 flex-wrap">
             <Text
-              className={`text-xs sm:text-sm font-bold text-foreground ${
-                isExpired ? 'line-through text-muted-foreground' : ''
+              className={`text-xs sm:text-sm font-bold text-slate-800 ${
+                isExpired ? 'line-through text-slate-400' : ''
               }`}
               numberOfLines={1}>
               {item.label}
@@ -72,13 +71,13 @@ export function FixedExpenseRow({
             {isCredit && (
               <Badge
                 variant="outline"
-                className={`px-1.5 py-0.5 rounded ${
+                className={`px-2 py-0.2 rounded-full ${
                   isExpired
                     ? 'bg-slate-100 border-slate-300'
                     : 'bg-indigo-50 border-indigo-200'
                 }`}>
                 <Text
-                  className={`text-[10px] font-bold ${
+                  className={`text-[9px] font-black uppercase tracking-wider ${
                     isExpired ? 'text-slate-500' : 'text-lavender'
                   }`}>
                   {isExpired ? 'Soldé' : `${creditInfo?.paid}/${creditInfo?.total}m`}
@@ -90,13 +89,13 @@ export function FixedExpenseRow({
             {schedule.status !== 'active' && schedule.status !== 'credit_expired' && (
               <Badge
                 variant="outline"
-                className="px-1.5 py-0.5 rounded"
+                className="px-2 py-0.2 rounded-full"
                 style={{
                   backgroundColor: schedule.badgeBg,
                   borderColor: schedule.badgeBorder,
                 }}>
                 <Text
-                  className="text-[10px] font-black"
+                  className="text-[9px] font-black uppercase tracking-wider"
                   style={{ color: schedule.badgeColor }}>
                   {schedule.badgeLabel}
                 </Text>
@@ -104,7 +103,7 @@ export function FixedExpenseRow({
             )}
           </View>
 
-          <Text className="text-[10px] sm:text-[11px] font-medium mt-0.5" style={{ color: cat.color }}>
+          <Text className="text-[11px] font-semibold mt-0.5" style={{ color: cat.color }}>
             {cat.label}
             {isCredit && !isExpired && ` • Reste ${creditInfo?.remainingMonths} mois`}
             {!isCredit && schedule.status === 'upcoming' && ` • Dès ${formatMonthYear(item.targetMonth || item.startMonth || '')}`}
@@ -112,11 +111,11 @@ export function FixedExpenseRow({
             {!isCredit && schedule.status === 'only_month_active' && ' • Ce mois-ci uniquement'}
           </Text>
 
-          {/* Progression du crédit */}
+          {/* Barre de progression du crédit style capsule Apple */}
           {isCredit && !isExpired && (
-            <View className="h-1 bg-muted rounded-full overflow-hidden mt-1 max-w-[100px]">
+            <View className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1.5 max-w-[110px]">
               <View
-                className="h-full bg-accent rounded-full"
+                className="h-full bg-emerald-500 rounded-full"
                 style={{ width: `${creditInfo?.percent || 0}%` }}
               />
             </View>
@@ -124,59 +123,62 @@ export function FixedExpenseRow({
         </View>
       </View>
 
-      {/* COLONNE 2 : MONTANT */}
+      {/* COLONNE 2 : MONTANT EN TYPOGRAPHIE SF PRO */}
       <View className="items-end pr-2 shrink-0">
         <Text
           className={`text-xs sm:text-sm font-black ${
-            isExpired ? 'text-muted-foreground line-through' : 'text-foreground'
+            isExpired ? 'text-slate-400 line-through' : 'text-slate-900'
           }`}>
           -{formatEuro(item.amount)}
         </Text>
         {isExpired && (
-          <Text className="text-[10px] text-muted-foreground font-semibold">0 € imputé</Text>
+          <Text className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">0 € imputé</Text>
         )}
         {isNotCounted && !isExpired && (
-          <Text className="text-[10px] text-muted-foreground font-semibold">Non imputé</Text>
+          <Text className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Non imputé</Text>
         )}
         {isCredit && !isExpired && (
-          <Text className="text-[10px] text-muted-foreground">
+          <Text className="text-[10px] text-slate-400 font-medium">
             Dû: {formatEuro(creditInfo?.remainingAmount || 0)}
           </Text>
         )}
       </View>
 
-      {/* COLONNE 3 : ACTIONS */}
-      <View className="w-20 sm:w-24 flex-row items-center justify-end gap-1 shrink-0">
+      {/* COLONNE 3 : ACTIONS AVEC TOUCH TARGETS CONFORTABLES (APPLE HIG 44PT) */}
+      <View className="w-20 sm:w-24 flex-row items-center justify-end gap-1.5 shrink-0">
         {isCredit && !isExpired && (
-          <Button
-            variant="ghost"
-            size="icon"
+          <TouchableOpacity
+            activeOpacity={0.6}
             onPress={() => onAdvanceMonth(item)}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            className="w-7 h-7 rounded-lg"
+            hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+            accessibilityRole="button"
+            className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200/80 items-center justify-center active:bg-emerald-100"
             accessibilityLabel={`Enregistrer +1 mois payé pour ${item.label}`}>
-            <Ionicons name="checkmark-circle-outline" size={16} color={colors.accent} />
-          </Button>
+            <Ionicons name="checkmark-circle-outline" size={17} color={colors.accent} />
+          </TouchableOpacity>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
+
+        <TouchableOpacity
+          activeOpacity={0.6}
           onPress={() => onEdit(item)}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          className="w-7 h-7 rounded-lg"
+          hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+          accessibilityRole="button"
+          className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200/80 items-center justify-center active:bg-slate-200"
           accessibilityLabel={`Modifier ${item.label}`}>
           <Ionicons name="pencil-outline" size={15} color={colors.textMuted} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.6}
           onPress={() => onDelete(item.id, item.label)}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          className="w-7 h-7 rounded-lg"
+          hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+          accessibilityRole="button"
+          className="w-8 h-8 rounded-full bg-rose-50 border border-rose-200/80 items-center justify-center active:bg-rose-100"
           accessibilityLabel={`Supprimer ${item.label}`}>
           <Ionicons name="trash-outline" size={15} color={colors.danger} />
-        </Button>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
+

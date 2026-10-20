@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
 import { ConfirmDialog, AppDialog } from '@/components/confirm-dialog';
@@ -99,13 +98,14 @@ export default function FixedExpensesScreen() {
         icon="calendar-outline"
         actionButton={
           <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={0.6}
             onPress={openAddModal}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessibilityRole="button"
             accessibilityLabel="Ajouter une charge fixe"
-            className="flex-row items-center gap-1.5 bg-accent px-3 py-2 rounded-xl shadow-xs">
-            <Ionicons name="add" size={16} color="#ffffff" />
-            <Text className="text-xs font-bold text-white">Ajouter</Text>
+            className="flex-row items-center gap-1.5 bg-accent px-3.5 py-2 min-h-[38px] rounded-full shadow-xs active:bg-accentDark">
+            <Ionicons name="add" size={17} color="#ffffff" />
+            <Text className="text-xs font-bold text-white uppercase tracking-wider">Ajouter</Text>
           </TouchableOpacity>
         }
       />
@@ -114,11 +114,12 @@ export default function FixedExpensesScreen() {
         <ListSkeleton />
       ) : (
         <ScrollView
+          bounces={true}
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="pb-[120px] w-full max-w-[860px] self-center">
-          <View className="px-3.5 sm:px-4 -mt-5 gap-3.5 sm:gap-4">
+          contentContainerClassName="pb-[120px] w-full max-w-[800px] self-center">
+          <View className="px-4 sm:px-6 pt-3.5 gap-3.5 sm:gap-4">
 
-          {/* 1. SÉLECTEUR DE SIMULATION MENSUELLE */}
+          {/* 1. SÉLECTEUR DE SIMULATION MENSUELLE (APPLE STEPPER) */}
           <FixedExpensesMonthSelector
             selectedMonthStr={selectedMonthStr}
             selectedMonthOffset={selectedMonthOffset}
@@ -132,7 +133,7 @@ export default function FixedExpensesScreen() {
             onResetToCurrentMonth={handleResetToCurrentMonth}
           />
 
-          {/* 2. CARTE DU TOTAL DES CHARGES FIXES & STATS */}
+          {/* 2. CARTE DU TOTAL DES CHARGES FIXES & STATS (APPLE METRICS CARD) */}
           <FixedExpensesStats
             totalFixedExpenses={simulatedTotalFixedExpenses}
             activeCount={activeFixedExpenses.length}
@@ -144,21 +145,21 @@ export default function FixedExpensesScreen() {
             selectedMonthLabel={selectedMonthShort}
           />
 
-          {/* 3. LE TABLEAU DES CHARGES FIXES */}
-          <Card className="bg-card rounded-3xl border border-border shadow-xs overflow-hidden">
+          {/* 3. TABLEAU INSET GROUPED DES CHARGES FIXES */}
+          <Card className="bg-card rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
             {/* EN-TÊTE DU TABLEAU */}
-            <View className="flex-row justify-between items-center p-4 sm:p-5 border-b border-border">
-              <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
-                <View className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
-                  <Ionicons name="receipt-outline" size={18} color={colors.lavender} />
+            <View className="flex-row justify-between items-center p-4 sm:p-5 border-b border-slate-100">
+              <View className="flex-row items-center gap-3 flex-1 pr-2">
+                <View className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200/80 justify-center items-center shrink-0">
+                  <Ionicons name="receipt-outline" size={19} color={colors.lavender} />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm sm:text-base font-bold text-foreground">
+                  <Text className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
                     {isSimulating
                       ? `Charges actives en ${selectedMonthShort}`
                       : 'Charges fixes & abonnements'}
                   </Text>
-                  <Text className="text-[11px] text-muted-foreground mt-0.5">
+                  <Text className="text-xs text-slate-400 mt-0.5">
                     {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
                     {expiredCreditsCount > 0 && ` • ${expiredCreditsCount} soldé${expiredCreditsCount > 1 ? 's' : ''}`}
                     {upcomingChargesCount > 0 && ` • ${upcomingChargesCount} à venir`}
@@ -166,14 +167,16 @@ export default function FixedExpensesScreen() {
                 </View>
               </View>
 
-              <Button
-                variant="outline"
-                size="sm"
+              <TouchableOpacity
+                activeOpacity={0.6}
                 onPress={openAddModal}
-                className="border-indigo-300 bg-indigo-50 gap-1 rounded-xl h-8 px-2.5 shrink-0">
-                <Ionicons name="add-circle" size={15} color={colors.lavender} />
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel="Ajouter une charge"
+                className="border border-indigo-300/80 bg-indigo-50/80 flex-row items-center gap-1.5 rounded-full px-3 py-1.5 min-h-[36px] active:bg-indigo-100 shrink-0 shadow-2xs">
+                <Ionicons name="add-circle" size={16} color={colors.lavender} />
                 <Text className="text-xs font-bold text-lavender">Ajouter</Text>
-              </Button>
+              </TouchableOpacity>
             </View>
 
             {fixedExpensesList.length === 0 ? (
@@ -181,14 +184,14 @@ export default function FixedExpensesScreen() {
             ) : (
               <View>
                 {/* LIGNE DES COLONNES DU TABLEAU */}
-                <View className="flex-row items-center px-3.5 sm:px-4 py-2.5 bg-muted/40 border-b border-border">
-                  <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                <View className="flex-row items-center px-4 py-2.5 bg-slate-50/80 border-b border-slate-100">
+                  <Text className="flex-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     POSTE DE CHARGE
                   </Text>
-                  <Text className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right pr-2">
+                  <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right pr-2">
                     MONTANT
                   </Text>
-                  <Text className="w-20 sm:w-24 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right">
+                  <Text className="w-20 sm:w-24 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
                     ACTIONS
                   </Text>
                 </View>
@@ -208,20 +211,20 @@ export default function FixedExpensesScreen() {
                 ))}
 
                 {/* PIED DU TABLEAU : TOTAL ARRONDI */}
-                <View className="flex-row justify-between items-center px-4 sm:px-5 py-3.5 bg-muted/30 border-t border-border">
+                <View className="flex-row justify-between items-center px-4 sm:px-5 py-4 bg-slate-50/60 border-t border-slate-100">
                   <View>
-                    <Text className="text-xs font-black text-foreground uppercase tracking-wider">
+                    <Text className="text-xs font-black text-slate-900 uppercase tracking-wider">
                       TOTAL DES CHARGES {isSimulating ? `(${selectedMonthShort})` : ''}
                     </Text>
-                    <Text className="text-[11px] text-muted-foreground">
+                    <Text className="text-xs text-slate-400 mt-0.5">
                       Arrondi unité • {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
                     </Text>
                   </View>
                   <View className="items-end">
-                    <Text className="text-lg sm:text-xl font-black text-foreground">
+                    <Text className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                       {formatEuroRound(simulatedTotalFixedExpenses)}
                     </Text>
-                    <Text className="text-[10px] sm:text-[11px] text-muted-foreground">
+                    <Text className="text-xs font-medium text-slate-400 mt-0.5">
                       Exact : {formatEuro(simulatedTotalFixedExpenses)}
                     </Text>
                   </View>

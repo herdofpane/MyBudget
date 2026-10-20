@@ -48,12 +48,12 @@ export default function HomeScreen() {
         <HomeSkeleton />
       ) : (
         <ScrollView
-          bounces={false}
+          bounces={true}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerClassName="flex-grow justify-between pb-[82px] w-full max-w-[860px] self-center">
+          contentContainerClassName="flex-grow justify-between pb-[92px] w-full max-w-[800px] self-center">
 
-          {/* 1. TOP BAR SUR FOND BLEU NUIT AVEC SÉLECTEUR DE MOIS INTÉGRÉ */}
+          {/* 1. TOP BAR SUR FOND BLEU NUIT AVEC SÉLECTEUR DE MOIS INTÉGRÉ (APPLE HIG) */}
           <HomeHeader
             isPrivate={isPrivate}
             selectedMonthFormatted={selectedMonthFormatted}
@@ -67,18 +67,18 @@ export default function HomeScreen() {
             onOpenInfo={() =>
               setInfoDialog({
                 visible: true,
-                title: 'Bienvenue sur FinTrack',
+                title: 'FinTrack — Budget & Épargne',
                 message:
-                  'Votre application de gestion budgétaire épurée inspirée du design fintech contemporain.',
+                  'Application de gestion budgétaire épurée conçue selon les principes d\'ergonomie Human Interface Guidelines.',
                 subtext:
-                  'Visualisez votre solde disponible, simulez vos mois futurs et ventilez votre épargne en un coup d\'œil.',
+                  'Visualisez votre solde disponible en temps réel, simulez vos échéances futures et sécurisez votre épargne.',
               })
             }
           />
 
-          {/* 2. CONTENU PRINCIPAL COMPACT TENANT SUR 1 SEUL ÉCRAN SANS DÉFILEMENT */}
-          <View className="px-3.5 sm:px-4 -mt-3.5 gap-3 flex-1 justify-center py-1">
-            {/* CARTE HÉROS DU RESTE À VIVRE (DYNAMIQUE SELON LE MOIS CHOISI) */}
+          {/* 2. CONTENU PRINCIPAL ERGONOMIQUE (APPLE INSET GROUPED CONTAINERS) */}
+          <View className="px-4 sm:px-6 pt-3.5 gap-3.5 flex-1 justify-center py-2">
+            {/* CARTE HÉROS DU RESTE À VIVRE (STYLE APPLE CARD / WALLET) */}
             <HomeBalanceCard
               resteAVivreFormatted={renderMoney(simulatedResteAVivre)}
               resteAVivreRoundFormatted={renderMoneyRound(simulatedResteAVivre)}
@@ -91,7 +91,7 @@ export default function HomeScreen() {
               onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
             />
 
-            {/* DUO DES 2 COMPTES : COURANT & ÉPARGNE (INTERACTIFS) */}
+            {/* DUO DES COMPTES COURANT & ÉPARGNE */}
             <HomeAccountsCard
               checkingFormatted={renderMoney(simulatedCheckingAmount)}
               checkingRoundFormatted={renderMoneyRound(simulatedCheckingAmount)}
@@ -101,7 +101,7 @@ export default function HomeScreen() {
               onPressEpargne={() => router.push('/details')}
             />
 
-            {/* ÉDITION DIRECTE DU REVENU (LIGNE COMPACTE) */}
+            {/* ÉDITION DIRECTE DU REVENU (CELLULE TABLEAU iOS) */}
             <HomeIncomeCard
               incomeInput={incomeInput}
               onIncomeChange={setLocalIncome}
@@ -127,3 +127,4 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
+

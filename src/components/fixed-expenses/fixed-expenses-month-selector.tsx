@@ -38,13 +38,11 @@ export function FixedExpensesMonthSelector({
   const isAtCurrent = selectedMonthOffset === 0;
   const isAtMax = selectedMonthOffset >= 12;
 
-  // Filtrer les présélections clés pour les pills horizontaux (+0, +1, +2, +3, +6, +12)
+  // Filtrer les présélections clés pour les capsules horizontales (+0, +1, +2, +3, +6, +12)
   const quickOffsets = [0, 1, 2, 3, 6, 12];
   const quickPresets = simulationPresets.filter((p) => quickOffsets.includes(p.offset));
 
   const isResteAVivreMode = impactType === 'resteAVivre';
-  // Pour le reste à vivre, differenceWithCurrentMonth > 0 est positif/vert (plus d'argent pour vivre).
-  // Pour les charges, differenceWithCurrentMonth < 0 est positif/vert (moins de charges).
   const isPositiveImpact = isResteAVivreMode
     ? differenceWithCurrentMonth > 0
     : differenceWithCurrentMonth < 0;
@@ -53,83 +51,83 @@ export function FixedExpensesMonthSelector({
     : differenceWithCurrentMonth > 0;
 
   return (
-    <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-xs gap-3.5">
-      {/* 1. BARRE DE NAVIGATION PAS À PAS */}
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2.5">
+    <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm gap-3.5">
+      {/* 1. BARRE DE NAVIGATION STEPPER (APPLE HIG SEGMENTED BAR) */}
+      <View className="flex-row items-center justify-between min-h-[44px]">
+        <View className="flex-row items-center gap-3">
           <View
-            className={`w-9 h-9 rounded-xl items-center justify-center border ${
+            className={`w-10 h-10 rounded-2xl items-center justify-center border ${
               isSimulating
-                ? 'bg-indigo-50 border-indigo-200'
-                : 'bg-emerald-50 border-emerald-200'
+                ? 'bg-indigo-50 border-indigo-200/80'
+                : 'bg-emerald-50 border-emerald-200/80'
             }`}>
             <Ionicons
               name={isSimulating ? 'sparkles-outline' : 'calendar-outline'}
-              size={18}
+              size={19}
               color={isSimulating ? colors.lavender : colors.accent}
             />
           </View>
           <View>
             <View className="flex-row items-center gap-1.5">
-              <Text className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                {isSimulating ? 'Simulation Temporelle' : 'Mois en Cours'}
+              <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                {isSimulating ? 'Simulation Temporelle' : 'Mois Actif'}
               </Text>
               <Badge
                 variant="outline"
-                className={`px-1.5 py-0 rounded ${
+                className={`px-2 py-0.5 rounded-full ${
                   isSimulating
-                    ? 'border-indigo-300 bg-indigo-50'
-                    : 'border-emerald-300 bg-emerald-50'
+                    ? 'border-indigo-300/80 bg-indigo-50'
+                    : 'border-emerald-300/80 bg-emerald-50'
                 }`}>
                 <Text
-                  className={`text-[9px] font-extrabold ${
+                  className={`text-[9px] font-black uppercase tracking-wider ${
                     isSimulating ? 'text-lavender' : 'text-accent'
                   }`}>
                   {isSimulating ? `M+${selectedMonthOffset}` : 'Actuel'}
                 </Text>
               </Badge>
             </View>
-            <Text className="text-base sm:text-lg font-black text-foreground tracking-tight mt-0.5">
+            <Text className="text-base sm:text-lg font-black text-slate-900 tracking-tight mt-0.5">
               {selectedMonthFormatted}
             </Text>
           </View>
         </View>
 
-        {/* BOUTONS FLÉCHÉS DE NAVIGATION */}
+        {/* BOUTONS FLÉCHÉS DE NAVIGATION (CIBLES TACTILES 44PT CONFORMES HIG) */}
         <View className="flex-row items-center gap-1.5">
           <TouchableOpacity
-            activeOpacity={0.7}
+            activeOpacity={0.6}
             disabled={isAtCurrent}
             onPress={onPrevMonth}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessibilityRole="button"
-            className={`w-8 h-8 rounded-full border items-center justify-center ${
+            className={`w-9 h-9 rounded-full border items-center justify-center ${
               isAtCurrent
-                ? 'border-border/40 bg-muted/20 opacity-30'
-                : 'border-border bg-card'
+                ? 'border-slate-200/50 bg-slate-100/50 opacity-25'
+                : 'border-slate-200/90 bg-white active:bg-slate-100 shadow-xs'
             }`}
             accessibilityLabel="Mois précédent">
-            <Ionicons name="chevron-back" size={16} color={colors.text} />
+            <Ionicons name="chevron-back" size={17} color={colors.text} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            activeOpacity={0.7}
+            activeOpacity={0.6}
             disabled={isAtMax}
             onPress={onNextMonth}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessibilityRole="button"
-            className={`w-8 h-8 rounded-full border items-center justify-center ${
+            className={`w-9 h-9 rounded-full border items-center justify-center ${
               isAtMax
-                ? 'border-border/40 bg-muted/20 opacity-30'
-                : 'border-border bg-card'
+                ? 'border-slate-200/50 bg-slate-100/50 opacity-25'
+                : 'border-slate-200/90 bg-white active:bg-slate-100 shadow-xs'
             }`}
             accessibilityLabel="Mois suivant">
-            <Ionicons name="chevron-forward" size={16} color={colors.text} />
+            <Ionicons name="chevron-forward" size={17} color={colors.text} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* 2. ROULEAU DES PRÉSÉLECTIONS RAPIDES (PILLS DÉFILABLES) */}
+      {/* 2. ROULEAU DES PRÉSÉLECTIONS HORIZONTALES (CAPSULES DÉFILABLES HIG) */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -139,18 +137,19 @@ export function FixedExpensesMonthSelector({
           return (
             <TouchableOpacity
               key={preset.value}
-              activeOpacity={0.75}
+              activeOpacity={0.6}
               onPress={() => onSelectMonth(preset.value)}
+              hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
               accessibilityRole="button"
               accessibilityLabel={`Sélectionner le mois ${preset.fullLabel}`}
-              className={`px-3 py-1.5 rounded-xl border flex-row items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-full border flex-row items-center min-h-[34px] ${
                 isSelected
-                  ? 'bg-primary border-primary'
-                  : 'bg-muted/40 border-border'
+                  ? 'bg-primary border-primary shadow-xs'
+                  : 'bg-slate-100/80 border-slate-200/80 active:bg-slate-200/60'
               }`}>
               <Text
                 className={`text-xs font-bold ${
-                  isSelected ? 'text-white' : 'text-foreground'
+                  isSelected ? 'text-white' : 'text-slate-700'
                 }`}>
                 {preset.label}
               </Text>
@@ -159,10 +158,10 @@ export function FixedExpensesMonthSelector({
         })}
       </ScrollView>
 
-      {/* 3. ENCART D'IMPACT DE LA SIMULATION (SI UN MOIS FUTUR EST SÉLECTIONNÉ) */}
+      {/* 3. ENCART D'IMPACT PRÉVISIONNEL (STYLE BANNIÈRE iOS) */}
       {isSimulating && (
-        <View className="flex-row items-center justify-between p-2.5 sm:p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200/80">
-          <View className="flex-1 mr-2 flex-row items-center gap-2">
+        <View className="flex-row items-center justify-between p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200/80">
+          <View className="flex-1 mr-2 flex-row items-center gap-2.5">
             <Ionicons
               name={
                 isPositiveImpact
@@ -175,7 +174,7 @@ export function FixedExpensesMonthSelector({
                     : 'trending-up'
                   : 'swap-horizontal'
               }
-              size={16}
+              size={17}
               color={
                 isPositiveImpact
                   ? colors.accent
@@ -185,7 +184,7 @@ export function FixedExpensesMonthSelector({
               }
             />
             <View className="flex-1">
-              <Text className="text-xs font-bold text-foreground">
+              <Text className="text-xs font-bold text-slate-900">
                 {isResteAVivreMode ? (
                   <>
                     {differenceWithCurrentMonth > 0 && (
@@ -199,7 +198,7 @@ export function FixedExpensesMonthSelector({
                       </Text>
                     )}
                     {differenceWithCurrentMonth === 0 && (
-                      <Text className="text-muted-foreground">
+                      <Text className="text-slate-600">
                         Reste à vivre identique à ce mois-ci
                       </Text>
                     )}
@@ -217,14 +216,14 @@ export function FixedExpensesMonthSelector({
                       </Text>
                     )}
                     {differenceWithCurrentMonth === 0 && (
-                      <Text className="text-muted-foreground">
+                      <Text className="text-slate-600">
                         Même total que ce mois-ci
                       </Text>
                     )}
                   </>
                 )}
               </Text>
-              <Text className="text-[10px] text-muted-foreground" numberOfLines={1}>
+              <Text className="text-[11px] text-slate-500 mt-0.5" numberOfLines={1}>
                 {isResteAVivreMode
                   ? differenceWithCurrentMonth > 0
                     ? 'Grâce aux crédits amortis ou charges terminées'
@@ -241,17 +240,18 @@ export function FixedExpensesMonthSelector({
           </View>
 
           <TouchableOpacity
-            activeOpacity={0.7}
+            activeOpacity={0.6}
             onPress={onResetToCurrentMonth}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             accessibilityRole="button"
             accessibilityLabel="Réinitialiser au mois en cours"
-            className="px-2.5 py-1 rounded-lg bg-card border border-indigo-300 flex-row items-center gap-1">
-            <Ionicons name="refresh-outline" size={12} color={colors.lavender} />
-            <Text className="text-[11px] font-bold text-lavender">Ce mois</Text>
+            className="px-3 py-1.5 rounded-full bg-white border border-indigo-300/80 flex-row items-center gap-1.5 shadow-xs active:bg-indigo-50">
+            <Ionicons name="refresh-outline" size={13} color={colors.lavender} />
+            <Text className="text-xs font-bold text-lavender uppercase tracking-wider">Ce mois</Text>
           </TouchableOpacity>
         </View>
       )}
     </Card>
   );
 }
+

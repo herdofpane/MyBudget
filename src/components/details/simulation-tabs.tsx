@@ -11,14 +11,17 @@ interface SimulationTabsProps {
 
 export function SimulationTabs({ isMonthly, onSelectTab }: SimulationTabsProps) {
   return (
-    <View className="flex-row bg-slate-200/70 p-1 rounded-2xl gap-1 border border-slate-200/80 shadow-2xs">
+    <View className="flex-row bg-slate-200/80 p-1 rounded-2xl border border-slate-300/60 shadow-2xs">
       <TouchableOpacity
         onPress={() => onSelectTab('monthly')}
-        activeOpacity={0.8}
+        activeOpacity={0.6}
+        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
         accessibilityRole="tab"
         accessibilityState={{ selected: isMonthly }}
-        className={`flex-1 flex-row justify-center items-center gap-1.5 py-2.5 rounded-xl transition-all ${
-          isMonthly ? 'bg-white shadow-xs border border-slate-200/60' : 'bg-transparent'
+        className={`flex-1 flex-row justify-center items-center gap-2 min-h-[44px] py-2 rounded-xl transition-all ${
+          isMonthly
+            ? 'bg-white shadow-xs border border-slate-200/80'
+            : 'bg-transparent'
         }`}>
         <Ionicons
           name="calendar-outline"
@@ -27,7 +30,7 @@ export function SimulationTabs({ isMonthly, onSelectTab }: SimulationTabsProps) 
         />
         <Text
           className={`text-xs ${
-            isMonthly ? 'text-primary font-black' : 'text-slate-500 font-bold'
+            isMonthly ? 'text-primary font-black' : 'text-slate-600 font-bold'
           }`}>
           Répartition Mensuelle
         </Text>
@@ -35,11 +38,14 @@ export function SimulationTabs({ isMonthly, onSelectTab }: SimulationTabsProps) 
 
       <TouchableOpacity
         onPress={() => onSelectTab('onetime')}
-        activeOpacity={0.8}
+        activeOpacity={0.6}
+        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
         accessibilityRole="tab"
         accessibilityState={{ selected: !isMonthly }}
-        className={`flex-1 flex-row justify-center items-center gap-1.5 py-2.5 rounded-xl transition-all ${
-          !isMonthly ? 'bg-white shadow-xs border border-slate-200/60' : 'bg-transparent'
+        className={`flex-1 flex-row justify-center items-center gap-2 min-h-[44px] py-2 rounded-xl transition-all ${
+          !isMonthly
+            ? 'bg-white shadow-xs border border-slate-200/80'
+            : 'bg-transparent'
         }`}>
         <Ionicons
           name="flash-outline"
@@ -48,7 +54,7 @@ export function SimulationTabs({ isMonthly, onSelectTab }: SimulationTabsProps) 
         />
         <Text
           className={`text-xs ${
-            !isMonthly ? 'text-accentDark font-black' : 'text-slate-500 font-bold'
+            !isMonthly ? 'text-accentDark font-black' : 'text-slate-600 font-bold'
           }`}>
           Revenu Ponctuel
         </Text>

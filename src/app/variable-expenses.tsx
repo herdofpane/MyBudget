@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
 import { ConfirmDialog, AppDialog } from '@/components/confirm-dialog';
@@ -65,13 +64,14 @@ export default function VariableExpensesScreen() {
         icon="pie-chart-outline"
         actionButton={
           <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={0.6}
             onPress={openAddModal}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessibilityRole="button"
             accessibilityLabel="Ajouter une charge variable"
-            className="flex-row items-center gap-1.5 bg-accent px-3 py-2 rounded-xl shadow-xs">
-            <Ionicons name="add" size={16} color="#ffffff" />
-            <Text className="text-xs font-bold text-white">Ajouter</Text>
+            className="flex-row items-center gap-1.5 bg-accent px-3.5 py-2 min-h-[38px] rounded-full shadow-xs active:bg-accentDark">
+            <Ionicons name="add" size={17} color="#ffffff" />
+            <Text className="text-xs font-bold text-white uppercase tracking-wider">Ajouter</Text>
           </TouchableOpacity>
         }
       />
@@ -80,9 +80,10 @@ export default function VariableExpensesScreen() {
         <ListSkeleton />
       ) : (
         <ScrollView
+          bounces={true}
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="pb-[120px] w-full max-w-[860px] self-center">
-          <View className="px-3.5 sm:px-4 -mt-5 gap-3.5 sm:gap-4">
+          contentContainerClassName="pb-[120px] w-full max-w-[800px] self-center">
+          <View className="px-4 sm:px-6 pt-3.5 gap-3.5 sm:gap-4">
 
           {/* 1. CARTE DU TOTAL DES CHARGES VARIABLES */}
           <VariableExpensesStats
@@ -92,32 +93,34 @@ export default function VariableExpensesScreen() {
             variableExpenseRatio={variableExpenseRatio}
           />
 
-          {/* 2. LE TABLEAU DES CHARGES VARIABLES */}
-          <Card className="bg-card rounded-3xl border border-border shadow-xs overflow-hidden">
+          {/* 2. LE TABLEAU INSET GROUPED DES CHARGES VARIABLES */}
+          <Card className="bg-card rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
             {/* EN-TÊTE DE LA CARTE TABLEAU */}
-            <View className="flex-row justify-between items-center p-4 sm:p-5 border-b border-border">
-              <View className="flex-row items-center gap-2.5 sm:gap-3 flex-1 pr-2">
-                <View className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 justify-center items-center shrink-0">
-                  <Ionicons name="pie-chart-outline" size={18} color="#D97706" />
+            <View className="flex-row justify-between items-center p-4 sm:p-5 border-b border-slate-100">
+              <View className="flex-row items-center gap-3 flex-1 pr-2">
+                <View className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/80 justify-center items-center shrink-0">
+                  <Ionicons name="pie-chart-outline" size={19} color="#D97706" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm sm:text-base font-bold text-foreground">
+                  <Text className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
                     Charges variables & amortissements
                   </Text>
-                  <Text className="text-[11px] text-muted-foreground mt-0.5">
+                  <Text className="text-xs text-slate-400 mt-0.5">
                     {variableCategories.length} poste{variableCategories.length > 1 ? 's' : ''} lissé{variableCategories.length > 1 ? 's' : ''} sur la durée
                   </Text>
                 </View>
               </View>
 
-              <Button
-                variant="outline"
-                size="sm"
+              <TouchableOpacity
+                activeOpacity={0.6}
                 onPress={openAddModal}
-                className="border-amber-300 bg-amber-50 gap-1 rounded-xl h-8 px-2.5 shrink-0">
-                <Ionicons name="add-circle" size={15} color="#D97706" />
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel="Ajouter une charge variable"
+                className="border border-amber-300/80 bg-amber-50/80 flex-row items-center gap-1.5 rounded-full px-3 py-1.5 min-h-[36px] active:bg-amber-100 shrink-0 shadow-2xs">
+                <Ionicons name="add-circle" size={16} color="#D97706" />
                 <Text className="text-xs font-bold text-amber-800">Ajouter</Text>
-              </Button>
+              </TouchableOpacity>
             </View>
 
             {variableCategories.length === 0 ? (
@@ -125,14 +128,14 @@ export default function VariableExpensesScreen() {
             ) : (
               <View>
                 {/* LIGNE DES COLONNES DU TABLEAU */}
-                <View className="flex-row items-center px-3.5 sm:px-4 py-2.5 bg-muted/40 border-b border-border">
-                  <Text className="flex-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                <View className="flex-row items-center px-4 py-2.5 bg-slate-50/80 border-b border-slate-100">
+                  <Text className="flex-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     POSTE & DURÉE
                   </Text>
-                  <Text className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right pr-2">
+                  <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right pr-2">
                     MONTANT (LISSÉ)
                   </Text>
-                  <Text className="w-16 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right">
+                  <Text className="w-16 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
                     ACTIONS
                   </Text>
                 </View>
@@ -149,20 +152,20 @@ export default function VariableExpensesScreen() {
                 ))}
 
                 {/* PIED DU TABLEAU : TOTAL MENSUEL LISSÉ */}
-                <View className="flex-row justify-between items-center px-4 sm:px-5 py-3.5 bg-muted/30 border-t border-border">
+                <View className="flex-row justify-between items-center px-4 sm:px-5 py-4 bg-slate-50/60 border-t border-slate-100">
                   <View>
-                    <Text className="text-xs font-black text-foreground uppercase tracking-wider">
+                    <Text className="text-xs font-black text-slate-900 uppercase tracking-wider">
                       TOTAL MENSUEL LISSÉ
                     </Text>
-                    <Text className="text-[11px] text-muted-foreground">
-                      Arrondi unité • {variableCategories.length} charges
+                    <Text className="text-xs text-slate-400 mt-0.5">
+                      Arrondi unité • {variableCategories.length} charge{variableCategories.length > 1 ? 's' : ''}
                     </Text>
                   </View>
                   <View className="items-end">
-                    <Text className="text-lg sm:text-xl font-black text-foreground">
+                    <Text className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                       {formatEuroRound(totalEstimatedVariable)}
                     </Text>
-                    <Text className="text-[10px] sm:text-[11px] text-muted-foreground">
+                    <Text className="text-xs font-medium text-slate-400 mt-0.5">
                       Exact : {formatEuro(totalEstimatedVariable)} / mois
                     </Text>
                   </View>

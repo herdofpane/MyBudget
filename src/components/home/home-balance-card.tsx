@@ -38,84 +38,84 @@ export function HomeBalanceCard({
   const livingPercent = hasIncome ? Math.max(0, 100 - fixedPercent - epargnePercent) : 0;
 
   return (
-    <Card className="bg-card rounded-2xl p-3.5 sm:p-4 border border-border/80 shadow-xs gap-2">
-      {/* 1. ENTÊTE DE LA CARTE : BADGE D'ÉTAT & INTITULÉ */}
+    <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm gap-3">
+      {/* 1. EN-TÊTE : BADGE D'ÉTAT & TITRE SF PRO (APPLE HIG CAPSULE) */}
       <View className="flex-row justify-between items-center">
-        <View className="flex-row items-center gap-1.5">
-          <View className={`w-2 h-2 rounded-full ${isSimulating ? 'bg-indigo-500' : 'bg-emerald-500'}`} />
-          <Text className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-            {isSimulating ? 'Reste à vivre simulé' : 'Reste à vivre disponible'}
+        <View className="flex-row items-center gap-2">
+          <View className={`w-2.5 h-2.5 rounded-full ${isSimulating ? 'bg-indigo-500' : 'bg-emerald-500'}`} />
+          <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            {isSimulating ? 'Reste à vivre prévisionnel' : 'Reste à vivre disponible'}
           </Text>
         </View>
 
         {isSimulating && selectedMonthLabel ? (
-          <Badge variant="outline" className="bg-indigo-50 border-indigo-200 px-2 py-0.5 rounded-full">
-            <Text className="text-[10px] font-black text-lavender uppercase tracking-wide">
+          <Badge variant="outline" className="bg-indigo-50/90 border-indigo-200/90 px-2.5 py-0.5 rounded-full">
+            <Text className="text-[10px] font-black text-lavender uppercase tracking-wider">
               {selectedMonthLabel}
             </Text>
           </Badge>
         ) : (
-          <Badge variant="outline" className="bg-emerald-50 border-emerald-200 px-2 py-0.5 rounded-full flex-row items-center gap-1">
-            <Ionicons name="sparkles" size={10} color={colors.accent} />
-            <Text className="text-[10px] font-bold text-accent">Budget actif</Text>
+          <Badge variant="outline" className="bg-emerald-50/90 border-emerald-200/90 px-2.5 py-0.5 rounded-full flex-row items-center gap-1.5">
+            <Ionicons name="sparkles" size={11} color={colors.accent} />
+            <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">Budget actif</Text>
           </Badge>
         )}
       </View>
 
-      {/* 2. MONTANT PRINCIPAL */}
-      <View className="flex-row items-baseline gap-2 flex-wrap my-0.5">
-        <Text className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+      {/* 2. MONTANT HÉROÏQUE TYPE APPLE CARD */}
+      <View className="gap-1 my-0.5">
+        <Text className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight" numberOfLines={1}>
           {resteAVivreFormatted}
         </Text>
         {!isMasked && resteAVivreRoundFormatted && (
-          <Text className="text-xs sm:text-sm font-semibold text-muted-foreground">
-            (≈ {resteAVivreRoundFormatted})
+          <Text className="text-xs sm:text-sm font-semibold text-slate-400">
+            Montant estimé ≈ {resteAVivreRoundFormatted}
           </Text>
         )}
       </View>
 
-      {/* 3. JAUGE VISUELLE DE RÉPARTITION (SI REVENU DISPONIBLE) */}
+      {/* 3. JAUGE DE RÉPARTITION BUDGÉTAIRE INSPIRÉE D'APPLE FITNESS / HEALTH */}
       {hasIncome && !isMasked && (
-        <View className="pt-1.5 border-t border-border/40 gap-1.5">
-          {/* Segmented Progress Bar */}
-          <View className="h-2 w-full bg-slate-100 rounded-full flex-row overflow-hidden">
+        <View className="pt-2 border-t border-slate-100 gap-2">
+          {/* Segmented Pill Progress Bar */}
+          <View className="h-2.5 w-full bg-slate-100 rounded-full flex-row overflow-hidden p-0.5 gap-1">
             {fixedPercent > 0 && (
               <View
                 style={{ width: `${fixedPercent}%` }}
-                className="h-full bg-indigo-500 rounded-l-full"
+                className="h-full bg-indigo-500 rounded-full"
               />
             )}
             {epargnePercent > 0 && (
               <View
                 style={{ width: `${epargnePercent}%` }}
-                className="h-full bg-emerald-500"
+                className="h-full bg-emerald-500 rounded-full"
               />
             )}
             {livingPercent > 0 && (
               <View
                 style={{ width: `${livingPercent}%` }}
-                className="h-full bg-teal-400 rounded-r-full"
+                className="h-full bg-teal-400 rounded-full"
               />
             )}
           </View>
 
-          {/* Légende ergonomique */}
-          <View className="flex-row justify-between items-center">
-            <View className="flex-row items-center gap-1">
-              <View className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-              <Text className="text-[10px] text-muted-foreground font-medium">
+          {/* Légende ergonomique avec indicateurs colorés */}
+          <View className="flex-row justify-between items-center px-0.5">
+            <View className="flex-row items-center gap-1.5">
+              <View className="w-2 h-2 rounded-full bg-indigo-500" />
+              <Text className="text-[11px] text-slate-500 font-semibold">
                 Fixes {fixedPercent}%
               </Text>
             </View>
-            <View className="flex-row items-center gap-1">
-              <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <Text className="text-[10px] text-muted-foreground font-medium">
+            <View className="flex-row items-center gap-1.5">
+              <View className="w-2 h-2 rounded-full bg-emerald-500" />
+              <Text className="text-[11px] text-slate-500 font-semibold">
                 Épargne {epargnePercent}%
               </Text>
             </View>
-            <View className="flex-row items-center gap-1">
-              <View className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-              <Text className="text-[10px] text-muted-foreground font-medium">
+            <View className="flex-row items-center gap-1.5">
+              <View className="w-2 h-2 rounded-full bg-teal-400" />
+              <Text className="text-[11px] text-slate-500 font-semibold">
                 Vie {livingPercent}%
               </Text>
             </View>
@@ -123,30 +123,33 @@ export function HomeBalanceCard({
         </View>
       )}
 
-      {/* 4. ACTIONS RAPIDES & ERGONOMIQUES (TOUCH TARGETS CONFORTABLES) */}
-      <View className="flex-row gap-2 pt-1 border-t border-border/40">
+      {/* 4. ACTIONS RAPIDES TINTED BUTTONS (APPLE HIG 44PT MINIMUM TOUCH TARGET) */}
+      <View className="flex-row gap-2.5 pt-2 border-t border-slate-100">
         <TouchableOpacity
-          activeOpacity={0.7}
+          activeOpacity={0.6}
           onPress={onNavigateFixedExpenses}
-          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityRole="button"
           accessibilityLabel="Consulter et ajuster vos charges fixes"
-          className="flex-1 flex-row items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-slate-50 border border-slate-200/80 active:bg-slate-100">
-          <Ionicons name="calendar-outline" size={14} color={colors.lavender} />
-          <Text className="text-xs font-bold text-foreground">Charges Fixes</Text>
+          className="flex-1 min-h-[44px] flex-row items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-slate-100/80 border border-slate-200/80 active:bg-slate-200/70">
+          <Ionicons name="calendar-outline" size={16} color={colors.lavender} />
+          <Text className="text-xs font-bold text-slate-800">Charges Fixes</Text>
+          <Ionicons name="chevron-forward" size={13} color={colors.textMuted} />
         </TouchableOpacity>
 
         <TouchableOpacity
-          activeOpacity={0.7}
+          activeOpacity={0.6}
           onPress={onNavigateDetails}
-          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityRole="button"
           accessibilityLabel="Ouvrir la ventilation détaillée et les simulations"
-          className="flex-1 flex-row items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80 active:bg-emerald-100/70">
-          <Ionicons name="bar-chart-outline" size={14} color={colors.accentDark} />
+          className="flex-1 min-h-[44px] flex-row items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-emerald-50 border border-emerald-200/80 active:bg-emerald-100/80">
+          <Ionicons name="bar-chart-outline" size={16} color={colors.accentDark} />
           <Text className="text-xs font-bold text-accentDark">Ventilation</Text>
+          <Ionicons name="chevron-forward" size={13} color={colors.accentDark} />
         </TouchableOpacity>
       </View>
     </Card>
   );
 }
+

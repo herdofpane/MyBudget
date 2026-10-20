@@ -28,66 +28,67 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
 
 ## ✨ Fonctionnalités Clés
 
-### 1. 🏠 Tableau de Bord Accueil (FinTrack)
-- **Sélecteur Temporel & Simulation Dynamique de l'Accueil (M+1 à M+12)** : Intégration en tête d'accueil du simulateur mensuel interactif permettant d'anticiper en temps réel votre budget futur (navigation pas à pas `<` / `>` et raccourcis rapides `Ce mois`, `+1m`, `+2m`, `+3m`, `+6m`, `+12m`).
-- **Recalcul Dynamique des Piliers Budgétaires** :
-  - **Reste à vivre projeté** : Recalculé selon les charges fixes réelles du mois futur (crédits amortis déduits, charges futures programmées prises en compte).
-  - **Duo de Comptes Prévisionnel** : Ajustement automatique en direct du **Compte Courant** et du **Compte Épargne Klyro** (dérivé de la formule mathématique racine carrée).
-  - **Raccourci Charges Fixes** : Affiche le montant projeté des charges avec un badge `Simulé`.
-- **Encart d'Impact du Pouvoir d'Achat** : Visualisation immédiate du gain en reste à vivre (`+X € de reste à vivre en plus` grâce aux crédits qui arrivent à échéance).
-- **Synchronisation Globale Accueil ↔ Charges Fixes** : Le mois sélectionné est partagé dans le contexte applicatif : choisir un mois futur sur l'accueil synchronise instantanément la vue des charges fixes (et inversement).
-- **Carte Héro Reste à Vivre** : Visualisation centrale et immédiate de votre reste à vivre avec badge `M+X` en mode simulation, et raccourcis directs vers la simulation approfondie et l'échéancier.
-- **Double Affichage Monétaire & Arrondi à l'Unité** : Chaque indicateur clé (Reste à vivre, Compte courant, Épargne, Charges fixes) affiche simultanément son montant exact au centime près et son estimation arrondie à l'unité (`≈ X €`) pour une clarté visuelle et cognitive maximale.
-- **Mode Discrétion (Privacy Mode)** : Masquage en un clic de tous les montants monétaires (`•••• €`) pour consulter son solde en toute sérénité dans les lieux publics.
-- **Édition Instantanée du Revenu** : Ajustez votre revenu net mensuel directement depuis la carte dédiée avec sauvegarde automatique et fluide (initialisé à **0 € par défaut**, sans données fictives).
-- **Raccourcis Intelligents** : Navigation instantanée d'un tap vers les charges fixes, variables et le simulateur complet.
+### 1. 🏠 Tableau de Bord Accueil (FinTrack) — Design Apple Human Interface Guidelines (HIG)
+- **Ergonomie Apple HIG & Navigation Bar** : En-tête bleu nuit signature intégrant une barre de navigation fluide, des boutons d'actions circulaires translucides (cibles tactiles conformes au standard Apple 44pt minimum) et typographie San Francisco-like claire et hiérarchisée.
+- **Sélecteur Temporel Segmenté façon iOS** : Stepper mensuel interactif avec boutons de navigation ergonomiques, badge prévisionnel `M+X` en capsule et retour instantané au mois en cours.
+- **Carte Héro Reste à Vivre (Style Apple Card / Apple Wallet)** :
+  - Solde principal en typographie héroïque aérée avec équivalent arrondi en sous-titre.
+  - Jauge de répartition budgétaire segmentée inspirée d'Apple Health / Fitness avec segments arrondis continus (`Fixes`, `Épargne`, `Vie courante`).
+  - Actions rapides façon *Apple Tinted Buttons* d'au moins 44pt de hauteur avec chevrons directionnels subtils.
+- **Duo de Comptes (Courant & Épargne)** : Deux cartes interactives au style Inset Grouped d'Apple avec micro-indicateurs chromatiques, soldes nets et flèches de navigation.
+- **Saisie du Revenu Net (Formulaire Inset Grouped iOS)** : Ligne de réglage avec icône dans un squircle, label descriptif et champ de saisie direct fluide avec focus ring soigné.
+- **Double Affichage Monétaire & Arrondi à l'Unité** : Chaque indicateur affiche son montant exact et son estimation arrondie à l'unité (`≈ X €`) pour un confort cognitif maximal.
+- **Mode Discrétion (Privacy Mode)** : Masquage en un tap de tous les montants monétaires (`•••• €`) avec retour haptique/visuel instantané.
+- **Raccourcis Intelligents** : Navigation sans latence vers les charges fixes, variables et le simulateur approfondi.
 
-### 2. 📅 Échéancier des Charges Fixes & Amortissement de Crédits
-- **Détection Automatique Intelligente** : À la création comme en modification, la catégorie et l'icône sont déduites à 100% automatiquement dès la frappe du nom (*Loyer, EDF, Netflix, Navigo, Prêt...*), garantissant une saisie rapide et fluide sans sélection manuelle superflue.
-- **Typologie Complète** : Ventilation par catégories dédiées (*Logement, Énergie, Assurance, Abonnements, Transport, Crédit, Autre*).
-- **Gestion des Crédits et Emprunts** : Suivi des charges temporaires avec calcul de progression (mensualités honorées vs durée totale, barre de progression visuelle, activation automatique lors de la saisie de mots-clés d'emprunt).
-- **Planification Temporelle Avancée** :
-  - *Tous les mois* : prélèvements récurrents perpétuels.
-  - *À partir d'un mois donné* : charges démarrant dans le futur.
-  - *Uniquement ce mois* : charges ponctuelles associées à une échéance unique.
-- **Pointage des Prélèvements** : Marquage en un tap du statut prélevé / en attente.
-- **Ratio d'Endettement Fixe** : Calcul automatique du pourcentage du revenu absorbé par les charges incompressibles.
-- **Simulation Temporelle Dynamique (M+1 à M+12)** : Sélecteur de mois interactif permettant d'anticiper en temps réel l'évolution de ses charges fixes sur les 12 prochains mois (recalcul immédiat des totaux, mise à jour des mensualités restantes, détection des crédits soldés et activation des charges différées).
-- **Double Affichage Statistique** : Synthèse affichant le total arrondi à l'unité et le montant exact correspondant.
+### 2. 📅 Échéancier des Charges Fixes & Crédits — Design Apple Human Interface Guidelines (HIG)
+- **Tableau Inset Grouped & Squircle Icons** : Liste structurée selon les conventions des tableaux iOS, avec icônes de catégories en squircles colorés doux, micro-badges d'état en capsules pills et typographie San Francisco-like claire et hiérarchisée.
+- **Ergonomie & Cibles Tactiles (44pt Apple HIG)** : Tous les boutons interactifs (actions de charge, boutons fléchés, raccourcis et contrôles modaux) respectent strictement la norme ergonomique Apple avec des cibles tactiles confortables de 44x44 points.
+- **Feuille Modale de Saisie (Form Sheet iOS)** : Formulaire épuré avec commutateurs à bascule façon iOS Switches, boutons de durées en capsules, détection 100% automatique de l'icône/catégorie dès la frappe et panneau d'aperçu d'échéance instantané.
+- **Sélecteur Temporel Segmenté (M+1 à M+12)** : Stepper pas à pas interactif avec navigation tactile fluide, rouleau de capsules de mois rapides (+0m, +1m, +2m, +3m, +6m, +12m) et bannière prévisionnelle d'impact financier.
+- **Carte Métrique Groupée de Synthèse** : Affichage héroïque du montant arrondi et exact, bannières d'information feutrées pour les crédits soldés ou charges différées, et volet statistique épuré (moyenne par charge, ratio d'endettement).
+- **Détection Automatique Intelligente** : À la création comme en modification, la catégorie et l'icône sont déduites immédiatement sans sélection manuelle superflue.
+- **Planification Temporelle & Gestion des Emprunts** : Suivi précis des mensualités d'emprunts avec barre de progression continue et gestion fine des charges perpétuelles, différées ou ponctuelles.
 - **Initialisation Vierge** : Démarrage propre avec un carnet vierge de charges par défaut (zéro donnée fictive pré-remplie).
 
-### 3. 🛒 Charges Variables & Lissage Pluriannuel
-- **Attribution Automatique d'Icône & Teinte** : Dès la saisie du titre (*Courses, Restaurant, Vacances, Basic Fit, Essence...*), l'icône thématique et la couleur harmonieuse sont instantanément attribuées de façon 100% automatique, à la création comme en modification.
-- **Enveloppes Budgétaires Visuelles** : Gestion fine par postes de dépenses.
+### 3. 🛒 Charges Variables & Lissage Pluriannuel — Design Apple Human Interface Guidelines (HIG)
+- **Tableau Inset Grouped & Squircle Icons** : Liste de dépenses structurée selon les standards iOS, avec icônes en squircles teintés doux (`rounded-2xl`), badges de durée de lissage en capsules pills et typographie San Francisco-like percutante.
+- **Ergonomie & Cibles Tactiles (44pt Apple HIG)** : Boutons d'édition et de suppression circulaires feutrés avec feedback tactile fluide et zone de contact minimale garantie de 44x44 points (`hitSlop`).
+- **Feuille Modale de Saisie (Form Sheet iOS)** : Formulaire épuré avec détection 100% automatique de l'icône et de la teinte dès la frappe, sélection rapide de durée en capsules horizontales (+1m, +3m, +6m, +12m, +24m) et bannière de prévisualisation instantanée de l'impact mensuel lissé.
+- **Carte Métrique Groupée de Synthèse** : Affichage héroïque du montant mensuel lissé avec badge capsule ambre, équivalence exacte au centime près et volet statistique épuré (moyenne mensuelle, part des revenus).
 - **Lissage Temporel des Dépenses Importantes** : Possibilité d'étaler un achat ou un poste sur plusieurs mois (*1, 3, 6, 12 ou 24 mois*) pour neutraliser son impact mensuel sans déséquilibrer un mois isolé.
-- **Suivi Budgété vs Dépensé** : Jauges de consommation en temps réel avec alertes de dépassement.
 - **Initialisation Vierge** : Démarrage propre sans données factices.
 
-### 4. 🧮 Simulateur Budgétaire & Ventilation Mathématique (Calcul & Détail)
+### 4. Simulateur Budgétaire & Ventilation Mathématique — Design Apple Human Interface Guidelines (HIG)
+- **Contrôle Segmenté iOS (Segmented Control)** : Bascule fluide en capsule entre *Répartition Mensuelle* et *Revenu Ponctuel*, avec typographie San Francisco, ombre douce et cibles tactiles de 44 pt garanties (`hitSlop`).
+- **Cartes de Synthèse Inset Grouped** :
+  - **Duo de Piliers Principaux** : Présentation en cartes étagées du *Compte Courant* (dépenses de vie courante) et de l'*Épargne conseillée* avec badges capsules distinctifs, montants héroïques, équivalents arrondis et pourcentages d'attribution sur le revenu global.
+  - **Cellule Seuil Nécessaire** : Ligne Inset Grouped stylisée avec squircle d'icône ambre, montant exact et arrondi au centime près.
+- **Bandeaux Pédagogiques Mathématiques (Apple Callouts)** :
+  - Explicitation formelle et décomposition numérique en temps réel du calcul du Compte Courant : $\text{Reste à vivre} - \text{Épargne} = \sqrt{\text{ResteÀVivre} \times \text{Nécessaire}}$.
+  - Formule d'épargne progressive avec substitution dynamique des variables : $\text{ResteÀVivre} - \sqrt{\text{ResteÀVivre} \times \text{Nécessaire}}$.
+- **Panneau de Réglages Inset Grouped & Cibles Ergonomiques (44 pt)** :
+  - Lignes de consultation et de redirection rapide pour le revenu net mensuel et les charges fixes avec boutons de redirection pills.
+  - Champ de saisie feutré avec indicateur d'état dynamique (*Par défaut (Charges variables)* ou *Personnalisé*) et bouton de réinitialisation rapide au seuil des charges variables.
+  - Grand bouton d'action principal Apple pour appliquer et enregistrer le budget officiel.
+- **Cellules de Navigation Inférieure** : Liens rapides vers *Gérer mes charges fixes* et *Gérer mes charges variables* au format Inset Grouped Cell avec squircles et chevron de divulgation iOS standard.
 - **Synchronisation Directe avec le Réel** :
   - Le **revenu mensuel** provient directement de la saisie instantanée sur l'écran d'accueil (`income`, **0 € par défaut**).
   - Le **total des charges fixes** provient directement de la somme réelle des charges fixes actives de votre échéancier (`totalFixedExpenses`).
   - Le **Total Nécessaire (Seuil de survie)** est **égal par défaut au montant total de vos charges variables** (`totalEstimatedVariable`), assurant une adéquation automatique et logique entre vos enveloppes réelles et vos paramètres de simulation, tout en restant librement modifiable si besoin.
 - **Double Lecture Exacte & Arrondie** : Les piliers Compte Courant, Épargne et Total Nécessaire présentent simultanément leurs valeurs exactes et arrondies.
-- **Indicateurs d'État & Réversibilité (Nielsen)** :
-  - Badge dynamique précisant l'état du seuil : *« Par défaut (Charges variables) »* ou *« Personnalisé »*.
-  - Bouton d'action rapide permettant de rétablir le seuil exact des charges variables en un seul tap.
-  - Liens rapides d'accès direct vers *Gérer mes charges fixes* et *Gérer mes charges variables* avec affichage de leurs totaux respectifs.
 - **Double Mode de Calcul** :
   - **Mode Mensuel Récurrent** : Simulation sur la base du salaire régulier, des charges fixes réelles et des charges variables.
   - **Mode Revenu Ponctuel (Extra)** : Ventilation d'une prime, d'un bonus ou d'une rentrée d'argent exceptionnelle (initialisé à **0 € par défaut**).
 - **Ventilation du Nécessaire (Seuil de survie)** :
-  - 🛒 *Courses & Entretien* : **49%**
-  - 🚗 *Transports (Essence/Titres)* : **37%**
-  - 💊 *Hygiène & Santé* : **14%**
+  - *Courses & Entretien* : **49%**
+  - *Transports (Essence/Titres)* : **37%**
+  - *Hygiène & Santé* : **14%**
 - **Ventilation du Facultatif (Budget Plaisir)** :
-  - 🎟️ *Activités, Loisirs & Culture* : **37%**
-  - ☕ *Restaurants & Cafés* : **26%**
-  - 👗 *Habillement* : **21%**
-  - ✨ *Divers & Imprévus* : **16%**
-- **Algorithme d'Épargne Progressive** :  
-  Formule mathématique exacte dérivée du modèle financier :
-  $$\text{Épargne} = \max\left(0,\, \text{ResteÀVivre} - \sqrt{\text{ResteÀVivre} \times \text{Nécessaire}}\right)$$
+  - *Activités, Loisirs & Culture* : **37%**
+  - *Restaurants & Cafés* : **26%**
+  - *Habillement* : **21%**
+  - *Divers & Imprévus* : **16%**
 - **Bac à Sable Interactif** : Testez des ajustements de revenus et de charges sans altérer vos données officielles tant que vous ne confirmez pas via *Appliquer comme budget officiel*.
 
 ---

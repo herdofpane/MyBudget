@@ -1,9 +1,8 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@/components/ui/text';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { colors } from '@/theme/colors';
 import { formatEuro } from '@/constants/formatters';
 import { VariableCategory } from '@/types';
@@ -30,60 +29,62 @@ export function VariableExpenseRow({
 
   return (
     <View
-      className={`flex-row items-center px-3.5 sm:px-4 py-3 border-b border-border/60 ${
-        isEven ? 'bg-card' : 'bg-muted/10'
+      className={`flex-row items-center px-3.5 sm:px-4 py-3 border-b border-slate-100 ${
+        isEven ? 'bg-card' : 'bg-slate-50/40'
       }`}>
-      {/* COLONNE 1 : TITRE & BADGE DURÉE EN DESSOUS */}
-      <View className="flex-1 flex-row items-center gap-2.5 pr-2">
+      {/* COLONNE 1 : SQUIRCLE D'ICÔNE & INTITULÉ DE LA CHARGE (APPLE HIG) */}
+      <View className="flex-1 flex-row items-center gap-3 pr-2">
         <View
-          className="w-8 h-8 rounded-lg justify-center items-center shrink-0"
+          className="w-10 h-10 rounded-2xl justify-center items-center shrink-0 border border-black/[0.04] shadow-2xs"
           style={{ backgroundColor: `${item.color}15` }}>
-          <Ionicons name={item.icon as any} size={16} color={item.color} />
+          <Ionicons name={item.icon as any} size={18} color={item.color} />
         </View>
         <View className="flex-1">
-          <Text className="text-xs sm:text-sm font-bold text-foreground" numberOfLines={1}>
+          <Text className="text-xs sm:text-sm font-bold text-slate-800" numberOfLines={1}>
             {item.label}
           </Text>
-          <Badge variant="outline" className="border-amber-200 bg-amber-50 gap-1 px-1.5 py-0.5 rounded-md self-start mt-1">
+          <Badge variant="outline" className="border-amber-200/90 bg-amber-50/90 gap-1 px-2 py-0.5 rounded-full self-start mt-1">
             <Ionicons name="calendar-outline" size={10} color="#D97706" />
-            <Text className="text-[10px] font-semibold text-amber-800">
+            <Text className="text-[10px] font-bold text-amber-800 uppercase tracking-wider">
               {formattedDuration}
             </Text>
           </Badge>
         </View>
       </View>
 
-      {/* COLONNE 2 : MONTANTS TOTAL & LISSÉ */}
+      {/* COLONNE 2 : MONTANTS TOTAL & LISSÉ (TYPOGRAPHIE SF PRO) */}
       <View className="items-end pr-2 shrink-0">
-        <Text className="text-xs sm:text-sm font-black text-foreground">
+        <Text className="text-xs sm:text-sm font-black text-slate-900">
           -{formatEuro(total)}
         </Text>
-        <Text className="text-[10px] sm:text-[11px] text-amber-800 font-semibold mt-0.5">
+        <Text className="text-[10px] sm:text-[11px] text-amber-800 font-bold mt-0.5">
           {formatEuro(monthly)}/m
         </Text>
       </View>
 
-      {/* COLONNE 3 : ACTIONS (MODIFIER / SUPPRIMER) */}
-      <View className="w-16 flex-row items-center justify-end gap-1 shrink-0">
-        <Button
-          variant="ghost"
-          size="icon"
+      {/* COLONNE 3 : ACTIONS (CIBLES TACTILES CONFORTABLES APPLE 44PT) */}
+      <View className="w-16 flex-row items-center justify-end gap-1.5 shrink-0">
+        <TouchableOpacity
+          activeOpacity={0.6}
           onPress={() => onEdit(item)}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          className="w-7 h-7 rounded-lg"
+          hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+          accessibilityRole="button"
+          className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200/80 items-center justify-center active:bg-slate-200"
           accessibilityLabel={`Modifier ${item.label}`}>
           <Ionicons name="pencil-outline" size={15} color={colors.textMuted} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.6}
           onPress={() => onDelete(item.id, item.label)}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          className="w-7 h-7 rounded-lg"
+          hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+          accessibilityRole="button"
+          className="w-8 h-8 rounded-full bg-rose-50 border border-rose-200/80 items-center justify-center active:bg-rose-100"
           accessibilityLabel={`Supprimer ${item.label}`}>
           <Ionicons name="trash-outline" size={15} color={colors.danger} />
-        </Button>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
+
