@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -90,12 +90,24 @@ export default function FixedExpensesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
 
-      {/* EN-TÊTE PRINCIPAL ÉPURÉ */}
+      {/* EN-TÊTE PRINCIPAL ÉPURÉ UNIFIÉ */}
       <NavigationHeader
         title="Charges Fixes"
         subtitle="BUDGET RÉCURRENT"
+        icon="calendar-outline"
+        actionButton={
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={openAddModal}
+            accessibilityRole="button"
+            accessibilityLabel="Ajouter une charge fixe"
+            className="flex-row items-center gap-1.5 bg-accent px-3 py-2 rounded-xl shadow-xs">
+            <Ionicons name="add" size={16} color="#ffffff" />
+            <Text className="text-xs font-bold text-white">Ajouter</Text>
+          </TouchableOpacity>
+        }
       />
 
       {isLoading ? (
@@ -103,7 +115,8 @@ export default function FixedExpensesScreen() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="px-3.5 sm:px-4 pt-1.5 pb-[115px] gap-3.5 sm:gap-4 w-full max-w-[860px] self-center">
+          contentContainerClassName="pb-[120px] w-full max-w-[860px] self-center">
+          <View className="px-3.5 sm:px-4 -mt-5 gap-3.5 sm:gap-4">
 
           {/* 1. SÉLECTEUR DE SIMULATION MENSUELLE */}
           <FixedExpensesMonthSelector
@@ -216,6 +229,7 @@ export default function FixedExpensesScreen() {
               </View>
             )}
           </Card>
+          </View>
         </ScrollView>
       )}
 

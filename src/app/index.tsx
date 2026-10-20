@@ -7,7 +7,6 @@ import { router } from 'expo-router';
 import { AppDialog } from '@/components/confirm-dialog';
 import { HomeSkeleton } from '@/components/ui/loading-state';
 import { useHomeSummary } from '@/hooks/use-home-summary';
-import { FixedExpensesMonthSelector } from '@/components/fixed-expenses/fixed-expenses-month-selector';
 import {
   HomeHeader,
   HomeBalanceCard,
@@ -20,22 +19,18 @@ export default function HomeScreen() {
     isLoading,
     isPrivate,
     incomeInput,
-    // Données de simulation du mois sélectionné
-    selectedSimulationMonth,
+    parsedIncome,
+    simulatedTotalFixedExpenses,
     selectedMonthOffset,
     isSimulating,
-    simulationPresets,
     selectedMonthFormatted,
     simulatedResteAVivre,
     simulatedEpargneAmount,
     simulatedCheckingAmount,
     differenceResteAVivre,
-    // Handlers navigation temporelle
-    handleSelectSimulationMonth,
     handleNextSimulationMonth,
     handlePrevSimulationMonth,
     handleResetToCurrentMonth,
-    // Dialogs & inputs
     infoDialog,
     setInfoDialog,
     setLocalIncome,
@@ -53,64 +48,60 @@ export default function HomeScreen() {
         <HomeSkeleton />
       ) : (
         <ScrollView
+          bounces={false}
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="pb-[120px] w-full max-w-[860px] self-center">
+          keyboardShouldPersistTaps="handled"
+          contentContainerClassName="flex-grow justify-between pb-[82px] w-full max-w-[860px] self-center">
 
-          {/* 1. TOP BAR SUR FOND BLEU NUIT AVEC INDICATEUR DU MOIS */}
+          {/* 1. TOP BAR SUR FOND BLEU NUIT AVEC SÉLECTEUR DE MOIS INTÉGRÉ */}
           <HomeHeader
             isPrivate={isPrivate}
             selectedMonthFormatted={selectedMonthFormatted}
+            selectedMonthOffset={selectedMonthOffset}
             isSimulating={isSimulating}
-            simulationOffset={selectedMonthOffset}
+            differenceResteAVivre={differenceResteAVivre}
+            onNextMonth={handleNextSimulationMonth}
+            onPrevMonth={handlePrevSimulationMonth}
+            onResetMonth={handleResetToCurrentMonth}
             onTogglePrivate={togglePrivate}
             onOpenInfo={() =>
               setInfoDialog({
                 visible: true,
-                title: 'Bienvenue sur Klyro',
+                title: 'Bienvenue sur FinTrack',
                 message:
                   'Votre application de gestion budgétaire épurée inspirée du design fintech contemporain.',
                 subtext:
-                  'Visualisez votre solde total, vos jauges de dépenses et vos transactions en temps réel.',
+                  'Visualisez votre solde disponible, simulez vos mois futurs et ventilez votre épargne en un coup d\'œil.',
               })
             }
           />
 
-          {/* CONTENU PRINCIPAL DÉCALÉ VERS LE HAUT SUR LE BANDEAU BLEU NUIT */}
-          <View className="px-3.5 sm:px-4 -mt-5 gap-3.5 sm:gap-4">
-            {/* 2. SÉLECTEUR & SIMULATEUR DE MOIS AVANCÉ */}
-            <FixedExpensesMonthSelector
-              selectedMonthStr={selectedSimulationMonth}
-              selectedMonthOffset={selectedMonthOffset}
-              selectedMonthFormatted={selectedMonthFormatted}
-              isSimulating={isSimulating}
-              simulationPresets={simulationPresets}
-              differenceWithCurrentMonth={differenceResteAVivre}
-              impactType="resteAVivre"
-              onSelectMonth={handleSelectSimulationMonth}
-              onNextMonth={handleNextSimulationMonth}
-              onPrevMonth={handlePrevSimulationMonth}
-              onResetToCurrentMonth={handleResetToCurrentMonth}
-            />
-
-            {/* 3. CARTE HÉROS DU RESTE À VIVRE (DYNAMIQUE SELON LE MOIS CHOISI) */}
+          {/* 2. CONTENU PRINCIPAL COMPACT TENANT SUR 1 SEUL ÉCRAN SANS DÉFILEMENT */}
+          <View className="px-3.5 sm:px-4 -mt-3.5 gap-3 flex-1 justify-center py-1">
+            {/* CARTE HÉROS DU RESTE À VIVRE (DYNAMIQUE SELON LE MOIS CHOISI) */}
             <HomeBalanceCard
               resteAVivreFormatted={renderMoney(simulatedResteAVivre)}
               resteAVivreRoundFormatted={renderMoneyRound(simulatedResteAVivre)}
               isSimulating={isSimulating}
               selectedMonthLabel={isSimulating ? `M+${selectedMonthOffset}` : undefined}
+              income={parsedIncome}
+              fixedExpenses={simulatedTotalFixedExpenses}
+              epargne={simulatedEpargneAmount}
               onNavigateDetails={() => router.push('/details')}
               onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
             />
 
-            {/* 4. DUO DES 2 COMPTES : COURANT & ÉPARGNE */}
+            {/* DUO DES 2 COMPTES : COURANT & ÉPARGNE (INTERACTIFS) */}
             <HomeAccountsCard
               checkingFormatted={renderMoney(simulatedCheckingAmount)}
               checkingRoundFormatted={renderMoneyRound(simulatedCheckingAmount)}
               epargneFormatted={renderMoney(simulatedEpargneAmount)}
               epargneRoundFormatted={renderMoneyRound(simulatedEpargneAmount)}
+              onPressChecking={() => router.push('/variable-expenses')}
+              onPressEpargne={() => router.push('/details')}
             />
 
-            {/* 5. ÉDITION DIRECTE DU REVENU */}
+            {/* ÉDITION DIRECTE DU REVENU (LIGNE COMPACTE) */}
             <HomeIncomeCard
               incomeInput={incomeInput}
               onIncomeChange={setLocalIncome}

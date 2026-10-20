@@ -1,4 +1,4 @@
-# FinTrack by Klyro (MyBudget) 💳📊
+# FinTrack (MyBudget) 💳📊
 
 > Application universelle (iOS, Android, Web) de gestion budgétaire personnelle, simulation financière en temps réel et suivi intelligent des dépenses.
 
@@ -20,7 +20,7 @@ L'application est accessible directement dans votre navigateur grâce au déploi
 
 ## 📖 Présentation du Projet
 
-**FinTrack by Klyro** est conçue pour offrir une maîtrise financière limpide, proactive et sans stress. Inspirée des standards visuels des meilleures néobanques et applications fintech contemporaines, elle allie une interface épurée à un moteur de calcul budgétaire rigoureux.
+**FinTrack** est conçue pour offrir une maîtrise financière limpide, proactive et agréable. Inspirée des standards visuels des meilleures néobanques et applications fintech contemporaines, elle allie une interface épurée à un bandeau bleu nuit signature unifié sur tous les écrans et un moteur de calcul budgétaire rigoureux.
 
 Toutes les données sont stockées **localement et de façon sécurisée** sur votre appareil (aucun compte obligatoire, zéro transmission de données personnelles à des serveurs tiers).
 

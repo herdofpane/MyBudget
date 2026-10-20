@@ -91,7 +91,7 @@ export function SimulationSummaryCard({
               </Text>
             </View>
             <View className="flex-row items-center justify-between gap-1 flex-wrap">
-              <Text className="text-[10px] sm:text-[11px] text-indigo-700/80 font-medium">Épargne Klyro</Text>
+              <Text className="text-[10px] sm:text-[11px] text-indigo-700/80 font-medium">Épargne conseillée</Text>
               <Badge variant="secondary" className="bg-indigo-100/70 border-0 px-1 py-0.2 rounded">
                 <Text className="text-[9px] sm:text-[10px] text-indigo-800 font-bold">
                   {currentIncome > 0 ? formatPercent((currentEpargne / currentIncome) * 100) : '0%'}

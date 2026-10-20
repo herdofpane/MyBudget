@@ -20,7 +20,7 @@ export function VariableExpensesEmpty({ onAdd }: VariableExpensesEmptyProps) {
       </Text>
       <Button
         onPress={onAdd}
-        className="bg-primary rounded-xl px-4 py-2 mt-2 gap-1.5 h-auto">
+        className="bg-accent rounded-xl px-4 py-2.5 mt-2 gap-1.5 h-auto shadow-xs active:opacity-90">
         <Ionicons name="add" size={16} color="#ffffff" />
         <Text className="text-xs font-bold text-white">
           Ajouter ma première charge variable

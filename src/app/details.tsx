@@ -53,12 +53,24 @@ export default function DetailsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
 
-      {/* EN-TÊTE PRINCIPAL */}
+      {/* EN-TÊTE PRINCIPAL ÉPURÉ UNIFIÉ */}
       <NavigationHeader
         title="Calcul & Détails"
-        subtitle="RÉPARTITION NÉCESSAIRE, FACULTATIF & ÉPARGNE"
+        subtitle="VENTILATION & PRÉVOYANCE"
+        icon="calculator-outline"
+        actionButton={
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setShowResetDialog(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Réinitialiser les paramètres par défaut"
+            className="flex-row items-center gap-1.5 bg-white/10 border border-white/20 px-3 py-2 rounded-xl">
+            <Ionicons name="refresh-outline" size={15} color="#ffffff" />
+            <Text className="text-xs font-bold text-white">Défaut</Text>
+          </TouchableOpacity>
+        }
       />
 
       {isLoading ? (
@@ -66,7 +78,8 @@ export default function DetailsScreen() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="px-3.5 sm:px-4 pt-1.5 pb-[115px] gap-3.5 sm:gap-4 w-full max-w-[860px] self-center">
+          contentContainerClassName="pb-[120px] w-full max-w-[860px] self-center">
+          <View className="px-3.5 sm:px-4 -mt-5 gap-3.5 sm:gap-4">
 
           {/* 1. SÉLECTEUR D'ONGLET : MENSUELLE vs REVENU PONCTUEL */}
           <SimulationTabs
@@ -143,6 +156,7 @@ export default function DetailsScreen() {
               </View>
               <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
             </TouchableOpacity>
+          </View>
           </View>
         </ScrollView>
       )}

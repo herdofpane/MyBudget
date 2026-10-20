@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
@@ -11,6 +11,8 @@ interface HomeAccountsCardProps {
   checkingRoundFormatted?: string;
   epargneFormatted: string;
   epargneRoundFormatted?: string;
+  onPressChecking?: () => void;
+  onPressEpargne?: () => void;
 }
 
 export function HomeAccountsCard({
@@ -18,71 +20,89 @@ export function HomeAccountsCard({
   checkingRoundFormatted,
   epargneFormatted,
   epargneRoundFormatted,
+  onPressChecking,
+  onPressEpargne,
 }: HomeAccountsCardProps) {
   const isCheckingMasked = checkingFormatted.includes('•');
   const isEpargneMasked = epargneFormatted.includes('•');
 
   return (
-    <View className="flex-row gap-2.5 sm:gap-3.5">
-      {/* COMPTE COURANT */}
-      <Card className="flex-1 bg-card rounded-3xl p-4 border border-border shadow-xs justify-between">
-        <View>
-          <View className="flex-row items-center justify-between mb-1.5">
-            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded-full">
-              <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">
+    <View className="flex-row gap-2.5">
+      {/* 1. COMPTE COURANT (INTERACTIF) */}
+      <TouchableOpacity
+        activeOpacity={onPressChecking ? 0.7 : 1}
+        onPress={onPressChecking}
+        accessibilityRole={onPressChecking ? 'button' : 'none'}
+        accessibilityLabel="Consulter vos charges variables et compte courant"
+        className="flex-1">
+        <Card className="bg-card rounded-2xl p-3 border border-border/80 shadow-xs justify-between gap-1.5 active:bg-slate-50/80">
+          <View className="flex-row items-center justify-between">
+            <Badge variant="outline" className="border-emerald-300/80 bg-emerald-50 px-2 py-0.2 rounded-full flex-row items-center gap-1">
+              <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <Text className="text-[9px] font-black text-emerald-700 uppercase tracking-wider">
                 Courant
               </Text>
             </Badge>
-            <Ionicons name="card-outline" size={15} color={colors.accent} />
+            <View className="w-6 h-6 rounded-full bg-emerald-50 border border-emerald-200/60 items-center justify-center">
+              <Ionicons name="card-outline" size={12} color={colors.accent} />
+            </View>
           </View>
+
           <View className="my-0.5">
-            <Text className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+            <Text className="text-lg sm:text-xl font-black text-foreground tracking-tight" numberOfLines={1}>
               {checkingFormatted}
             </Text>
             {!isCheckingMasked && checkingRoundFormatted && (
-              <Text className="text-xs font-semibold text-muted-foreground mt-0.5">
+              <Text className="text-[11px] font-semibold text-muted-foreground">
                 ≈ {checkingRoundFormatted}
               </Text>
             )}
           </View>
-        </View>
-        <View className="pt-2 mt-2 border-t border-slate-100">
-          <Text className="text-xs font-bold text-foreground">Dépenses de vie</Text>
-          <Text className="text-[10px] text-muted-foreground mt-0.5" numberOfLines={1}>
-            Alimentation & quotidien
-          </Text>
-        </View>
-      </Card>
 
-      {/* COMPTE ÉPARGNE */}
-      <Card className="flex-1 bg-card rounded-3xl p-4 border border-border shadow-xs justify-between">
-        <View>
-          <View className="flex-row items-center justify-between mb-1.5">
-            <Badge variant="outline" className="border-indigo-200 bg-indigo-50 px-2 py-0.5 rounded-full">
-              <Text className="text-[10px] font-bold text-lavender uppercase tracking-wider">
+          <View className="pt-1.5 border-t border-slate-100 flex-row items-center justify-between">
+            <Text className="text-[11px] font-bold text-foreground">Vie & courses</Text>
+            <Ionicons name="chevron-forward" size={11} color={colors.textMuted} />
+          </View>
+        </Card>
+      </TouchableOpacity>
+
+      {/* 2. COMPTE ÉPARGNE (INTERACTIF) */}
+      <TouchableOpacity
+        activeOpacity={onPressEpargne ? 0.7 : 1}
+        onPress={onPressEpargne}
+        accessibilityRole={onPressEpargne ? 'button' : 'none'}
+        accessibilityLabel="Consulter votre plan d'épargne et simulation"
+        className="flex-1">
+        <Card className="bg-card rounded-2xl p-3 border border-border/80 shadow-xs justify-between gap-1.5 active:bg-slate-50/80">
+          <View className="flex-row items-center justify-between">
+            <Badge variant="outline" className="border-indigo-300/80 bg-indigo-50 px-2 py-0.2 rounded-full flex-row items-center gap-1">
+              <View className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              <Text className="text-[9px] font-black text-lavender uppercase tracking-wider">
                 Épargne
               </Text>
             </Badge>
-            <Ionicons name="sparkles-outline" size={15} color={colors.lavender} />
+            <View className="w-6 h-6 rounded-full bg-indigo-50 border border-indigo-200/60 items-center justify-center">
+              <Ionicons name="sparkles-outline" size={12} color={colors.lavender} />
+            </View>
           </View>
+
           <View className="my-0.5">
-            <Text className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+            <Text className="text-lg sm:text-xl font-black text-foreground tracking-tight" numberOfLines={1}>
               {epargneFormatted}
             </Text>
             {!isEpargneMasked && epargneRoundFormatted && (
-              <Text className="text-xs font-semibold text-muted-foreground mt-0.5">
+              <Text className="text-[11px] font-semibold text-muted-foreground">
                 ≈ {epargneRoundFormatted}
               </Text>
             )}
           </View>
-        </View>
-        <View className="pt-2 mt-2 border-t border-slate-100">
-          <Text className="text-xs font-bold text-foreground">Épargne Klyro</Text>
-          <Text className="text-[10px] text-muted-foreground mt-0.5" numberOfLines={1}>
-            Formule racine carrée
-          </Text>
-        </View>
-      </Card>
+
+          <View className="pt-1.5 border-t border-slate-100 flex-row items-center justify-between">
+            <Text className="text-[11px] font-bold text-foreground">Épargne</Text>
+            <Ionicons name="chevron-forward" size={11} color={colors.textMuted} />
+          </View>
+        </Card>
+      </TouchableOpacity>
     </View>
   );
 }
