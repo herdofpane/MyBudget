@@ -73,7 +73,7 @@ export function HomeAccountsCard({
         onPress={onPressEpargne}
         accessibilityRole={onPressEpargne ? 'button' : 'none'}
         accessibilityLabel="Consulter votre plan d'épargne et simulation"
-        accessibilityHint="Navigue vers les détails de calcul et la ventilation de l'épargne"
+        accessibilityHint="Navigue vers les détails de calcul et la répartition de l'épargne"
         className="flex-1">
         <Card className="bg-card rounded-3xl p-3.5 sm:p-4 border border-slate-200/90 shadow-sm justify-between gap-2.5 active:bg-slate-50/90">
           <View className="flex-row items-center justify-between">

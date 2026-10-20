@@ -142,10 +142,12 @@ export function HomeBalanceCard({
           onPress={onNavigateDetails}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityRole="button"
-          accessibilityLabel="Ouvrir la ventilation détaillée et les simulations"
-          className="flex-1 min-h-[44px] flex-row items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-emerald-50 border border-emerald-200/80 active:bg-emerald-100/80">
+          accessibilityLabel="Ouvrir le détail des calculs et la simulation"
+          className="flex-1 min-h-[44px] flex-row items-center justify-center gap-1.5 py-2.5 px-2.5 rounded-2xl bg-emerald-50 border border-emerald-200/80 active:bg-emerald-100/80">
           <Ionicons name="bar-chart-outline" size={16} color={colors.accentDark} />
-          <Text className="text-xs font-bold text-accentDark">Ventilation</Text>
+          <Text className="text-xs font-bold text-accentDark" numberOfLines={1}>
+            Détails du calcul
+          </Text>
           <Ionicons name="chevron-forward" size={13} color={colors.accentDark} />
         </TouchableOpacity>
       </View>

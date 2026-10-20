@@ -58,7 +58,7 @@ export default function DetailsScreen() {
       {/* EN-TÊTE PRINCIPAL ÉPURÉ UNIFIÉ */}
       <NavigationHeader
         title="Calcul & Détails"
-        subtitle="VENTILATION & PRÉVOYANCE"
+        subtitle="SIMULATION & PRÉVOYANCE"
         icon="calculator-outline"
         actionButton={
           <TouchableOpacity
