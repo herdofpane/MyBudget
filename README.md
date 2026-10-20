@@ -98,7 +98,7 @@ L'application respecte rigoureusement les principes **SOLID** et les heuristique
 
 ```text
 MyBudget/
-├── .github/workflows/       # Intégration & Déploiement continu (CI/CD GitHub Pages)
+├── .githooks/               # Hooks Git automatisés (déploiement automatique pre-push)
 ├── AGENTS.md                # Directives d'architecture, qualité et règles de développement
 ├── assets/                  # Icônes adaptatives, images et splash screens
 ├── scripts/                 # Scripts utilitaires (patchs interop, préparation build web)
@@ -206,16 +206,11 @@ Dans le terminal interactif :
 
 Le projet est configuré pour être compilé en mode statique avec un `baseUrl` adapté pour GitHub Pages (`/MyBudget`).
 
-### Déploiement Automatique (CI/CD GitHub Actions)
-À chaque `git push` sur la branche `main`, le workflow GitHub Actions (`.github/workflows/deploy.yml`) se déclenche automatiquement :
-1. Installation des dépendances du projet (`npm ci`).
-2. Export web statique optimisé (`expo export -p web`) et préparation du bundle (`dist/.nojekyll`, routage de repli `dist/404.html` pour Expo Router).
-3. Déploiement automatique du bundle sur la branche `gh-pages` via `peaceiris/actions-gh-pages`. GitHub Pages détecte instantanément la mise à jour et actualise le site en ligne.
-
-#### Prérequis sur le dépôt GitHub (à vérifier une seule fois) :
-1. Dans **Settings** > **Actions** > **General** > **Workflow permissions**, assurez-vous que l'option **Read and write permissions** est cochée (pour autoriser le bot GitHub Actions à mettre à jour la branche `gh-pages`).
-2. Dans **Settings** > **Pages** > **Build and deployment**, la source est configurée sur **Deploy from a branch** ciblant la branche **gh-pages** (dossier `/ (root)`).
-
+### Déploiement Automatique via le Terminal (Git Hook pre-push)
+Un hook Git (`.githooks/pre-push`) est configuré dans le projet. À chaque fois que vous exécutez `git push` sur la branche `main` depuis votre terminal :
+1. Git intercepte le push et lance automatiquement `npm run deploy` en arrière-plan.
+2. Le bundle est compilé, préparé (`.nojekyll`, fallback `404.html`) et publié sur la branche `gh-pages`.
+3. Une fois la publication sur `gh-pages` terminée, votre code est poussé sur GitHub sans aucune action supplémentaire.
 
 ### Déploiement Manuel (Optionnel)
 Vous pouvez également déclencher un déploiement ponctuel en local sur la branche `gh-pages` :

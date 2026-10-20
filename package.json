@@ -53,7 +53,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "predeploy": "expo export -p web && node ./scripts/prepare-web-dist.js",
-    "deploy": "gh-pages -t --nojekyll -d dist",
+    "deploy": "npx gh-pages -t --nojekyll -d dist",
     "postinstall": "node ./scripts/patch-react-native-css-interop.js"
   },
   "private": true

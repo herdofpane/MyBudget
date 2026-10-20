@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Prevent infinite recursion if gh-pages push triggered this hook
+if [ "$DEPLOYING_PAGES" = "true" ]; then
+  exit 0
+fi
+
+# Check if main branch is being pushed
+is_main=false
+while read local_ref local_sha remote_ref remote_sha; do
+  case "$local_ref" in
+    refs/heads/main)
+      is_main=true
+      ;;
+  esac
+done
+
+if [ "$is_main" = true ]; then
+  echo "--- Automated GitHub Pages deployment in progress... ---"
+  export DEPLOYING_PAGES=true
+  npm run deploy
+  deploy_status=$?
+  if [ $deploy_status -ne 0 ]; then
+    echo "--- GitHub Pages deployment failed ($deploy_status). Aborting git push. ---"
+    exit $deploy_status
+  fi
+  echo "--- GitHub Pages deployed successfully. Continuing git push... ---"
+fi
+
+exit 0
