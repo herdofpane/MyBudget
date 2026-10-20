@@ -210,12 +210,12 @@ Le projet est configuré pour être compilé en mode statique avec un `baseUrl` 
 À chaque `git push` sur la branche `main`, le workflow GitHub Actions (`.github/workflows/deploy.yml`) se déclenche automatiquement :
 1. Installation des dépendances du projet (`npm ci`).
 2. Export web statique optimisé (`expo export -p web`) et préparation du bundle (`dist/.nojekyll`, routage de repli `dist/404.html` pour Expo Router).
-3. Déploiement direct et sécurisé sur GitHub Pages via les actions officielles `actions/upload-pages-artifact` et `actions/deploy-pages`.
+3. Déploiement automatique du bundle sur la branche `gh-pages` via `peaceiris/actions-gh-pages`. GitHub Pages détecte instantanément la mise à jour et actualise le site en ligne.
 
-#### Configuration requise sur GitHub (à faire une seule fois) :
-1. Sur le dépôt GitHub, accéder à **Settings** > **Pages**.
-2. Dans la section **Build and deployment** > **Source**, sélectionner **GitHub Actions**.
-3. Tout push ultérieur sur la branche `main` mettra à jour l'application en ligne de façon autonome.
+#### Prérequis sur le dépôt GitHub (à vérifier une seule fois) :
+1. Dans **Settings** > **Actions** > **General** > **Workflow permissions**, assurez-vous que l'option **Read and write permissions** est cochée (pour autoriser le bot GitHub Actions à mettre à jour la branche `gh-pages`).
+2. Dans **Settings** > **Pages** > **Build and deployment**, la source est configurée sur **Deploy from a branch** ciblant la branche **gh-pages** (dossier `/ (root)`).
+
 
 ### Déploiement Manuel (Optionnel)
 Vous pouvez également déclencher un déploiement ponctuel en local sur la branche `gh-pages` :
