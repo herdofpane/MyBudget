@@ -167,14 +167,6 @@ export default function RootLayout() {
                 ),
               }}
             />
-
-            {/* Hidden screens */}
-            <Tabs.Screen
-              name="explore"
-              options={{
-                href: null,
-              }}
-            />
           </Tabs>
           <PortalHost />
         </View>

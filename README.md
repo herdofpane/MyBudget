@@ -101,7 +101,7 @@ MyBudget/
 ├── .github/workflows/       # Intégration & Déploiement continu (CI/CD GitHub Pages)
 ├── AGENTS.md                # Directives d'architecture, qualité et règles de développement
 ├── assets/                  # Icônes adaptatives, images et splash screens
-├── scripts/                 # Scripts utilitaires (patchs, reset)
+├── scripts/                 # Scripts utilitaires (patchs interop, préparation build web)
 └── src/
     ├── app/                 # Routes Expo Router (file-based routing)
     │   ├── _layout.tsx      # Navigation principale par onglets (Dock flottant)
@@ -199,7 +199,6 @@ Dans le terminal interactif :
 | `npm run lint` | Lance la vérification ESLint du code |
 | `npm run predeploy` | Exporte le bundle web statique optimisé dans le dossier `dist/` |
 | `npm run deploy` | Déploie automatiquement la version web sur la branche `gh-pages` |
-| `npm run reset-project` | Réinitialise le template vers un projet vierge |
 
 ---
 
@@ -208,14 +207,22 @@ Dans le terminal interactif :
 Le projet est configuré pour être compilé en mode statique avec un `baseUrl` adapté pour GitHub Pages (`/MyBudget`).
 
 ### Déploiement Automatique (CI/CD GitHub Actions)
-À chaque `git push` sur la branche `main`, un workflow GitHub Actions (`.github/workflows/deploy.yml`) compile automatiquement l'export web statique et déploie la dernière version sur la branche `gh-pages` en quelques instants sans intervention manuelle.
+À chaque `git push` sur la branche `main`, le workflow GitHub Actions (`.github/workflows/deploy.yml`) se déclenche automatiquement :
+1. Installation des dépendances du projet (`npm ci`).
+2. Export web statique optimisé (`expo export -p web`) et préparation du bundle (`dist/.nojekyll`, routage de repli `dist/404.html` pour Expo Router).
+3. Déploiement direct et sécurisé sur GitHub Pages via les actions officielles `actions/upload-pages-artifact` et `actions/deploy-pages`.
+
+#### Configuration requise sur GitHub (à faire une seule fois) :
+1. Sur le dépôt GitHub, accéder à **Settings** > **Pages**.
+2. Dans la section **Build and deployment** > **Source**, sélectionner **GitHub Actions**.
+3. Tout push ultérieur sur la branche `main` mettra à jour l'application en ligne de façon autonome.
 
 ### Déploiement Manuel (Optionnel)
-Vous pouvez également déclencher un déploiement manuellement en local :
+Vous pouvez également déclencher un déploiement ponctuel en local sur la branche `gh-pages` :
 ```bash
 npm run deploy
 ```
-La commande compile le bundle statique via `expo export -p web` puis pousse le contenu du dossier `dist/` sur la branche `gh-pages`.
+La commande compile le bundle statique via `npm run predeploy` puis pousse le contenu du dossier `dist/` sur la branche `gh-pages`.
 
 ---
 
