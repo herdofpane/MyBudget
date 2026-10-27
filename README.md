@@ -249,6 +249,8 @@ git commit -m "docs(readme): mise à jour complète de la documentation du proje
 ```
 
 > **Documentation continue** : Toute évolution fonctionnelle, technique ou structurelle doit s'accompagner **automatiquement** de la mise à jour du fichier `README.md` (badges, fonctionnalités, arborescence et commandes) afin de garantir une documentation vivante et toujours synchrone avec le code.
+>
+> **Protocole Agent & Commits** : Le workflow complet de validation, les portes qualité préalables et le cycle de déploiement sont détaillés dans la compétence dédiée [`.agents/skills/git-commit/SKILL.md`](.agents/skills/git-commit/SKILL.md).
 
 ---
 

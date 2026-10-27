@@ -18,6 +18,7 @@ Every architectural domain and quality standard is encapsulated into a dedicated
 | **`financial-math`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/financial-math/SKILL.md) | Pure math, progressive savings ($\sqrt{R \times N}$), rounded amounts prioritized on home. |
 | **`file-audit`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/file-audit/SKILL.md) | Automated validation script `node scripts/audit-file.js`, LOC ceilings, 0 `any`. |
 | **`docs-continuous-sync`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/docs-continuous-sync/SKILL.md) | Continuous proactive synchronization of `README.md` (badges, tree, formulas, commands). |
+| **`git-commit`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/git-commit/SKILL.md) | Conventional Commits, pre-commit validation gates, pre-push deployment lifecycle. |
 
 ---
 
@@ -33,6 +34,7 @@ Before writing any code or answering domain queries, activate the matching skill
 | **Persisted Data & Storage**<br>`src/services/**`, schema | `offline-persistence` | `project-architecture` | • 100% offline operation without network requirements.<br>• Single read/write entry point: `budget-storage.service.ts`.<br>• Atomic updates with defensive fallbacks and `PersistedBudgetState` schema. |
 | **Financial Rules & Formatters**<br>`src/utils/**`, `src/constants/**` | `financial-math` | `project-architecture` | • Pure functions only ($< 35$ LOC, zero side-effects).<br>• Savings allocation formula: $\sqrt{R \times N}$.<br>• Cognitive dual-display: rounded amounts prioritized on Home (`renderMoneyRound`). |
 | **Audits & Pre-delivery**<br>Any modified file | `file-audit` | `project-architecture` | • Run `node scripts/audit-file.js <file>`.<br>• LOC limits: $< 35$ (fn), $< 250$ (component), $< 400$ (file).<br>• Strict typing: zero `any`, matching brackets and zero lint/type errors. |
+| **Git Commits & Push**<br>Staging, commit, push, git hooks | `git-commit` | `file-audit`<br>`docs-continuous-sync` | • Pre-commit audit passed, Conventional Commits format with technical rationale.<br>• Pre-push hook awareness (auto GitHub Pages export on main). |
 | **Repository Structure & Docs**<br>`README.md`, dependencies | `docs-continuous-sync` | All skills | • Proactive synchronization of `README.md` after changes without waiting for user prompts. |
 
 ---
