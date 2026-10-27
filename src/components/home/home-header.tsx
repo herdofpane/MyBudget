@@ -15,6 +15,7 @@ interface HomeHeaderProps {
   onResetMonth?: () => void;
   onTogglePrivate: () => void;
   onOpenInfo: () => void;
+  onOpenBackup?: () => void;
 }
 
 export function HomeHeader({
@@ -28,6 +29,7 @@ export function HomeHeader({
   onResetMonth,
   onTogglePrivate,
   onOpenInfo,
+  onOpenBackup,
 }: HomeHeaderProps) {
   const currentMonthYear = new Date()
     .toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
@@ -58,6 +60,18 @@ export function HomeHeader({
 
         {/* Action Controls (Apple Circular Action Buttons, 44pt touch target) */}
         <View className="flex-row items-center gap-2">
+          {onOpenBackup && (
+            <TouchableOpacity
+              activeOpacity={0.6}
+              onPress={onOpenBackup}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessibilityRole="button"
+              className="w-10 h-10 rounded-full bg-white/10 border border-white/15 items-center justify-center active:bg-white/20"
+              accessibilityLabel="Sauvegarde et données">
+              <Ionicons name="cloud-upload-outline" size={18} color="#ffffff" />
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
             activeOpacity={0.6}
             onPress={onTogglePrivate}

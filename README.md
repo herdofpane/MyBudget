@@ -6,8 +6,9 @@
 [![React Native](https://img.shields.io/badge/React%20Native-0.86-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactnative.dev/)
 [![React 19](https://img.shields.io/badge/React-19.2-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vitest](https://img.shields.io/badge/Tests-Vitest%20Pure%20Math-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![NativeWind](https://img.shields.io/badge/Tailwind_CSS-NativeWind_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://www.nativewind.dev/)
-[![GitHub Pages](https://img.shields.io/badge/Déployé_sur-GitHub_Pages-22c55e?style=for-the-badge&logo=github&logoColor=white)](https://herdofpane.github.io/MyBudget/)
+[![GitHub Pages](https://img.shields.io/badge/Déployé_sur-GitHub_Pages_PWA-22c55e?style=for-the-badge&logo=github&logoColor=white)](https://herdofpane.github.io/MyBudget/)
 
 ---
 
@@ -37,8 +38,12 @@ Toutes les données sont stockées **localement et de façon sécurisée** sur v
   - Actions rapides façon *Apple Tinted Buttons* d'au moins 44pt de hauteur avec chevrons directionnels subtils.
 - **Duo de Comptes (Courant & Épargne)** : Deux cartes interactives au style Inset Grouped d'Apple avec micro-indicateurs chromatiques, soldes nets et flèches de navigation.
 - **Saisie du Revenu Net (Formulaire Inset Grouped iOS)** : Ligne de réglage avec icône dans un squircle, label descriptif et champ de saisie direct fluide avec focus ring soigné.
+- **Projection Trajectoire sur 12 Mois (Style Apple Health / Fitness)** : Graphique de tendance interactif en courbe SVG lissée projetant le reste à vivre futur selon l'échéance des emprunts et charges programmées.
+- **Données, Export & Restauration (JSON & CSV)** : Modale Inset Grouped permettant le téléchargement instantané d'une sauvegarde intégrale `.json` ou d'un tableur `.csv` (compatible Excel) et la réimportation sans perte.
 - **Double Affichage Monétaire & Arrondi à l'Unité** : Chaque indicateur affiche son montant exact et son estimation arrondie à l'unité (`≈ X €`) pour un confort cognitif maximal.
 - **Mode Discrétion (Privacy Mode)** : Masquage en un tap de tous les montants monétaires (`•••• €`) avec retour haptique/visuel instantané.
+- **PWA & Offline First** : Manifest Web et Service Worker de mise en cache assurant un fonctionnement 100% hors ligne et une installation en application autonome sur smartphone.
+- **Notifications Locales d'Échéances** : Rappels planifiés en amont des grosses échéances ou fins d'emprunts.
 - **Raccourcis Intelligents** : Navigation sans latence vers les charges fixes, variables et le simulateur approfondi.
 
 ### 2. 📅 Échéancier des Charges Fixes & Crédits — Design Apple Human Interface Guidelines (HIG)
@@ -113,13 +118,14 @@ MyBudget/
     │   └── details.tsx      # Écran Simulateur & détail des ventilations
     ├── components/          # Composants UI modulaires et réutilisables
     │   ├── ui/              # Composants atomiques (Card, Button, Badge, Input, Skeletons)
-    │   ├── home/            # Composants dédiés à l'accueil (Hero Reste à Vivre, Comptes, Revenu, Raccourcis)
+    │   ├── home/            # Composants dédiés à l'accueil (Hero, Comptes, Revenu, BackupModal, TrendChart)
     │   ├── fixed-expenses/  # Composants charges fixes (Modal, Stats, Ligne de charge)
     │   ├── variable-expenses/ # Composants charges variables (Modal, Stats, Jauges)
     │   ├── details/         # Composants simulateur (Onglets, Bilan de synthèse, Contrôles)
     │   ├── confirm-dialog.tsx # Dialogues de confirmation et alertes accessibles
     │   └── navigation-header.tsx # En-têtes standardisés
-    ├── constants/           # Règles métiers pures (formules, ratios, formatters monétaires)
+    ├── constants/           # Règles métiers pures (formules, ratios, formatters monétaires, tests)
+    │   └── __tests__/       # Tests unitaires de la formule progressive sqrt(R * N)
     ├── data/                # Données initiales, préréglages de catégories et icônes
     ├── hooks/               # Logique applicative découplée de la vue (Custom Hooks)
     │   ├── use-budget.tsx   # Contexte global et persistance d'état
@@ -134,13 +140,19 @@ MyBudget/
     │   ├── use-budget-health.ts     # Score et diagnostic financier neobanque
     │   ├── use-budget-backup.ts     # Import/Export JSON et restauration défensive
     │   └── index.ts                 # Baril d'export unifié des hooks
-    ├── services/            # Couche d'accès aux données (AsyncStorage Service)
+    ├── services/            # Couche d'accès aux données et notifications
+    │   ├── budget-storage.service.ts # Persistance AsyncStorage & tolérance aux pannes
+    │   ├── notifications.service.ts  # Alertes et rappels d'échéances
+    │   ├── __tests__/       # Tests unitaires d'isolation du stockage
+    │   └── index.ts         # Baril d'export des services
     ├── theme/               # Charte graphique unifiée (palette de couleurs fintech)
     ├── types/               # Définitions des contrats TypeScript
     └── utils/               # Fonctions utilitaires pures
         ├── auto-icon.ts     # Moteur sémantique de détection d'icônes, catégories & couleurs
         ├── fixed-expenses.ts# Calculs des échéanciers et statuts de crédit
         ├── credit.ts        # Logique mathématique des durées d'emprunts
+        ├── csv-export.ts    # Générateur de tableur CSV conforme RFC-4180
+        ├── __tests__/       # Tests unitaires des utilitaires (crédit, calendrier, CSV)
         └── index.ts         # Point d'entrée des utilitaires
 ```
 
@@ -206,8 +218,9 @@ Dans le terminal interactif :
 | `npm run android` | Lance l'application sur un terminal/émulateur Android |
 | `npm run ios` | Lance l'application sur le simulateur iOS |
 | `npm run lint` | Lance la vérification ESLint du code |
+| `npm run test` | Lance la suite de tests unitaires déterministes (Vitest) |
 | `npm run audit -- <fichier>` | Lance l'audit architectural déterministe (plafonds LOC, strict typing, SOLID) |
-| `npm run predeploy` | Exporte le bundle web statique optimisé dans le dossier `dist/` |
+| `npm run predeploy` | Exporte le bundle web statique optimisé (PWA + Service Worker) dans `dist/` |
 | `npm run deploy` | Déploie automatiquement la version web sur la branche `gh-pages` |
 
 ---

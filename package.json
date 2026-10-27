@@ -44,7 +44,8 @@
     "eslint": "^9.0.0",
     "eslint-config-expo": "~57.0.2",
     "gh-pages": "^6.3.0",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^2.1.8"
   },
   "scripts": {
     "start": "expo start",
@@ -52,6 +53,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "test": "vitest run",
     "audit": "node ./scripts/audit-file.js",
     "predeploy": "expo export -p web && node ./scripts/prepare-web-dist.js",
     "deploy": "npx gh-pages -t --nojekyll -d dist",

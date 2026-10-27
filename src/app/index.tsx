@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,9 +12,12 @@ import {
   HomeBalanceCard,
   HomeAccountsCard,
   HomeIncomeCard,
+  BackupModal,
+  BudgetTrendChart,
 } from '@/components/home';
 
 export default function HomeScreen() {
+  const [showBackupModal, setShowBackupModal] = useState(false);
   const {
     isLoading,
     isPrivate,
@@ -64,6 +67,7 @@ export default function HomeScreen() {
             onPrevMonth={handlePrevSimulationMonth}
             onResetMonth={handleResetToCurrentMonth}
             onTogglePrivate={togglePrivate}
+            onOpenBackup={() => setShowBackupModal(true)}
             onOpenInfo={() =>
               setInfoDialog({
                 visible: true,
@@ -108,9 +112,18 @@ export default function HomeScreen() {
               onIncomeBlur={handleBlurIncome}
               onSubmitEditing={handleBlurIncome}
             />
+
+            {/* PROJECTION TRAJECTOIRE BUDGÉTAIRE SUR 12 MOIS (APPLE HEALTH STYLE) */}
+            <BudgetTrendChart />
           </View>
         </ScrollView>
       )}
+
+      {/* MODALE DE SAUVEGARDE & EXPORT / IMPORT */}
+      <BackupModal
+        visible={showBackupModal}
+        onClose={() => setShowBackupModal(false)}
+      />
 
       {/* POP-UP PÉDAGOGIQUE */}
       {infoDialog && (
