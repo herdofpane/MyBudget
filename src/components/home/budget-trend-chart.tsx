@@ -12,10 +12,19 @@ export function BudgetTrendChart(): React.JSX.Element {
   const { budget, fixedExpensesList, totalEstimatedVariable } = useBudget();
   const [selectedIdx, setSelectedIdx] = useState<number>(0);
 
+  // French 3-letter month abbreviations without trailing period for clean mobile layout
+  const SHORT_MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
   // Compute 12-month projections
   const points = useMemo(() => {
     const currentBase = getCurrentMonthStr();
-    const result: Array<{ monthStr: string; label: string; resteAVivre: number; epargne: number }> = [];
+    const result: Array<{
+      monthStr: string;
+      label: string;
+      fullMonthLabel: string;
+      resteAVivre: number;
+      epargne: number;
+    }> = [];
 
     for (let offset = 0; offset <= 11; offset++) {
       const monthStr = addMonthsToMonthStr(currentBase, offset);
@@ -30,10 +39,18 @@ export function BudgetTrendChart(): React.JSX.Element {
         : totalEstimatedVariable;
       const epargne = computeSavings(reste, targetNec);
 
-      const dateObj = new Date(Date.UTC(parseInt(monthStr.slice(0, 4)), parseInt(monthStr.slice(5, 7)) - 1, 1));
-      const label = dateObj.toLocaleDateString('fr-FR', { month: 'short' });
+      const monthIndex = parseInt(monthStr.slice(5, 7), 10) - 1;
+      const shortLabel = SHORT_MONTHS[monthIndex] ?? monthStr.slice(5, 7);
+      const dateObj = new Date(Date.UTC(parseInt(monthStr.slice(0, 4), 10), monthIndex, 1));
+      const fullMonthLabel = dateObj.toLocaleDateString('fr-FR', { month: 'long' });
 
-      result.push({ monthStr, label, resteAVivre: Math.round(reste), epargne: Math.round(epargne) });
+      result.push({
+        monthStr,
+        label: shortLabel,
+        fullMonthLabel,
+        resteAVivre: Math.round(reste),
+        epargne: Math.round(epargne),
+      });
     }
     return result;
   }, [budget, fixedExpensesList, totalEstimatedVariable]);
@@ -98,7 +115,7 @@ export function BudgetTrendChart(): React.JSX.Element {
         {/* Selected badge */}
         <View className="bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full">
           <Text className="text-xs font-bold text-primary">
-            {activePoint.label.toUpperCase()} : {formatEuro(activePoint.resteAVivre)}
+            {activePoint.fullMonthLabel.toUpperCase()} : {formatEuro(activePoint.resteAVivre)}
           </Text>
         </View>
       </View>
@@ -123,31 +140,43 @@ export function BudgetTrendChart(): React.JSX.Element {
               fill={selectedIdx === idx ? '#22c55e' : '#94a3b8'}
               stroke={selectedIdx === idx ? '#ffffff' : 'none'}
               strokeWidth={selectedIdx === idx ? 2 : 0}
+              onPress={() => setSelectedIdx(idx)}
             />
           ))}
         </Svg>
       </View>
 
-      {/* Month Steppers Pills */}
-      <View className="flex-row justify-between pt-2 border-t border-border/40">
-        {coords.map((pt, idx) => (
-          <TouchableOpacity
-            key={pt.monthStr}
-            onPress={() => setSelectedIdx(idx)}
-            hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-            className={`px-1.5 py-0.5 rounded-md ${
-              selectedIdx === idx ? 'bg-primary' : 'bg-transparent'
-            }`}
-          >
-            <Text
-              className={`text-[10px] font-bold ${
-                selectedIdx === idx ? 'text-white' : 'text-muted-foreground'
-              }`}
+      {/* Month Steppers Pills - Exactly positioned below each chart point */}
+      <View
+        style={{ width: chartWidth, height: 30 }}
+        className="relative pt-1 border-t border-border/40 self-center"
+      >
+        {coords.map((pt, idx) => {
+          const isSelected = selectedIdx === idx;
+          return (
+            <TouchableOpacity
+              key={pt.monthStr}
+              onPress={() => setSelectedIdx(idx)}
+              hitSlop={{ top: 10, bottom: 12, left: 4, right: 4 }}
+              style={{ position: 'absolute', left: pt.x - 14, width: 28, top: 4 }}
+              className="items-center justify-center"
             >
-              {pt.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <View
+                className={`px-1 py-0.5 rounded-full items-center justify-center ${
+                  isSelected ? 'bg-primary' : 'bg-transparent'
+                }`}
+              >
+                <Text
+                  className={`text-[9px] font-bold ${
+                    isSelected ? 'text-primary-foreground' : 'text-muted-foreground'
+                  }`}
+                >
+                  {pt.label}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
