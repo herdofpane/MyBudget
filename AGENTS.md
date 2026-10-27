@@ -1,60 +1,60 @@
 # Klyro Project Guidelines & Skill Orchestrator
 
-Universal personal budget management application built with Expo and React Native.
-`AGENTS.md` acts as the central **Skill Orchestrator** for the workspace, coordinating specialized project skills located in `.agents/skills/` across all development phases.
+Universal personal budget management application built with Expo SDK 57 and React Native 0.86.
+`AGENTS.md` is the central **Skill Orchestrator** for this workspace. It enforces the automatic activation and execution of domain skills located in `.agents/skills/`.
 
 ---
 
-## 1. Project Skills Index (`.agents/skills/`)
+## 1. Project Skills Index & Quick Links
 
-Every development requirement and architectural domain is encapsulated into a dedicated, reusable project skill:
+Every architectural domain and quality standard is encapsulated into a dedicated project skill:
 
-| Skill Identifier | Location | Domain & Purpose |
+| Skill Identifier | Direct Link | Domain & Core Invariant |
 | :--- | :--- | :--- |
-| **`expo-react-native`** | [SKILL.md](file:///.agents/skills/expo-react-native/SKILL.md) | Expo SDK 57, React Native 0.86, Expo Router navigation, CNG, standard CLI workflows, EAS. |
-| **`project-architecture`** | [SKILL.md](file:///.agents/skills/project-architecture/SKILL.md) | Clean layer separation (`src/components/`, `src/hooks/`, `src/utils/`, `src/services/`), render optimization, list virtualization. |
-| **`apple-hig-ux`** | [SKILL.md](file:///.agents/skills/apple-hig-ux/SKILL.md) | Apple Human Interface Guidelines, Inset Grouped design, 4 mandatory async UI states, touch ergonomics ($\ge 44$ pt). |
-| **`offline-persistence`** | [SKILL.md](file:///.agents/skills/offline-persistence/SKILL.md) | 100% offline resilience, AsyncStorage gateway, schema versioning, atomic data mutations. |
-| **`financial-math`** | [SKILL.md](file:///.agents/skills/financial-math/SKILL.md) | Pure mathematical calculations, savings formulas ($\sqrt{R \times N}$), multi-month smoothing, credit progression. |
-| **`file-audit`** | [SKILL.md](file:///.agents/skills/file-audit/SKILL.md) | Deterministic code audit, LOC ceilings, strict typing, layer isolation, Scorecard Klyro. |
-| **`docs-continuous-sync`** | [SKILL.md](file:///.agents/skills/docs-continuous-sync/SKILL.md) | Automated synchronization of `README.md` (badges, features, tree diagram, formulas, commands). |
+| **`expo-react-native`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/expo-react-native/SKILL.md) | Expo SDK 57, React Native 0.86, Expo Router v4, CNG, dynamic SafeArea insets. |
+| **`project-architecture`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/project-architecture/SKILL.md) | 4-layer unidirectional architecture, strict SOLID, `< 250` LOC components, `< 35` LOC utils. |
+| **`apple-hig-ux`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/apple-hig-ux/SKILL.md) | Apple HIG, Inset Grouped, $\ge 44$ pt touch targets, 4 mandatory async UI states. |
+| **`offline-persistence`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/offline-persistence/SKILL.md) | 100% offline resilience, single gateway via `budgetStorageService`, defensive schema fallback. |
+| **`financial-math`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/financial-math/SKILL.md) | Pure math, progressive savings ($\sqrt{R \times N}$), rounded amounts prioritized on home. |
+| **`file-audit`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/file-audit/SKILL.md) | Automated validation script `node scripts/audit-file.js`, LOC ceilings, 0 `any`. |
+| **`docs-continuous-sync`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/docs-continuous-sync/SKILL.md) | Continuous proactive synchronization of `README.md` (badges, tree, formulas, commands). |
 
 ---
 
-## 2. Skill Orchestration Matrix
+## 2. Skill Activation Gatekeeper & Routing Matrix
 
-When receiving a user prompt or touching project files, activate and consult the relevant skills before writing code:
+Before writing any code or answering domain queries, activate the matching skills based on target files and intent:
 
-| Target Files & Modules | Primary Project Skill | Supporting Skill(s) | Key Orchestration Requirements |
+| Target Context & Globs | Primary Skill | Supporting Skills | Mandatory Invariants to Enforce |
 | :--- | :--- | :--- | :--- |
-| **File Audits & Reviews** (Any file, inspection) | `file-audit` | `project-architecture` | Run `npm run audit`, check LOC ceilings, 0 `any`, generate Scorecard Klyro. |
-| **App Routes & Navigators** (`src/app/`, `_layout.tsx`) | `expo-react-native` | `project-architecture`, `apple-hig-ux` | File-based routing, zero non-route code in `src/app/`, Safe Area insets, smooth navigation bar. |
-| **UI Components & Layouts** (`src/components/`, styles) | `apple-hig-ux` | `project-architecture` | Apple HIG, 4 async states (nominal/loading/empty/error), $\ge 44 \times 44$ pt touch targets, Inset Grouped cards. |
-| **Reactive State & Hooks** (`src/hooks/`) | `project-architecture` | `financial-math`, `offline-persistence` | Strict hook delegation, isolated selectors, memoization (`useMemo`, `useCallback`), no storage leaks into views. |
-| **Financial Formulas & Utils** (`src/utils/`, `src/constants/`) | `financial-math` | `project-architecture` | Pure functions $< 35$ LOC, deterministic math, savings progressive formula, multi-month smoothing. |
-| **Storage & Persistence** (`src/services/`, AsyncStorage) | `offline-persistence` | `project-architecture` | 100% offline reliability, single gateway through `budget-storage.service.ts`, defensive schema fallback. |
-| **Living Documentation** (`README.md`, specs) | `docs-continuous-sync` | All project skills | Proactive updates on functional, structural, or dependency modifications without waiting for prompts. |
+| **Routes & Navigation**<br>`src/app/**`, `_layout.tsx` | `expo-react-native` | `project-architecture`<br>`apple-hig-ux` | • Zero business or presentation code in routes (delegate to `src/components/` and `src/hooks/`).<br>• Respect Safe Area insets dynamically with zero hardcoded offsets. |
+| **UI Components & Screens**<br>`src/components/**` | `apple-hig-ux` | `project-architecture` | • Minimum $44 \times 44$ pt hit zones (`hitSlop` on small icons).<br>• 4 async states covered: nominal, loading (`HomeSkeleton`), empty, error.<br>• Inset Grouped cards with Apple radii (`rounded-3xl` / `rounded-2xl`). |
+| **Hooks & State Flow**<br>`src/hooks/**` | `project-architecture` | `offline-persistence`<br>`financial-math` | • Strict memoization (`useMemo`, `useCallback`).<br>• No direct `AsyncStorage` calls inside UI hooks (delegate to services).<br>• Domain hooks isolated from presentation logic. |
+| **Persisted Data & Storage**<br>`src/services/**`, schema | `offline-persistence` | `project-architecture` | • 100% offline operation without network requirements.<br>• Single read/write entry point: `budget-storage.service.ts`.<br>• Atomic updates with defensive fallbacks and `PersistedBudgetState` schema. |
+| **Financial Rules & Formatters**<br>`src/utils/**`, `src/constants/**` | `financial-math` | `project-architecture` | • Pure functions only ($< 35$ LOC, zero side-effects).<br>• Savings allocation formula: $\sqrt{R \times N}$.<br>• Cognitive dual-display: rounded amounts prioritized on Home (`renderMoneyRound`). |
+| **Audits & Pre-delivery**<br>Any modified file | `file-audit` | `project-architecture` | • Run `node scripts/audit-file.js <file>`.<br>• LOC limits: $< 35$ (fn), $< 250$ (component), $< 400$ (file).<br>• Strict typing: zero `any`, matching brackets and zero lint/type errors. |
+| **Repository Structure & Docs**<br>`README.md`, dependencies | `docs-continuous-sync` | All skills | • Proactive synchronization of `README.md` after changes without waiting for user prompts. |
 
 ---
 
-## 3. Orchestrated Development Lifecycle
+## 3. Multi-Skill Execution Lifecycle
 
-For every task, execute following this multi-skill workflow:
+Every implementation follows this sequential pipeline:
 
 ```mermaid
 graph TD
-    A[Task Intake] --> B[Skill Activation via Matrix]
-    B --> C[Phase 1: Architecture & Persistence Check]
-    C --> D[Phase 2: UI & Ergonomic Implementation]
-    D --> E[Phase 3: Mathematical Integrity & Verification]
-    E --> F[Phase 4: Continuous Docs Sync - README.md]
+    A[Task Intake & Prompt Analysis] --> B[Skill Activation via Matrix]
+    B --> C[Layer Boundary & Persistence Validation]
+    C --> D[UI & Apple HIG Ergonomics Implementation]
+    D --> E[Mathematical Rigor & Quality Verification]
+    E --> F[Continuous Docs Sync - README.md]
 ```
 
-1. **Intake & Activation**: Match user intent to the relevant skill(s) via the matrix in Section 2. Read the corresponding `SKILL.md` before coding.
-2. **Phase 1 — Architecture & Persistence**: Consult `project-architecture` and `offline-persistence`. Ensure layer boundaries are strictly respected and state hooks/services are prepared.
-3. **Phase 2 — UI & Ergonomics**: Consult `apple-hig-ux` and `expo-react-native`. Enforce Apple HIG, 4 async states, and $\ge 44$ pt touch targets.
-4. **Phase 3 — Mathematical Rigor & Verification**: Consult `financial-math`. Validate calculations with pure functions. Run validation commands (`lint`, `tsc --noEmit`).
-5. **Phase 4 — Documentation Sync**: Consult `docs-continuous-sync`. Synchronize `README.md` immediately with any structural or functional evolutions.
+1. **Intake & Activation**: Match file patterns and user intent. Open and inspect relevant `SKILL.md` files before generating edits.
+2. **Phase 1 — Boundaries & Persistence**: Enforce Layer 2/3 boundaries (`project-architecture`, `offline-persistence`).
+3. **Phase 2 — Ergonomics & Visuals**: Apply Apple HIG design system, 4 async states, and touch target constraints (`apple-hig-ux`, `expo-react-native`).
+4. **Phase 3 — Math & Verification**: Verify financial formulas, cognitive rounding priority, and clean compilation (`financial-math`, `file-audit`).
+5. **Phase 4 — Living Sync**: Update `README.md` immediately if routes, hooks, components, or dependencies changed (`docs-continuous-sync`).
 
 ---
 
@@ -63,7 +63,7 @@ graph TD
 Always validate workspace integrity before declaring a task complete:
 
 ```bash
-npx expo lint      # Run ESLint validation
-npx tsc --noEmit   # Run TypeScript compilation checks
-npx expo-doctor    # Check Expo dependency health
+node scripts/audit-file.js <path-to-file>   # Audit LOC ceilings & strict types
+npx expo lint                              # ESLint verification
+npx tsc --noEmit                           # TypeScript compilation
 ```
