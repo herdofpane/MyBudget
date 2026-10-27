@@ -14,6 +14,7 @@ import {
   VariableCategory,
   ExpenseRecord,
   BudgetContextType,
+  PersistedBudgetState,
 } from '@/types';
 
 import {
@@ -278,6 +279,14 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
   const variableExpenseRatio = budget.income > 0 ? (totalEstimatedVariable / budget.income) * 100 : 0;
   const savingsCapacityRatio = budget.income > 0 ? Math.max(0, (projectedSavings / budget.income) * 100) : 0;
 
+  const restoreState = useCallback(async (newState: PersistedBudgetState) => {
+    await budgetStorageService.saveState(newState);
+    setBudget(newState.budget);
+    setFixedExpensesList(newState.fixedExpensesList);
+    setVariableCategories(newState.variableCategories);
+    setExpenseHistory(newState.expenseHistory);
+  }, []);
+
   const contextValue = useMemo<BudgetContextType>(
     () => ({
       budget: { ...budget, fixedExpenses: totalFixedExpenses },
@@ -309,6 +318,7 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
       deleteVariableCategory,
       addExpenseToCategory,
       resetMonthStatus,
+      restoreState,
       selectedSimulationMonth,
       setSelectedSimulationMonth,
     }),
@@ -342,6 +352,7 @@ export function BudgetProvider({ children }: { children: ReactNode }) {
       deleteVariableCategory,
       addExpenseToCategory,
       resetMonthStatus,
+      restoreState,
       selectedSimulationMonth,
       setSelectedSimulationMonth,
     ]

@@ -99,10 +99,11 @@ L'application respecte rigoureusement les principes **SOLID** et les heuristique
 
 ```text
 MyBudget/
+├── .agents/skills/          # Skills projet modulaires (expo, architecture, hig-ux, math, storage, sync)
 ├── .githooks/               # Hooks Git automatisés (déploiement automatique pre-push)
-├── AGENTS.md                # Directives d'architecture, qualité et règles de développement
+├── AGENTS.md                # Orchestrateur central des skills, directives d'architecture et cycle de vie
 ├── assets/                  # Icônes adaptatives, images et splash screens
-├── scripts/                 # Scripts utilitaires (patchs interop, préparation build web)
+├── scripts/                 # Scripts utilitaires (audit qualité déterministe, patchs interop, build web)
 └── src/
     ├── app/                 # Routes Expo Router (file-based routing)
     │   ├── _layout.tsx      # Navigation principale par onglets (Dock flottant)
@@ -125,7 +126,14 @@ MyBudget/
     │   ├── use-home-summary.ts
     │   ├── use-fixed-expenses.ts
     │   ├── use-variable-expenses.ts
-    │   └── use-details-simulation.ts
+    │   ├── use-details-simulation.ts
+    │   ├── use-simulation-month.ts  # Stepper temporel et presets M+0..M+12
+    │   ├── use-expense-form.ts      # Gestion des formulaires modaux & détection sémantique
+    │   ├── use-privacy-mode.ts      # Mode discrétion global persisté
+    │   ├── use-haptics.ts           # Retours sensoriels haptiques Apple HIG
+    │   ├── use-budget-health.ts     # Score et diagnostic financier neobanque
+    │   ├── use-budget-backup.ts     # Import/Export JSON et restauration défensive
+    │   └── index.ts                 # Baril d'export unifié des hooks
     ├── services/            # Couche d'accès aux données (AsyncStorage Service)
     ├── theme/               # Charte graphique unifiée (palette de couleurs fintech)
     ├── types/               # Définitions des contrats TypeScript
@@ -198,6 +206,7 @@ Dans le terminal interactif :
 | `npm run android` | Lance l'application sur un terminal/émulateur Android |
 | `npm run ios` | Lance l'application sur le simulateur iOS |
 | `npm run lint` | Lance la vérification ESLint du code |
+| `npm run audit -- <fichier>` | Lance l'audit architectural déterministe (plafonds LOC, strict typing, SOLID) |
 | `npm run predeploy` | Exporte le bundle web statique optimisé dans le dossier `dist/` |
 | `npm run deploy` | Déploie automatiquement la version web sur la branche `gh-pages` |
 

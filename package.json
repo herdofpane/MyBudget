@@ -52,6 +52,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "audit": "node ./scripts/audit-file.js",
     "predeploy": "expo export -p web && node ./scripts/prepare-web-dist.js",
     "deploy": "npx gh-pages -t --nojekyll -d dist",
     "postinstall": "node ./scripts/patch-react-native-css-interop.js"

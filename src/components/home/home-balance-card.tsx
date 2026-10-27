@@ -62,14 +62,14 @@ export function HomeBalanceCard({
         )}
       </View>
 
-      {/* 2. MONTANT HÉROÏQUE TYPE APPLE CARD */}
+      {/* 2. MONTANT HÉROÏQUE TYPE APPLE CARD (ARRONDI PRIORITAIRE) */}
       <View className="gap-1 my-0.5">
         <Text className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight" numberOfLines={1}>
-          {resteAVivreFormatted}
+          {resteAVivreRoundFormatted || resteAVivreFormatted}
         </Text>
-        {!isMasked && resteAVivreRoundFormatted && (
+        {!isMasked && resteAVivreFormatted && (
           <Text className="text-xs sm:text-sm font-semibold text-slate-400">
-            Montant estimé ≈ {resteAVivreRoundFormatted}
+            Précis : {resteAVivreFormatted}
           </Text>
         )}
       </View>

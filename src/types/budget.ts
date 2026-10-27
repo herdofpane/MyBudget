@@ -97,6 +97,13 @@ export interface InitialDataPayload {
   expenseHistory: ExpenseRecord[];
 }
 
+export interface PersistedBudgetState {
+  budget: BudgetData;
+  fixedExpensesList: FixedExpenseItem[];
+  variableCategories: VariableCategory[];
+  expenseHistory: ExpenseRecord[];
+}
+
 export interface BudgetContextType {
   budget: BudgetData;
   fixedExpensesList: FixedExpenseItem[];
@@ -127,6 +134,7 @@ export interface BudgetContextType {
   deleteVariableCategory: (id: string) => Promise<void>;
   addExpenseToCategory: (categoryId: string, amount: number, label: string) => Promise<void>;
   resetMonthStatus: () => Promise<void>;
+  restoreState: (state: PersistedBudgetState) => Promise<void>;
   selectedSimulationMonth: string;
   setSelectedSimulationMonth: (month: string) => void;
 }

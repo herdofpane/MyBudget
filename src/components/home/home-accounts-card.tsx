@@ -51,11 +51,11 @@ export function HomeAccountsCard({
 
           <View className="my-0.5">
             <Text className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight" numberOfLines={1}>
-              {checkingFormatted}
+              {checkingRoundFormatted || checkingFormatted}
             </Text>
-            {!isCheckingMasked && checkingRoundFormatted && (
+            {!isCheckingMasked && checkingFormatted && (
               <Text className="text-xs font-semibold text-slate-400 mt-0.5">
-                ≈ {checkingRoundFormatted}
+                Précis : {checkingFormatted}
               </Text>
             )}
           </View>
@@ -90,11 +90,11 @@ export function HomeAccountsCard({
 
           <View className="my-0.5">
             <Text className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight" numberOfLines={1}>
-              {epargneFormatted}
+              {epargneRoundFormatted || epargneFormatted}
             </Text>
-            {!isEpargneMasked && epargneRoundFormatted && (
+            {!isEpargneMasked && epargneFormatted && (
               <Text className="text-xs font-semibold text-slate-400 mt-0.5">
-                ≈ {epargneRoundFormatted}
+                Précis : {epargneFormatted}
               </Text>
             )}
           </View>
