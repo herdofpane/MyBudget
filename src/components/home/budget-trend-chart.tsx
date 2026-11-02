@@ -140,7 +140,6 @@ export function BudgetTrendChart(): React.JSX.Element {
               fill={selectedIdx === idx ? '#22c55e' : '#94a3b8'}
               stroke={selectedIdx === idx ? '#ffffff' : 'none'}
               strokeWidth={selectedIdx === idx ? 2 : 0}
-              onPress={() => setSelectedIdx(idx)}
             />
           ))}
         </Svg>
