@@ -80,6 +80,7 @@ export default function FixedExpensesScreen() {
     upcomingChargesCount,
     averageExpense,
     parsedAmountForCredit,
+    parsedMonthlyAmountForCredit,
     parsedDurationForCredit,
     remainingMonthsPreview,
     remainingCostCreditPreview,
@@ -254,6 +255,7 @@ export default function FixedExpensesScreen() {
         monthPresets={monthPresets}
         currentMonthStr={currentMonthStr}
         parsedAmountForCredit={parsedAmountForCredit}
+        parsedMonthlyAmountForCredit={parsedMonthlyAmountForCredit}
         parsedDurationForCredit={parsedDurationForCredit}
         remainingMonthsPreview={remainingMonthsPreview}
         remainingCostCreditPreview={remainingCostCreditPreview}

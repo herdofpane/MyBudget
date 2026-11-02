@@ -36,6 +36,7 @@ interface FixedExpenseModalProps {
   monthPresets: { label: string; value: string }[];
   currentMonthStr: string;
   parsedAmountForCredit: number;
+  parsedMonthlyAmountForCredit: number;
   parsedDurationForCredit: number;
   remainingMonthsPreview: number;
   remainingCostCreditPreview: number;
@@ -79,6 +80,7 @@ export function FixedExpenseModal({
   monthPresets,
   currentMonthStr,
   parsedAmountForCredit,
+  parsedMonthlyAmountForCredit,
   parsedDurationForCredit,
   remainingMonthsPreview,
   remainingCostCreditPreview,
@@ -176,12 +178,21 @@ export function FixedExpenseModal({
 
               {/* CHAMP 2 : MONTANT */}
               <View className="gap-1.5">
-                <Text className="text-xs font-bold text-slate-700">Montant mensuel (€)</Text>
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-xs font-bold text-slate-700">
+                    {isCreditInput ? 'Montant total du crédit (€)' : 'Montant mensuel (€)'}
+                  </Text>
+                  {isCreditInput && (
+                    <Text className="text-[10px] font-semibold text-accent">
+                      Divisé sur {durationInput || '12'} mois
+                    </Text>
+                  )}
+                </View>
                 <Input
                   value={amountInput}
                   onChangeText={onAmountChange}
                   keyboardType="decimal-pad"
-                  placeholder="Ex: 85.00"
+                  placeholder={isCreditInput ? 'Ex: 900.00' : 'Ex: 85.00'}
                   placeholderTextColor={colors.textMuted}
                   className="bg-slate-100/90 border-slate-200/80 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 min-h-[44px]"
                 />
@@ -315,9 +326,15 @@ export function FixedExpenseModal({
                     {/* Aperçu du solde restant dû */}
                     <View className="bg-white rounded-2xl p-3 border border-slate-200/80 gap-1.5 shadow-2xs">
                       <View className="flex-row justify-between">
-                        <Text className="text-xs text-slate-500">Mensualité :</Text>
+                        <Text className="text-xs text-slate-500">Montant total :</Text>
                         <Text className="text-xs font-bold text-slate-900">
-                          {formatEuro(parsedAmountForCredit)} / mois
+                          {formatEuro(parsedAmountForCredit)}
+                        </Text>
+                      </View>
+                      <View className="flex-row justify-between">
+                        <Text className="text-xs text-slate-500">Mensualité :</Text>
+                        <Text className="text-xs font-bold text-accent">
+                          {formatEuro(parsedMonthlyAmountForCredit)} / mois
                         </Text>
                       </View>
                       <View className="flex-row justify-between">

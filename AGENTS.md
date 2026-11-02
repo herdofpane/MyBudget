@@ -16,6 +16,7 @@ Every architectural domain and quality standard is encapsulated into a dedicated
 | **`apple-hig-ux`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/apple-hig-ux/SKILL.md) | Apple HIG, Inset Grouped, $\ge 44$ pt touch targets, 4 mandatory async UI states. |
 | **`offline-persistence`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/offline-persistence/SKILL.md) | 100% offline resilience, single gateway via `budgetStorageService`, defensive schema fallback. |
 | **`financial-math`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/financial-math/SKILL.md) | Pure math, progressive savings ($\sqrt{R \times N}$), rounded amounts prioritized on home. |
+| **`features-catalog`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/features-catalog/SKILL.md) | Full mapping of functional features to files, components, hooks, services, and tests. |
 | **`file-audit`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/file-audit/SKILL.md) | Automated validation script `node scripts/audit-file.js`, LOC ceilings, 0 `any`. |
 | **`docs-continuous-sync`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/docs-continuous-sync/SKILL.md) | Continuous proactive synchronization of `README.md` (badges, tree, formulas, commands). |
 | **`git-commit`** | [SKILL.md](file:///c:/Users/bradl/Documents/projets/MyBudget/.agents/skills/git-commit/SKILL.md) | Conventional Commits, pre-commit validation gates, pre-push deployment lifecycle. |
@@ -28,6 +29,7 @@ Before writing any code or answering domain queries, activate the matching skill
 
 | Target Context & Globs | Primary Skill | Supporting Skills | Mandatory Invariants to Enforce |
 | :--- | :--- | :--- | :--- |
+| **Features & File Navigation**<br>Feature exploration, locating code | `features-catalog` | `project-architecture` | • Consult functional mapping before modifying or creating cross-cutting modules.<br>• Maintain alignment between routes, components, and storage. |
 | **Routes & Navigation**<br>`src/app/**`, `_layout.tsx` | `expo-react-native` | `project-architecture`<br>`apple-hig-ux` | • Zero business or presentation code in routes (delegate to `src/components/` and `src/hooks/`).<br>• Respect Safe Area insets dynamically with zero hardcoded offsets. |
 | **UI Components & Screens**<br>`src/components/**` | `apple-hig-ux` | `project-architecture` | • Minimum $44 \times 44$ pt hit zones (`hitSlop` on small icons).<br>• 4 async states covered: nominal, loading (`HomeSkeleton`), empty, error.<br>• Inset Grouped cards with Apple radii (`rounded-3xl` / `rounded-2xl`). |
 | **Hooks & State Flow**<br>`src/hooks/**` | `project-architecture` | `offline-persistence`<br>`financial-math` | • Strict memoization (`useMemo`, `useCallback`).<br>• No direct `AsyncStorage` calls inside UI hooks (delegate to services).<br>• Domain hooks isolated from presentation logic. |

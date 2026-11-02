@@ -161,7 +161,10 @@ export function useFixedExpenses() {
   const openEditModal = useCallback((item: FixedExpenseItem) => {
     setEditingItem(item);
     setLabelInput(item.label);
-    setAmountInput(item.amount.toString());
+    const initialAmount = item.isCredit && item.durationMonths
+      ? (item.totalAmount ?? Math.round(item.amount * item.durationMonths * 100) / 100).toString()
+      : item.amount.toString();
+    setAmountInput(initialAmount);
     setCategoryInput(item.category);
     setIconInput(item.icon || CATEGORY_CONFIG[item.category]?.icon || 'home-outline');
     setIsCreditInput(!!item.isCredit);
@@ -175,13 +178,13 @@ export function useFixedExpenses() {
   }, [currentMonthStr]);
 
   const handleSave = useCallback(async () => {
-    const amount = parseFloat(amountInput.replace(',', '.'));
-    if (!labelInput.trim() || isNaN(amount) || amount <= 0) {
+    const enteredAmount = parseFloat(amountInput.replace(',', '.'));
+    if (!labelInput.trim() || isNaN(enteredAmount) || enteredAmount <= 0) {
       setFeedbackDialog({
         visible: true,
         type: 'warning',
         title: 'Champs incomplets',
-        message: 'Veuillez saisir un nom et un montant mensuel valide supérieur à 0 €.',
+        message: 'Veuillez saisir un nom et un montant valide supérieur à 0 €.',
       });
       return;
     }
@@ -197,13 +200,18 @@ export function useFixedExpenses() {
     const finalActivationType: FixedExpenseActivationType = isScheduledInput ? activationTypeInput : 'all';
     const finalTargetMonth = isScheduledInput ? targetMonthInput : undefined;
 
+    const monthlyAmount = isCreditInput && parsedDuration
+      ? Math.round((enteredAmount / parsedDuration) * 100) / 100
+      : enteredAmount;
+
     setIsSaving(true);
     try {
       if (editingItem) {
         await updateFixedExpense({
           ...editingItem,
           label: labelInput.trim(),
-          amount,
+          amount: monthlyAmount,
+          totalAmount: isCreditInput ? enteredAmount : undefined,
           category: finalCategory,
           icon: finalIcon,
           isCredit: isCreditInput,
@@ -216,7 +224,8 @@ export function useFixedExpenses() {
       } else {
         await addFixedExpense({
           label: labelInput.trim(),
-          amount,
+          amount: monthlyAmount,
+          totalAmount: isCreditInput ? enteredAmount : undefined,
           category: finalCategory,
           icon: finalIcon,
           isCredit: isCreditInput,
@@ -329,20 +338,23 @@ export function useFixedExpenses() {
   const parsedDurationForCredit = Math.max(1, parseInt(durationInput, 10) || 12);
   const parsedPaidForCredit = Math.max(0, parseInt(paidMonthsInput, 10) || 0);
   const remainingMonthsPreview = Math.max(0, parsedDurationForCredit - parsedPaidForCredit);
-  const remainingCostCreditPreview = Math.round(remainingMonthsPreview * parsedAmountForCredit * 100) / 100;
+  const parsedMonthlyAmountForCredit = isCreditInput
+    ? Math.round((parsedAmountForCredit / parsedDurationForCredit) * 100) / 100
+    : parsedAmountForCredit;
+  const remainingCostCreditPreview = Math.round(remainingMonthsPreview * parsedMonthlyAmountForCredit * 100) / 100;
 
   const estimatedEndDatePreview = useMemo(() => {
     return formatCreditEndDate({
       id: '',
       label: '',
-      amount: parsedAmountForCredit,
+      amount: parsedMonthlyAmountForCredit,
       category: categoryInput,
       icon: '',
       isCredit: true,
       durationMonths: parsedDurationForCredit,
       paidMonthsCount: parsedPaidForCredit,
     });
-  }, [parsedAmountForCredit, categoryInput, parsedDurationForCredit, parsedPaidForCredit]);
+  }, [parsedMonthlyAmountForCredit, categoryInput, parsedDurationForCredit, parsedPaidForCredit]);
 
   // Explication pédagogique en temps réel du mois d'activation choisi
   const targetMonthPreviewStatus: TargetMonthPreview = useMemo(
@@ -420,6 +432,7 @@ export function useFixedExpenses() {
     upcomingChargesCount,
     averageExpense,
     parsedAmountForCredit,
+    parsedMonthlyAmountForCredit,
     parsedDurationForCredit,
     remainingMonthsPreview,
     remainingCostCreditPreview,

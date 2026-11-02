@@ -14,7 +14,8 @@ export interface FacultativeBreakdown {
 }
 
 export interface OneTimeIncomeData {
-  amount: number;       // Montant ponctuel reçu (par défaut : 0 €)
+  amount: number;
+  totalAmount?: number;           // Montant total du crédit ou de la dépense globale       // Montant ponctuel reçu (par défaut : 0 €)
   necessary: number;    // Seuil de survie / nécessaire (par défaut : 0 €)
   facultative?: number; // Budget plaisir / facultatif optionnel
   savings: number;      // Épargne calculée
@@ -46,6 +47,8 @@ export interface FixedExpenseItem {
   id: string;
   label: string;
   amount: number;
+  totalAmount?: number;
+  totalAmount?: number;           // Montant total du crédit ou de la dépense globale
   category: FixedCategoryType;
   icon: string;
   dueDay?: number;         // Optionnel : jour d'échéance
@@ -75,6 +78,7 @@ export interface ExpenseRecord {
   categoryId: string;
   label: string;
   amount: number;
+  totalAmount?: number;           // Montant total du crédit ou de la dépense globale
   date: string;
 }
 
