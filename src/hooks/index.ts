@@ -1,11 +1,6 @@
-export * from './use-budget';
-export * from './use-home-summary';
-export * from './use-fixed-expenses';
-export * from './use-variable-expenses';
-export * from './use-details-simulation';
-export * from './use-simulation-month';
-export * from './use-expense-form';
-export * from './use-privacy-mode';
-export * from './use-haptics';
-export * from './use-budget-health';
-export * from './use-budget-backup';
+export { useBudget, BudgetProvider } from '@/providers/budget-provider';
+export { useHomeSummary, useBudgetHealth, usePrivacyMode, useBudgetBackup } from '@/features/dashboard';
+export { useFixedExpenses, useExpenseForm, useSimulationMonth } from '@/features/fixed-expenses';
+export { useVariableExpenses } from '@/features/variable-expenses';
+export { useDetailsSimulation } from '@/features/simulation';
+export { useHaptics } from './use-haptics';

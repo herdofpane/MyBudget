@@ -12,12 +12,12 @@ import { DetailsSkeleton } from '@/components/ui/loading-state';
 import { colors } from '@/theme/colors';
 import { formatEuro } from '@/constants/formatters';
 
-import { useDetailsSimulation } from '@/hooks/use-details-simulation';
 import {
+  useDetailsSimulation,
   SimulationTabs,
   SimulationSummaryCard,
   SimulationControlsCard,
-} from '@/components/details';
+} from '@/features/simulation';
 
 export default function DetailsScreen() {
   const {

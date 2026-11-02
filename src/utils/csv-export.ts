@@ -31,7 +31,7 @@ export function generateBudgetCsv(
   lines.push('Nom,Montant Mensuel,Categorie,Type,Mois Debut,Duree Totale (Mois)');
   for (const item of fixedExpenses) {
     lines.push([
-      sanitizeCsvCell(item.name),
+      sanitizeCsvCell((item as any).label || (item as any).name || ''),
       sanitizeCsvCell(item.amount),
       sanitizeCsvCell(item.category),
       sanitizeCsvCell(item.isCredit ? 'Credit' : 'Charge Recurrente'),
@@ -46,9 +46,9 @@ export function generateBudgetCsv(
   lines.push('Categorie,Montant Mensuel Lisse,Duree Lissage (Mois)');
   for (const cat of variableCategories) {
     lines.push([
-      sanitizeCsvCell(cat.name),
-      sanitizeCsvCell(cat.estimatedMonthly),
-      sanitizeCsvCell(cat.smoothingMonths || 1),
+      sanitizeCsvCell((cat as any).label || (cat as any).name || ''),
+      sanitizeCsvCell((cat as any).estimatedBudget || (cat as any).estimatedMonthly || 0),
+      sanitizeCsvCell(cat.durationMonths || (cat as any).smoothingMonths || 1),
     ].join(','));
   }
 

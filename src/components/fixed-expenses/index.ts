@@ -1,5 +1,7 @@
-export * from './fixed-expenses-stats';
-export * from './fixed-expense-row';
-export * from './fixed-expenses-empty';
-export * from './fixed-expense-modal';
-export * from './fixed-expenses-month-selector';
+export {
+  FixedExpenseRow,
+  FixedExpenseModal,
+  FixedExpensesStats,
+  FixedExpensesMonthSelector,
+  FixedExpensesEmpty,
+} from '@/features/fixed-expenses';

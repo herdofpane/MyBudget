@@ -22,32 +22,29 @@ describe('Fixed Expenses Scheduling Utilities', () => {
   it('determines charge activity based on activationType', () => {
     const recurringItem: FixedExpenseItem = {
       id: 'fix-1',
-      name: 'Internet',
+      label: 'Internet',
       amount: 40,
-      category: 'bills',
+      category: 'abonnements',
       icon: 'wifi-outline',
-      color: '#6366f1',
       activationType: 'all',
     };
 
     const futureItem: FixedExpenseItem = {
       id: 'fix-2',
-      name: 'New Gym',
+      label: 'New Gym',
       amount: 50,
-      category: 'leisure',
+      category: 'autre',
       icon: 'barbell-outline',
-      color: '#ec4899',
       activationType: 'starting_from',
       targetMonth: '2026-12',
     };
 
     const oneTimeItem: FixedExpenseItem = {
       id: 'fix-3',
-      name: 'Annual Insurance',
+      label: 'Annual Insurance',
       amount: 600,
-      category: 'insurance',
+      category: 'assurance',
       icon: 'shield-outline',
-      color: '#f59e0b',
       activationType: 'only_month',
       targetMonth: '2026-11',
     };

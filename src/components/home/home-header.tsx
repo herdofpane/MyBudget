@@ -5,7 +5,7 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/theme/colors';
 
 interface HomeHeaderProps {
-  isPrivate: boolean;
+  isPrivate?: boolean;
   selectedMonthFormatted?: string;
   selectedMonthOffset?: number;
   isSimulating?: boolean;
@@ -13,7 +13,7 @@ interface HomeHeaderProps {
   onNextMonth?: () => void;
   onPrevMonth?: () => void;
   onResetMonth?: () => void;
-  onTogglePrivate: () => void;
+  onTogglePrivate?: () => void;
   onOpenInfo: () => void;
   onOpenBackup?: () => void;
 }
@@ -72,19 +72,6 @@ export function HomeHeader({
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={onTogglePrivate}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            accessibilityRole="button"
-            className="w-10 h-10 rounded-full bg-white/10 border border-white/15 items-center justify-center active:bg-white/20"
-            accessibilityLabel={isPrivate ? 'Afficher les montants' : 'Masquer les montants'}>
-            <Ionicons
-              name={isPrivate ? 'eye-off-outline' : 'eye-outline'}
-              size={18}
-              color="#ffffff"
-            />
-          </TouchableOpacity>
 
           <TouchableOpacity
             activeOpacity={0.6}

@@ -11,11 +11,10 @@ import { FixedExpenseItem } from '@/types';
 function createMockCreditItem(partial: Partial<FixedExpenseItem> = {}): FixedExpenseItem {
   return {
     id: 'test-credit-1',
-    name: 'Auto Loan',
+    label: 'Auto Loan',
     amount: 250,
     category: 'transport',
     icon: 'car-outline',
-    color: '#3b82f6',
     isCredit: true,
     durationMonths: 24,
     paidMonthsCount: 6,

@@ -119,17 +119,26 @@ export function AppDialog({
       animationType="fade"
       transparent
       onRequestClose={handleDismiss}>
-      <Pressable style={styles.overlay} onPress={handleDismiss}>
+      <View style={styles.overlay}>
+        {/* Backdrop pour fermer au clic extérieur */}
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={handleDismiss}
+          accessibilityLabel="Fermer"
+        />
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboardWrap}>
-          <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
+          style={styles.keyboardWrap}
+          pointerEvents="box-none">
+          <View style={styles.card}>
             {/* BOUTON FERMER DISCRET EN HAUT À DROITE */}
             <TouchableOpacity
               onPress={handleDismiss}
               activeOpacity={0.7}
               disabled={isLoading}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               style={[styles.closeBtn, isLoading && { opacity: 0.5 }]}
+              accessibilityRole="button"
               accessibilityLabel="Fermer la boîte de dialogue">
               <Ionicons name="close" size={18} color="#5C5264" />
             </TouchableOpacity>
@@ -194,9 +203,9 @@ export function AppDialog({
                 </Text>
               </TouchableOpacity>
             </View>
-          </Pressable>
+          </View>
         </KeyboardAvoidingView>
-      </Pressable>
+      </View>
     </Modal>
   );
 }
@@ -283,6 +292,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.surfaceSubtle,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 50,
+    elevation: 10,
   },
   content: {
     alignItems: 'center',

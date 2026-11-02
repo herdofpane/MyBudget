@@ -128,6 +128,17 @@ export function getCreditProgress(item: FixedExpenseItem) {
 }
 
 /**
+ * Calculates credit progress as a ratio between 0 and 1.
+ */
+export function calculateCreditProgress(item: FixedExpenseItem): number {
+  if (!item.isCredit || !item.durationMonths || item.durationMonths <= 0) return 0;
+  const remaining = getCreditRemainingMonths(item);
+  if (remaining === Infinity) return 0;
+  const paid = Math.min(item.durationMonths, Math.max(0, item.durationMonths - remaining));
+  return Math.min(1, Math.max(0, paid / item.durationMonths));
+}
+
+/**
  * Formats estimated credit completion date in French locale (e.g. "Juin 2027")
  */
 export function formatCreditEndDate(item: FixedExpenseItem): string {

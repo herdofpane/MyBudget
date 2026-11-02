@@ -47,7 +47,6 @@ export interface FixedExpenseItem {
   id: string;
   label: string;
   amount: number;
-  totalAmount?: number;
   totalAmount?: number;           // Montant total du crédit ou de la dépense globale
   category: FixedCategoryType;
   icon: string;

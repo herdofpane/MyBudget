@@ -109,51 +109,68 @@ MyBudget/
 ├── AGENTS.md                # Orchestrateur central des skills, directives d'architecture et cycle de vie
 ├── assets/                  # Icônes adaptatives, images et splash screens
 ├── scripts/                 # Scripts utilitaires (audit qualité déterministe, patchs interop, build web)
-└── src/
-    ├── app/                 # Routes Expo Router (file-based routing)
-    │   ├── _layout.tsx      # Navigation principale par onglets (Dock flottant)
-    │   ├── index.tsx        # Écran Tableau de bord (Accueil)
-    │   ├── fixed-expenses.tsx # Écran Charges fixes & crédits
-    │   ├── variable-expenses.tsx # Écran Charges variables & lissage
-    │   └── details.tsx      # Écran Simulateur & détail des ventilations
-    ├── components/          # Composants UI modulaires et réutilisables
-    │   ├── ui/              # Composants atomiques (Card, Button, Badge, Input, Skeletons)
-    │   ├── home/            # Composants dédiés à l'accueil (Hero, Comptes, Revenu, BackupModal, TrendChart)
-    │   ├── fixed-expenses/  # Composants charges fixes (Modal, Stats, Ligne de charge)
-    │   ├── variable-expenses/ # Composants charges variables (Modal, Stats, Jauges)
-    │   ├── details/         # Composants simulateur (Onglets, Bilan de synthèse, Contrôles)
-    │   ├── confirm-dialog.tsx # Dialogues de confirmation et alertes accessibles
-    │   └── navigation-header.tsx # En-têtes standardisés
-    ├── constants/           # Règles métiers pures (formules, ratios, formatters monétaires, tests)
-    │   └── __tests__/       # Tests unitaires de la formule progressive sqrt(R * N)
-    ├── data/                # Données initiales, préréglages de catégories et icônes
-    ├── hooks/               # Logique applicative découplée de la vue (Custom Hooks)
-    │   ├── use-budget.tsx   # Contexte global et persistance d'état
-    │   ├── use-home-summary.ts
-    │   ├── use-fixed-expenses.ts
-    │   ├── use-variable-expenses.ts
-    │   ├── use-details-simulation.ts
-    │   ├── use-simulation-month.ts  # Stepper temporel et presets M+0..M+12
-    │   ├── use-expense-form.ts      # Gestion des formulaires modaux & détection sémantique
-    │   ├── use-privacy-mode.ts      # Mode discrétion global persisté
-    │   ├── use-haptics.ts           # Retours sensoriels haptiques Apple HIG
-    │   ├── use-budget-health.ts     # Score et diagnostic financier neobanque
-    │   ├── use-budget-backup.ts     # Import/Export JSON et restauration défensive
-    │   └── index.ts                 # Baril d'export unifié des hooks
-    ├── services/            # Couche d'accès aux données et notifications
-    │   ├── budget-storage.service.ts # Persistance AsyncStorage & tolérance aux pannes
-    │   ├── notifications.service.ts  # Alertes et rappels d'échéances
-    │   ├── __tests__/       # Tests unitaires d'isolation du stockage
-    │   └── index.ts         # Baril d'export des services
-    ├── theme/               # Charte graphique unifiée (palette de couleurs fintech)
-    ├── types/               # Définitions des contrats TypeScript
-    └── utils/               # Fonctions utilitaires pures
-        ├── auto-icon.ts     # Moteur sémantique de détection d'icônes, catégories & couleurs
-        ├── fixed-expenses.ts# Calculs des échéanciers et statuts de crédit
-        ├── credit.ts        # Logique mathématique des durées d'emprunts
-        ├── csv-export.ts    # Générateur de tableur CSV conforme RFC-4180
-        ├── __tests__/       # Tests unitaires des utilitaires (crédit, calendrier, CSV)
-        └── index.ts         # Point d'entrée des utilitaires
+```text
+src/
+├── app/                  # Routing & Écrans (Expo Router v4 / React Navigation)
+│   ├── (tabs)/           # Navigation principale par onglets (Dock flottant)
+│   │   ├── _layout.tsx   # Layout des onglets avec barre de navigation Apple HIG
+│   │   ├── index.tsx     # Écran Accueil & Tableau de bord
+│   │   ├── fixed-expenses.tsx # Écran Charges fixes & crédits
+│   │   ├── variable-expenses.tsx # Écran Charges variables & lissage
+│   │   └── details.tsx   # Écran Simulateur & calculs de ventilation
+│   ├── auth/             # Flux d'authentification
+│   │   ├── _layout.tsx   # Stack de navigation d'authentification
+│   │   ├── login.tsx     # Écran de connexion
+│   │   └── register.tsx  # Écran d'inscription
+│   ├── index.tsx         # Redirection racine vers (tabs)
+│   └── _layout.tsx       # Root layout avec Stack et injection des AppProviders
+├── features/             # Découpage vertical par domaine métier
+│   ├── authentication/   # Gestion d'authentification et sessions utilisateurs
+│   │   ├── components/   # LoginForm, RegisterForm
+│   │   ├── hooks/        # useLogin, useSession
+│   │   ├── services/     # authService.ts
+│   │   ├── types/        # auth.types.ts
+│   │   ├── __tests__/    # auth-service.test.ts
+│   │   └── index.ts      # Point d'entrée public strict de la feature
+│   ├── dashboard/        # Synthèse budgétaire & métriques d'accueil
+│   │   ├── components/   # HomeHeader, HomeBalanceCard, HomeAccountsCard, etc.
+│   │   ├── hooks/        # useHomeSummary, useBudgetHealth, usePrivacyMode
+│   │   ├── services/     # dashboardService.ts
+│   │   ├── types/        # dashboard.types.ts
+│   │   ├── __tests__/    # dashboard-service.test.ts
+│   │   └── index.ts      # Point d'entrée public strict de la feature
+│   ├── fixed-expenses/   # Charges fixes récurrentes et crédits
+│   │   ├── components/   # FixedExpenseRow, FixedExpenseModal, FixedExpensesStats
+│   │   ├── hooks/        # useFixedExpenses, useExpenseForm, useSimulationMonth
+│   │   ├── services/     # fixedExpensesService.ts
+│   │   ├── types/        # fixed-expenses.types.ts
+│   │   ├── __tests__/    # fixed-expenses-service.test.ts
+│   │   └── index.ts      # Point d'entrée public strict de la feature
+│   ├── variable-expenses/# Charges variables et lissage plurimensuel
+│   │   ├── components/   # VariableExpenseRow, VariableExpenseModal, etc.
+│   │   ├── hooks/        # useVariableExpenses
+│   │   ├── services/     # variableExpensesService.ts
+│   │   ├── types/        # variable-expenses.types.ts
+│   │   ├── __tests__/    # variable-expenses-service.test.ts
+│   │   └── index.ts      # Point d'entrée public strict de la feature
+│   └── simulation/       # Simulateur de budget et projections
+│       ├── components/   # SimulationTabs, SimulationControlsCard, etc.
+│       ├── hooks/        # useDetailsSimulation
+│       ├── services/     # simulationService.ts
+│       ├── types/        # simulation.types.ts
+│       ├── __tests__/    # simulation-service.test.ts
+│       └── index.ts      # Point d'entrée public strict de la feature
+├── components/
+│   ├── ui/               # Design System atomique et agnostique (Button, Card, Input, Badge, Skeletons)
+│   ├── confirm-dialog.tsx# Dialogues de confirmation accessibles
+│   └── navigation-header.tsx # En-têtes standardisés
+├── lib/                  # Clients tiers et intégrations (api-client, storageClient, theme, utils)
+├── providers/            # Providers globaux (AppProviders, AuthProvider, BudgetProvider, AppThemeProvider)
+├── config/               # Variables d'environnement validées (env.ts) et constantes globales (constants.ts)
+├── data/                 # Données initiales et taxonomie des catégories
+├── theme/                # Palette officielle et tokens chromatiques
+├── types/                # Modèles et interfaces transverses
+└── utils/                # Fonctions utilitaires pures (< 35 LOC)
 ```
 
 - **S (Single Responsibility)** : Chaque composant UI se concentre sur l'affichage ; toute la logique métier réside dans des hooks dédiés.

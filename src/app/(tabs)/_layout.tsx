@@ -1,0 +1,199 @@
+import React from 'react';
+import { Tabs } from 'expo-router';
+import { View, Platform, StyleSheet, useWindowDimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/theme/colors';
+
+interface TabIconProps {
+  name: keyof typeof Ionicons.glyphMap;
+  focusedName: keyof typeof Ionicons.glyphMap;
+  focused: boolean;
+  color: string;
+}
+
+function TabIcon({ name, focusedName, focused, color }: TabIconProps) {
+  return (
+    <View
+      style={[
+        styles.iconContainer,
+        focused && styles.iconContainerFocused,
+      ]}>
+      <Ionicons
+        name={focused ? focusedName : name}
+        size={22}
+        color={focused ? colors.accent : (color || colors.textMuted)}
+      />
+    </View>
+  );
+}
+
+export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isWeb = Platform.OS === 'web';
+  const isDesktop = width >= 768;
+  const isNarrow = width < 420;
+
+  const containerWidth = isDesktop ? Math.min(width, 960) : width;
+  const horizontalMargin = isDesktop ? 32 : isNarrow ? 14 : 20;
+  const maxDock = isDesktop ? 580 : 500;
+  const dockWidth = Math.min(containerWidth - horizontalMargin, maxDock);
+  const dockLeft = (containerWidth - dockWidth) / 2;
+
+  const dockBottom = isDesktop
+    ? 16
+    : isWeb
+    ? 12
+    : Math.max(insets.bottom, 12);
+
+  const tabBarHeight = isDesktop ? 74 : 70;
+  const tabBarPaddingBottom = isDesktop ? 8 : 6;
+  const tabBarPaddingTop = isDesktop ? 8 : 6;
+
+  return (
+    <View style={styles.rootWrapper}>
+      <View style={[styles.appContainer, { maxWidth: isDesktop ? 960 : '100%' }]}>
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            tabBarHideOnKeyboard: true,
+            tabBarStyle: {
+              backgroundColor: colors.card,
+              borderColor: colors.border,
+              borderWidth: 1,
+              borderRadius: isDesktop ? 28 : 24,
+              height: tabBarHeight,
+              paddingBottom: tabBarPaddingBottom,
+              paddingTop: tabBarPaddingTop,
+              position: 'absolute',
+              bottom: dockBottom,
+              left: dockLeft,
+              width: dockWidth,
+              shadowColor: colors.primary,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: isDesktop ? 0.09 : 0.07,
+              shadowRadius: isDesktop ? 18 : 14,
+              elevation: 10,
+            },
+            tabBarItemStyle: {
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingVertical: 2,
+              paddingHorizontal: 2,
+            },
+            tabBarActiveTintColor: colors.accent,
+            tabBarInactiveTintColor: colors.textMuted,
+            tabBarLabelStyle: {
+              fontSize: isNarrow ? 11 : 12,
+              fontWeight: '700',
+              marginTop: 2,
+              marginBottom: 0,
+              lineHeight: 14,
+            },
+          }}>
+          {/* 1. ACCUEIL */}
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: 'Accueil',
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  name="home-outline"
+                  focusedName="home"
+                  focused={focused}
+                  color={color as string}
+                />
+              ),
+            }}
+          />
+
+          {/* 2. HISTORIQUE CHARGES FIXES */}
+          <Tabs.Screen
+            name="fixed-expenses"
+            options={{
+              title: isNarrow ? 'Fixes' : 'Charges Fixes',
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  name="calendar-outline"
+                  focusedName="calendar"
+                  focused={focused}
+                  color={color as string}
+                />
+              ),
+            }}
+          />
+
+          {/* 3. ESTIMATION CHARGES VARIABLES */}
+          <Tabs.Screen
+            name="variable-expenses"
+            options={{
+              title: 'Variables',
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  name="pie-chart-outline"
+                  focusedName="pie-chart"
+                  focused={focused}
+                  color={color as string}
+                />
+              ),
+            }}
+          />
+
+          {/* 4. CALCUL ET DETAIL */}
+          <Tabs.Screen
+            name="details"
+            options={{
+              title: isNarrow ? 'Calcul' : 'Calcul & Détail',
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  name="calculator-outline"
+                  focusedName="calculator"
+                  focused={focused}
+                  color={color as string}
+                />
+              ),
+            }}
+          />
+        </Tabs>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  rootWrapper: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    ...(Platform.OS === 'web'
+      ? ({
+          height: '100vh',
+          maxHeight: '100vh',
+          overflow: 'hidden',
+        } as any)
+      : {}),
+  },
+  appContainer: {
+    flex: 1,
+    width: '100%',
+    ...(Platform.OS === 'web'
+      ? ({
+          height: '100%',
+          maxHeight: '100%',
+          overflow: 'hidden',
+        } as any)
+      : {}),
+  },
+  iconContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  iconContainerFocused: {
+    backgroundColor: '#ECFDF5',
+  },
+});
