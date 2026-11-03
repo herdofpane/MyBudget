@@ -8,23 +8,22 @@ import { formatEuro } from '@/constants/formatters';
 import { isChargeActiveInMonth, addMonthsToMonthStr, getCurrentMonthStr } from '@/utils/fixed-expenses';
 import { computeSavings } from '@/constants/breakdown';
 
+const SHORT_MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
 export function BudgetTrendChart(): React.JSX.Element {
   const { budget, fixedExpensesList, totalEstimatedVariable } = useBudget();
   const [selectedIdx, setSelectedIdx] = useState<number>(0);
 
-  // French 3-letter month abbreviations without trailing period for clean mobile layout
-  const SHORT_MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-
   // Compute 12-month projections
   const points = useMemo(() => {
     const currentBase = getCurrentMonthStr();
-    const result: Array<{
+    const result: {
       monthStr: string;
       label: string;
       fullMonthLabel: string;
       resteAVivre: number;
       epargne: number;
-    }> = [];
+    }[] = [];
 
     for (let offset = 0; offset <= 11; offset++) {
       const monthStr = addMonthsToMonthStr(currentBase, offset);
@@ -55,11 +54,11 @@ export function BudgetTrendChart(): React.JSX.Element {
     return result;
   }, [budget, fixedExpensesList, totalEstimatedVariable]);
 
-  // SVG Geometry
+  // SVG Geometry (compact height for 1-screen fit)
   const chartWidth = Math.min(Dimensions.get('window').width - 64, 700);
-  const chartHeight = 110;
+  const chartHeight = 64;
   const paddingX = 16;
-  const paddingY = 16;
+  const paddingY = 10;
 
   const minVal = Math.min(...points.map((p) => p.resteAVivre), 0);
   const maxVal = Math.max(...points.map((p) => p.resteAVivre), 100);
@@ -95,33 +94,33 @@ export function BudgetTrendChart(): React.JSX.Element {
   const activePoint = coords[selectedIdx] || coords[0];
 
   return (
-    <View className="bg-card border border-border/80 rounded-3xl p-4 sm:p-5 shadow-xs">
+    <View className="bg-card border border-border/80 rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs">
       {/* Header */}
-      <View className="flex-row items-center justify-between mb-2">
+      <View className="flex-row items-center justify-between mb-1">
         <View className="flex-row items-center gap-2">
-          <View className="w-8 h-8 rounded-xl bg-accent/10 items-center justify-center">
-            <Ionicons name="trending-up" size={17} color="#22c55e" />
+          <View className="w-7 h-7 rounded-lg bg-accent/10 items-center justify-center">
+            <Ionicons name="trending-up" size={14} color="#22c55e" />
           </View>
           <View>
-            <Text className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Projection sur 12 Mois
+            <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              Projection 12 Mois
             </Text>
-            <Text className="text-sm font-black text-foreground">
+            <Text className="text-xs font-black text-foreground">
               Trajectoire Reste à Vivre
             </Text>
           </View>
         </View>
 
         {/* Selected badge */}
-        <View className="bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full">
-          <Text className="text-xs font-bold text-primary">
+        <View className="bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">
+          <Text className="text-[11px] font-bold text-primary">
             {activePoint.fullMonthLabel.toUpperCase()} : {formatEuro(activePoint.resteAVivre)}
           </Text>
         </View>
       </View>
 
       {/* SVG Curve */}
-      <View className="items-center my-1">
+      <View className="items-center">
         <Svg width={chartWidth} height={chartHeight}>
           <Defs>
             <LinearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
@@ -130,25 +129,25 @@ export function BudgetTrendChart(): React.JSX.Element {
             </LinearGradient>
           </Defs>
           <Path d={areaPath} fill="url(#chartGradient)" />
-          <Path d={linePath} fill="none" stroke="#22c55e" strokeWidth={2.5} />
+          <Path d={linePath} fill="none" stroke="#22c55e" strokeWidth={2} />
           {coords.map((pt, idx) => (
             <Circle
               key={pt.monthStr}
               cx={pt.x}
               cy={pt.y}
-              r={selectedIdx === idx ? 5 : 2.5}
+              r={selectedIdx === idx ? 4.5 : 2}
               fill={selectedIdx === idx ? '#22c55e' : '#94a3b8'}
               stroke={selectedIdx === idx ? '#ffffff' : 'none'}
-              strokeWidth={selectedIdx === idx ? 2 : 0}
+              strokeWidth={selectedIdx === idx ? 1.5 : 0}
             />
           ))}
         </Svg>
       </View>
 
-      {/* Month Steppers Pills - Exactly positioned below each chart point */}
+      {/* Month Steppers Pills */}
       <View
-        style={{ width: chartWidth, height: 30 }}
-        className="relative pt-1 border-t border-border/40 self-center"
+        style={{ width: chartWidth, height: 22 }}
+        className="relative pt-0.5 border-t border-border/40 self-center"
       >
         {coords.map((pt, idx) => {
           const isSelected = selectedIdx === idx;
@@ -157,7 +156,7 @@ export function BudgetTrendChart(): React.JSX.Element {
               key={pt.monthStr}
               onPress={() => setSelectedIdx(idx)}
               hitSlop={{ top: 10, bottom: 12, left: 4, right: 4 }}
-              style={{ position: 'absolute', left: pt.x - 14, width: 28, top: 4 }}
+              style={{ position: 'absolute', left: pt.x - 14, width: 28, top: 2 }}
               className="items-center justify-center"
             >
               <View

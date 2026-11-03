@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,6 @@ import { Text } from '@/components/ui/text';
 import { NavigationHeader } from '@/components/navigation-header';
 import { AppDialog } from '@/components/confirm-dialog';
 import { DetailsSkeleton } from '@/components/ui/loading-state';
-import { colors } from '@/theme/colors';
 import { formatEuro } from '@/constants/formatters';
 
 import {
@@ -52,7 +51,7 @@ export default function DetailsScreen() {
   } = useDetailsSimulation();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']} style={{ flex: 1, minHeight: 0 }}>
       <StatusBar style="light" />
 
       {/* EN-TÊTE PRINCIPAL ÉPURÉ UNIFIÉ */}
@@ -67,8 +66,8 @@ export default function DetailsScreen() {
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessibilityRole="button"
             accessibilityLabel="Réinitialiser les paramètres par défaut"
-            className="flex-row items-center gap-1.5 bg-white/15 px-3.5 py-2 min-h-[38px] rounded-full shadow-xs active:bg-white/25">
-            <Ionicons name="refresh-outline" size={16} color="#ffffff" />
+            className="flex-row items-center gap-1 bg-white/15 px-3 py-1.5 min-h-[34px] rounded-full shadow-xs active:bg-white/25">
+            <Ionicons name="refresh-outline" size={15} color="#ffffff" />
             <Text className="text-xs font-bold text-white uppercase tracking-wider">Défaut</Text>
           </TouchableOpacity>
         }
@@ -77,12 +76,9 @@ export default function DetailsScreen() {
       {isLoading ? (
         <DetailsSkeleton />
       ) : (
-        <ScrollView
-          bounces={true}
-          showsVerticalScrollIndicator={false}
-          contentContainerClassName="pb-[120px] w-full max-w-[800px] self-center">
-          <View className="px-4 sm:px-6 pt-3.5 gap-3.5 sm:gap-4">
-
+        <View
+          style={{ flex: 1, minHeight: 0 }}
+          className="w-full max-w-[800px] self-center px-3.5 sm:px-6 pt-2 pb-[98px] gap-2.5 justify-evenly overflow-hidden">
           {/* 1. SÉLECTEUR D'ONGLET : MENSUELLE vs REVENU PONCTUEL */}
           <SimulationTabs
             isMonthly={isMonthly}
@@ -122,51 +118,7 @@ export default function DetailsScreen() {
             onChangeOneTimeNecessary={setOverrideOneTimeNecessary}
             onApplyBudget={handleApplyBudget}
           />
-
-          {/* 4. LIENS RAPIDES VERS LES CHARGES */}
-          <View className="gap-2.5">
-            {/* LIEN CHARGES FIXES */}
-            <TouchableOpacity
-              onPress={() => router.push('/fixed-expenses')}
-              activeOpacity={0.6}
-              hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
-              accessibilityRole="button"
-              accessibilityLabel="Gérer mes charges fixes"
-              className="flex-row items-center justify-between bg-card rounded-2xl p-3.5 sm:p-4 border border-border shadow-xs active:bg-slate-50 min-h-[58px]">
-              <View className="flex-row items-center gap-3">
-                <View className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 justify-center items-center">
-                  <Ionicons name="calendar-outline" size={19} color={colors.lavender} />
-                </View>
-                <View>
-                  <Text className="text-sm font-bold text-foreground">Gérer mes charges fixes</Text>
-                  <Text className="text-[11px] text-muted-foreground">{formatEuro(totalFixedExpenses)} / mois</Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={17} color={colors.textMuted} />
-            </TouchableOpacity>
-
-            {/* LIEN CHARGES VARIABLES */}
-            <TouchableOpacity
-              onPress={() => router.push('/variable-expenses')}
-              activeOpacity={0.6}
-              hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
-              accessibilityRole="button"
-              accessibilityLabel="Gérer mes charges variables"
-              className="flex-row items-center justify-between bg-card rounded-2xl p-3.5 sm:p-4 border border-border shadow-xs active:bg-slate-50 min-h-[58px]">
-              <View className="flex-row items-center gap-3">
-                <View className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 justify-center items-center">
-                  <Ionicons name="pie-chart-outline" size={19} color="#D97706" />
-                </View>
-                <View>
-                  <Text className="text-sm font-bold text-foreground">Gérer mes charges variables</Text>
-                  <Text className="text-[11px] text-muted-foreground">{formatEuro(totalEstimatedVariable)} / mois</Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={17} color={colors.textMuted} />
-            </TouchableOpacity>
-          </View>
-          </View>
-        </ScrollView>
+        </View>
       )}
 
       {/* POP-UP CONFIRMATION DE RÉINITIALISATION */}

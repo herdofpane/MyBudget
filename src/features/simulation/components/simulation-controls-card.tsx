@@ -40,9 +40,6 @@ export function SimulationControlsCard({
   oneTimeNecessaryInput,
   isSaving,
   onReset,
-  onNavigateHome,
-  onNavigateFixedExpenses,
-  onNavigateVariableExpenses,
   onChangeMonthlyNecessary,
   onResetMonthlyNecessaryToDefault,
   onChangeOneTimeAmount,
@@ -50,23 +47,16 @@ export function SimulationControlsCard({
   onApplyBudget,
 }: SimulationControlsCardProps) {
   return (
-    <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-border shadow-xs gap-4">
+    <Card className="bg-card rounded-2xl p-3 sm:p-3.5 border border-border shadow-xs gap-2">
       {/* EN-TÊTE DE LA CARTE DE CONTRÔLE */}
-      <View className="flex-row items-center gap-2.5 sm:gap-3 justify-between">
-        <View className="flex-row items-center gap-3 flex-1 pr-1">
-          <View className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
-            <Ionicons name="options-outline" size={19} color={colors.lavender} />
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center gap-1.5 flex-1 pr-1">
+          <View className="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-200 justify-center items-center shrink-0">
+            <Ionicons name="options-outline" size={13} color={colors.lavender} />
           </View>
-          <View className="flex-1">
-            <Text className="text-sm sm:text-base font-bold text-foreground tracking-tight">
-              Ajuster la simulation
-            </Text>
-            <Text className="text-[11px] text-muted-foreground" numberOfLines={1}>
-              {isMonthly
-                ? 'Revenu, charges et seuil de survie'
-                : 'Montant ponctuel et seuil minimum'}
-            </Text>
-          </View>
+          <Text className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
+            Ajuster la simulation
+          </Text>
         </View>
 
         <TouchableOpacity
@@ -75,170 +65,113 @@ export function SimulationControlsCard({
           onPress={onReset}
           accessibilityRole="button"
           accessibilityLabel="Rétablir les réglages par défaut"
-          className="flex-row items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-full border border-slate-200/90 bg-slate-100/80 active:bg-slate-200 shrink-0">
-          <Ionicons name="refresh-outline" size={13} color={colors.textMuted} />
-          <Text className="text-xs font-semibold text-muted-foreground">Standard</Text>
+          className="flex-row items-center gap-1 px-2.5 py-1 min-h-[30px] rounded-full border border-slate-200/90 bg-slate-100/80 active:bg-slate-200 shrink-0">
+          <Ionicons name="refresh-outline" size={11} color={colors.textMuted} />
+          <Text className="text-[11px] font-semibold text-muted-foreground">Standard</Text>
         </TouchableOpacity>
       </View>
 
-      {/* CHAMPS SELON LE MODE */}
-      <View className="gap-3">
-        {isMonthly ? (
-          <>
-            {/* 1. REVENU MENSUEL (Issu de l'Accueil) */}
-            <View className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 flex-row items-center justify-between">
-              <View className="flex-1 pr-2">
-                <View className="flex-row items-center gap-1.5 mb-1">
-                  <View className="w-5 h-5 rounded-md bg-emerald-100/80 items-center justify-center">
-                    <Ionicons name="cash-outline" size={12} color={colors.accent} />
-                  </View>
-                  <Text className="text-xs font-bold text-foreground">Revenu net mensuel</Text>
-                  <Badge variant="outline" className="border-emerald-200 bg-emerald-50 px-1.5 py-0 rounded-md">
-                    <Text className="text-[10px] font-semibold text-accent">Accueil</Text>
-                  </Badge>
-                </View>
-                <Text className="text-base sm:text-lg font-black text-foreground">
-                  {formatEuro(income)}
-                </Text>
-                <Text className="text-[10px] text-muted-foreground mt-0.5">
-                  Modifiable depuis le tableau de bord Accueil
-                </Text>
-              </View>
-              <TouchableOpacity
-                activeOpacity={0.6}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                onPress={onNavigateHome}
-                accessibilityRole="button"
-                accessibilityLabel="Modifier le revenu mensuel"
-                className="px-3 py-1.5 min-h-[36px] rounded-full bg-emerald-50 border border-emerald-200 flex-row items-center gap-1 active:bg-emerald-100">
-                <Text className="text-xs font-bold text-accent">Modifier</Text>
-                <Ionicons name="arrow-forward" size={12} color={colors.accent} />
-              </TouchableOpacity>
+      {/* CHAMPS INTERACTIFS COMPACTS */}
+      {isMonthly ? (
+        <View className="gap-1.5">
+          {/* Ligne récapitulative Revenu & Charges */}
+          <View className="flex-row items-center justify-between bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200/60">
+            <Text className="text-[10px] text-muted-foreground">
+              Revenu : <Text className="font-bold text-slate-800">{formatEuro(income)}</Text>
+            </Text>
+            <Text className="text-[10px] text-muted-foreground">
+              Charges fixes : <Text className="font-bold text-slate-800">{formatEuro(totalFixedExpenses)}</Text>
+            </Text>
+          </View>
+
+          {/* Saisie Seuil Nécessaire */}
+          <View className="flex-row items-center justify-between bg-slate-100/90 rounded-xl px-3 py-1.5 border border-slate-200/80 min-h-[42px]">
+            <View className="flex-row items-center gap-1.5 flex-1 pr-2">
+              <Ionicons name="pie-chart-outline" size={13} color="#D97706" />
+              <Text className="text-xs font-bold text-foreground" numberOfLines={1}>
+                Seuil Nécessaire
+              </Text>
+              {isNecessaryModifiedFromDefault && (
+                <Badge variant="outline" className="border-indigo-200 bg-indigo-50 px-1.5 py-0 rounded-md">
+                  <Text className="text-[8px] font-semibold text-lavender">Modifié</Text>
+                </Badge>
+              )}
             </View>
 
-            {/* 2. CHARGES FIXES */}
-            <View className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 flex-row items-center justify-between">
-              <View className="flex-1 pr-2">
-                <View className="flex-row items-center gap-1.5 mb-1">
-                  <View className="w-5 h-5 rounded-md bg-indigo-100/80 items-center justify-center">
-                    <Ionicons name="calendar-outline" size={12} color={colors.lavender} />
-                  </View>
-                  <Text className="text-xs font-bold text-foreground">Charges fixes</Text>
-                  <Badge variant="outline" className="border-indigo-200 bg-indigo-50 px-1.5 py-0 rounded-md">
-                    <Text className="text-[10px] font-semibold text-lavender">Charges Fixes</Text>
-                  </Badge>
-                </View>
-                <Text className="text-base sm:text-lg font-black text-foreground">
-                  {formatEuro(totalFixedExpenses)}
-                </Text>
-                <Text className="text-[10px] text-muted-foreground mt-0.5">
-                  Total récurrent calculé automatiquement
-                </Text>
-              </View>
-              <TouchableOpacity
-                activeOpacity={0.6}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                onPress={onNavigateFixedExpenses}
-                accessibilityRole="button"
-                accessibilityLabel="Gérer les charges fixes"
-                className="px-3 py-1.5 min-h-[36px] rounded-full bg-indigo-50 border border-indigo-200 flex-row items-center gap-1 active:bg-indigo-100">
-                <Text className="text-xs font-bold text-lavender">Gérer</Text>
-                <Ionicons name="arrow-forward" size={12} color={colors.lavender} />
-              </TouchableOpacity>
-            </View>
-
-            {/* 3. TOTAL NÉCESSAIRE */}
-            <View className="gap-1.5">
-              <View className="flex-row items-center justify-between flex-wrap gap-1">
-                <View className="flex-row items-center gap-1.5">
-                  <View className="w-5 h-5 rounded-md bg-amber-100/80 items-center justify-center">
-                    <Ionicons name="pie-chart-outline" size={12} color="#D97706" />
-                  </View>
-                  <Text className="text-xs font-bold text-foreground">Total Nécessaire (Seuil survie) (€)</Text>
-                </View>
-                {isNecessaryModifiedFromDefault ? (
-                  <Badge variant="outline" className="border-indigo-200 bg-indigo-50 px-2 py-0.5 rounded-full">
-                    <Text className="text-[10px] font-semibold text-lavender">Personnalisé</Text>
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="border-amber-200 bg-amber-50 px-2 py-0.5 rounded-full">
-                    <Text className="text-[10px] font-semibold text-amber-700">Par défaut (Charges variables)</Text>
-                  </Badge>
-                )}
-              </View>
-
+            <View className="flex-row items-center min-w-[90px] max-w-[130px]">
               <Input
                 value={monthlyNecessaryInput}
                 onChangeText={(v) => onChangeMonthlyNecessary(v.replace(/[^0-9.,]/g, ''))}
                 keyboardType="decimal-pad"
                 placeholder={totalEstimatedVariable.toString()}
                 placeholderTextColor={colors.textMuted}
-                className="bg-slate-100/80 border-slate-200/90 rounded-2xl px-4 py-2.5 text-base font-bold text-foreground min-h-[48px]"
+                className="flex-1 text-sm font-black text-foreground border-0 bg-transparent shadow-none px-0 py-0 h-auto text-right"
               />
-
-              <View className="gap-1 mt-0.5">
-                <Text className="text-[11px] text-muted-foreground leading-relaxed">
-                  Égal par défaut au montant de vos charges variables ({formatEuro(totalEstimatedVariable)}/mois), mais modifiable librement pour simuler un autre seuil.
-                </Text>
-                {isNecessaryModifiedFromDefault && onResetMonthlyNecessaryToDefault && (
-                  <TouchableOpacity
-                    activeOpacity={0.6}
-                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                    onPress={onResetMonthlyNecessaryToDefault}
-                    accessibilityRole="button"
-                    accessibilityLabel="Rétablir le montant des charges variables"
-                    className="self-start flex-row items-center gap-1.5 mt-0.5 px-3 py-1.5 min-h-[34px] rounded-full bg-amber-50 border border-amber-200/90 active:bg-amber-100">
-                    <Ionicons name="refresh-outline" size={12} color="#D97706" />
-                    <Text className="text-[11px] font-semibold text-amber-800">
-                      Rétablir le montant ({formatEuro(totalEstimatedVariable)})
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
+              <Text className="text-xs font-bold text-slate-500 ml-1">€</Text>
             </View>
-          </>
-        ) : (
-          <>
-            {/* REVENU PONCTUEL */}
-            <View className="gap-1.5">
-              <View className="flex-row items-center gap-1.5">
-                <View className="w-5 h-5 rounded-md bg-emerald-100/80 items-center justify-center">
-                  <Ionicons name="flash-outline" size={12} color={colors.accent} />
-                </View>
-                <Text className="text-xs font-bold text-foreground">Montant du revenu ponctuel (€)</Text>
-              </View>
+          </View>
+
+          {isNecessaryModifiedFromDefault && onResetMonthlyNecessaryToDefault && (
+            <TouchableOpacity
+              activeOpacity={0.6}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+              onPress={onResetMonthlyNecessaryToDefault}
+              accessibilityRole="button"
+              className="self-end flex-row items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/80">
+              <Ionicons name="refresh-outline" size={10} color="#D97706" />
+              <Text className="text-[10px] font-semibold text-amber-800">
+                Par défaut ({formatEuro(totalEstimatedVariable)})
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : (
+        <View className="gap-1.5">
+          {/* Saisie Montant Ponctuel */}
+          <View className="flex-row items-center justify-between bg-slate-100/90 rounded-xl px-3 py-1.5 border border-slate-200/80 min-h-[42px]">
+            <View className="flex-row items-center gap-1.5 flex-1 pr-2">
+              <Ionicons name="flash-outline" size={13} color={colors.accent} />
+              <Text className="text-xs font-bold text-foreground" numberOfLines={1}>
+                Montant Ponctuel
+              </Text>
+            </View>
+            <View className="flex-row items-center min-w-[90px] max-w-[130px]">
               <Input
                 value={oneTimeAmountInput}
                 onChangeText={(v) => onChangeOneTimeAmount(v.replace(/[^0-9.,]/g, ''))}
                 keyboardType="decimal-pad"
                 placeholder="0"
                 placeholderTextColor={colors.textMuted}
-                className="bg-slate-100/80 border-slate-200/90 rounded-2xl px-4 py-2.5 text-base font-bold text-foreground min-h-[48px]"
+                className="flex-1 text-sm font-black text-foreground border-0 bg-transparent shadow-none px-0 py-0 h-auto text-right"
               />
+              <Text className="text-xs font-bold text-slate-500 ml-1">€</Text>
             </View>
+          </View>
 
-            {/* NÉCESSAIRE SUR REVENU PONCTUEL */}
-            <View className="gap-1.5">
-              <View className="flex-row items-center gap-1.5">
-                <View className="w-5 h-5 rounded-md bg-amber-100/80 items-center justify-center">
-                  <Ionicons name="pie-chart-outline" size={12} color="#D97706" />
-                </View>
-                <Text className="text-xs font-bold text-foreground">Part Nécessaire (Seuil survie) (€)</Text>
-              </View>
+          {/* Saisie Part Nécessaire */}
+          <View className="flex-row items-center justify-between bg-slate-100/90 rounded-xl px-3 py-1.5 border border-slate-200/80 min-h-[42px]">
+            <View className="flex-row items-center gap-1.5 flex-1 pr-2">
+              <Ionicons name="pie-chart-outline" size={13} color="#D97706" />
+              <Text className="text-xs font-bold text-foreground" numberOfLines={1}>
+                Part Nécessaire
+              </Text>
+            </View>
+            <View className="flex-row items-center min-w-[90px] max-w-[130px]">
               <Input
                 value={oneTimeNecessaryInput}
                 onChangeText={(v) => onChangeOneTimeNecessary(v.replace(/[^0-9.,]/g, ''))}
                 keyboardType="decimal-pad"
                 placeholder="0"
                 placeholderTextColor={colors.textMuted}
-                className="bg-slate-100/80 border-slate-200/90 rounded-2xl px-4 py-2.5 text-base font-bold text-foreground min-h-[48px]"
+                className="flex-1 text-sm font-black text-foreground border-0 bg-transparent shadow-none px-0 py-0 h-auto text-right"
               />
+              <Text className="text-xs font-bold text-slate-500 ml-1">€</Text>
             </View>
-          </>
-        )}
-      </View>
+          </View>
+        </View>
+      )}
 
-      {/* BOUTON ENREGISTRER / APPLIQUER */}
+      {/* BOUTON ENREGISTRER / APPLIQUER COMPACT */}
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={onApplyBudget}
@@ -249,15 +182,15 @@ export function SimulationControlsCard({
             ? 'Appliquer comme budget officiel'
             : 'Enregistrer ce revenu ponctuel'
         }
-        className={`flex-row items-center justify-center bg-primary rounded-2xl py-3.5 px-4 min-h-[50px] gap-2 shadow-sm active:bg-slate-800 ${
+        className={`flex-row items-center justify-center bg-primary rounded-xl py-2 px-3 min-h-[40px] gap-1.5 shadow-2xs active:bg-slate-800 ${
           isSaving ? 'opacity-70' : ''
         }`}>
         {isSaving ? (
-          <ActivityIndicator size="small" color="#ffffff" className="mr-1.5" />
+          <ActivityIndicator size="small" color="#ffffff" className="mr-1" />
         ) : (
-          <Ionicons name="checkmark-circle" size={18} color="#ffffff" />
+          <Ionicons name="checkmark-circle" size={15} color="#ffffff" />
         )}
-        <Text className="text-xs sm:text-sm font-bold text-white tracking-wide">
+        <Text className="text-xs font-bold text-white tracking-wide">
           {isSaving
             ? 'Enregistrement...'
             : isMonthly

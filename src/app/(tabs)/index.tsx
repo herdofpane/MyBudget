@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -48,12 +48,7 @@ export default function HomeScreen() {
       {isLoading ? (
         <HomeSkeleton />
       ) : (
-        <ScrollView
-          bounces={true}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerClassName="flex-grow justify-between pb-[92px] w-full max-w-[800px] self-center">
-
+        <View className="flex-1 justify-between pb-[104px] w-full max-w-[800px] self-center overflow-hidden">
           {/* 1. TOP BAR SUR FOND BLEU NUIT AVEC SÉLECTEUR DE MOIS INTÉGRÉ (APPLE HIG) */}
           <HomeHeader
             selectedMonthFormatted={selectedMonthFormatted}
@@ -76,9 +71,9 @@ export default function HomeScreen() {
             }
           />
 
-          {/* 2. CONTENU PRINCIPAL ERGONOMIQUE (APPLE INSET GROUPED CONTAINERS) */}
-          <View className="px-4 sm:px-6 pt-3.5 gap-3.5 flex-1 justify-center py-2">
-            {/* CARTE HÉROS DU RESTE À VIVRE (STYLE APPLE CARD / WALLET) */}
+          {/* 2. CONTENU PRINCIPAL SUR UN SEUL ÉCRAN SANS SCROLL */}
+          <View className="px-3.5 sm:px-6 py-1.5 gap-2 flex-1 justify-evenly">
+            {/* CARTE HÉROS DU RESTE À VIVRE */}
             <HomeBalanceCard
               resteAVivreFormatted={renderMoney(simulatedResteAVivre)}
               resteAVivreRoundFormatted={renderMoneyRound(simulatedResteAVivre)}
@@ -101,7 +96,7 @@ export default function HomeScreen() {
               onPressEpargne={() => router.push('/details')}
             />
 
-            {/* ÉDITION DIRECTE DU REVENU (CELLULE TABLEAU iOS) */}
+            {/* ÉDITION DIRECTE DU REVENU */}
             <HomeIncomeCard
               incomeInput={incomeInput}
               onIncomeChange={setLocalIncome}
@@ -109,10 +104,10 @@ export default function HomeScreen() {
               onSubmitEditing={handleBlurIncome}
             />
 
-            {/* PROJECTION TRAJECTOIRE BUDGÉTAIRE SUR 12 MOIS (APPLE HEALTH STYLE) */}
+            {/* PROJECTION TRAJECTOIRE BUDGÉTAIRE SUR 12 MOIS */}
             <BudgetTrendChart />
           </View>
-        </ScrollView>
+        </View>
       )}
 
       {/* MODALE DE SAUVEGARDE & EXPORT / IMPORT */}
@@ -137,4 +132,3 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-

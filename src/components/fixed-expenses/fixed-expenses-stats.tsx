@@ -29,83 +29,63 @@ export function FixedExpensesStats({
   selectedMonthLabel,
 }: FixedExpensesStatsProps) {
   return (
-    <Card className="bg-card rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm gap-3.5">
-      <View className="flex-row justify-between items-start">
-        <View className="flex-1 pr-2">
-          <View className="flex-row items-center gap-2 mb-1">
-            <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+    <Card className="bg-card rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 border border-slate-200/90 shadow-xs gap-1.5">
+      <View className="flex-row justify-between items-center flex-wrap gap-2">
+        {/* Gauche : Titre + Montant arrondi + Montant exact en ligne */}
+        <View className="flex-1 min-w-[160px]">
+          <View className="flex-row items-center gap-1.5">
+            <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
               {isSimulating ? `Charges fixes • ${selectedMonthLabel}` : 'Total charges fixes'}
             </Text>
-            <Badge
-              variant="outline"
-              className={`px-2 py-0.5 rounded-full ${
-                isSimulating
-                  ? 'border-indigo-300/80 bg-indigo-50'
-                  : 'border-slate-200 bg-slate-100/80'
-              }`}>
-              <Text
-                className={`text-[9px] font-black uppercase tracking-wider ${
-                  isSimulating ? 'text-lavender' : 'text-slate-600'
-                }`}>
-                {isSimulating ? 'Simulé' : 'Arrondi'}
-              </Text>
-            </Badge>
+            {expiredCreditsCount > 0 && (
+              <Badge variant="outline" className="bg-emerald-50 border-emerald-200 px-1.5 py-0 rounded-full">
+                <Text className="text-[8px] font-bold text-emerald-800">
+                  {expiredCreditsCount} soldé{expiredCreditsCount > 1 ? 's' : ''}
+                </Text>
+              </Badge>
+            )}
+            {upcomingChargesCount > 0 && (
+              <Badge variant="outline" className="bg-indigo-50 border-indigo-200 px-1.5 py-0 rounded-full">
+                <Text className="text-[8px] font-bold text-lavender">
+                  {upcomingChargesCount} à venir
+                </Text>
+              </Badge>
+            )}
           </View>
-          <Text className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight" numberOfLines={1}>
-            {formatEuroRound(totalFixedExpenses)}
-          </Text>
-          <Text className="text-xs sm:text-sm font-semibold text-slate-400 mt-0.5">
-            Montant exact : {formatEuro(totalFixedExpenses)}
-          </Text>
+          <View className="flex-row items-baseline gap-2 mt-0.5">
+            <Text className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight" numberOfLines={1}>
+              {formatEuroRound(totalFixedExpenses)}
+            </Text>
+            <Text className="text-[11px] font-semibold text-slate-400">
+              ({formatEuro(totalFixedExpenses)})
+            </Text>
+          </View>
         </View>
 
-        <Badge variant="outline" className="bg-indigo-50 border-indigo-200/80 px-3 py-1 rounded-full flex-row items-center gap-1.5 shadow-xs">
-          <Ionicons name="layers-outline" size={14} color={colors.lavender} />
-          <Text className="text-xs font-bold text-lavender">
-            {activeCount} active{activeCount > 1 ? 's' : ''}
-          </Text>
-        </Badge>
-      </View>
-
-      {/* BANDEAU SI DES CRÉDITS SONT ARRIVÉS À ÉCHÉANCE */}
-      {expiredCreditsCount > 0 && (
-        <View className="flex-row items-center bg-emerald-50/80 p-3 rounded-2xl border border-emerald-200/80 gap-2.5">
-          <Ionicons name="shield-checkmark" size={17} color={colors.accent} />
-          <Text className="text-xs font-semibold text-emerald-900 flex-1">
-            {isSimulating
-              ? `${expiredCreditsCount} crédit${expiredCreditsCount > 1 ? 's' : ''} soldé${expiredCreditsCount > 1 ? 's' : ''} d’ici ${selectedMonthLabel}`
-              : `${expiredCreditsCount} crédit${expiredCreditsCount > 1 ? 's' : ''} arrivé${expiredCreditsCount > 1 ? 's' : ''} à terme (imputation 0 €)`}
-          </Text>
-        </View>
-      )}
-
-      {/* BANDEAU SI DES CHARGES SONT DIFFÉRÉES */}
-      {upcomingChargesCount > 0 && (
-        <View className="flex-row items-center bg-indigo-50/80 p-3 rounded-2xl border border-indigo-200/80 gap-2.5">
-          <Ionicons name="calendar-outline" size={17} color={colors.lavender} />
-          <Text className="text-xs text-lavender font-semibold flex-1">
-            {upcomingChargesCount} charge{upcomingChargesCount > 1 ? 's' : ''} différée{upcomingChargesCount > 1 ? 's' : ''} à venir (non imputée{upcomingChargesCount > 1 ? 's' : ''} ce mois-ci)
-          </Text>
-        </View>
-      )}
-
-      {/* RÉCAPITULATIF STATISTIQUE INSET GROUPED */}
-      <View className="flex-row items-center bg-slate-100/70 rounded-2xl p-3 border border-slate-200/70">
-        <View className="flex-1 items-center">
-          <Text className="text-xs text-slate-500 font-medium">Moyenne par charge</Text>
-          <Text className="text-sm font-bold text-slate-900 mt-0.5">
-            ~{formatEuroRound(averageExpense)}
-          </Text>
-        </View>
-        <View className="w-px h-8 bg-slate-200" />
-        <View className="flex-1 items-center">
-          <Text className="text-xs text-slate-500 font-medium">Part des revenus</Text>
-          <Text className="text-sm font-bold text-slate-900 mt-0.5">
-            {formatPercent(fixedExpenseRatio)}
-          </Text>
+        {/* Droite : Indicateurs compacts (Moyenne, Part revenus, Actives) */}
+        <View className="flex-row items-center bg-slate-100/80 rounded-xl px-2.5 py-1.5 border border-slate-200/70 gap-2.5">
+          <View className="items-center">
+            <Text className="text-[9px] text-slate-500 font-semibold uppercase">Moyenne</Text>
+            <Text className="text-xs font-black text-slate-900">
+              ~{formatEuroRound(averageExpense)}
+            </Text>
+          </View>
+          <View className="w-px h-6 bg-slate-200" />
+          <View className="items-center">
+            <Text className="text-[9px] text-slate-500 font-semibold uppercase">Revenus</Text>
+            <Text className="text-xs font-black text-slate-900">
+              {formatPercent(fixedExpenseRatio)}
+            </Text>
+          </View>
+          <View className="w-px h-6 bg-slate-200" />
+          <View className="items-center flex-row gap-1">
+            <Ionicons name="layers-outline" size={12} color={colors.lavender} />
+            <Text className="text-xs font-black text-lavender">
+              {activeCount}
+            </Text>
+          </View>
         </View>
       </View>
     </Card>
   );
 }
-
