@@ -48,7 +48,7 @@ export default function HomeScreen() {
       {isLoading ? (
         <HomeSkeleton />
       ) : (
-        <View className="flex-1 justify-between pb-[104px] w-full max-w-[800px] self-center overflow-hidden">
+        <View className="flex-1 justify-between pb-[82px] sm:pb-[88px] w-full max-w-[800px] self-center overflow-hidden">
           {/* 1. TOP BAR SUR FOND BLEU NUIT AVEC SÉLECTEUR DE MOIS INTÉGRÉ (APPLE HIG) */}
           <HomeHeader
             selectedMonthFormatted={selectedMonthFormatted}
@@ -72,7 +72,7 @@ export default function HomeScreen() {
           />
 
           {/* 2. CONTENU PRINCIPAL SUR UN SEUL ÉCRAN SANS SCROLL */}
-          <View className="px-3.5 sm:px-6 py-1.5 gap-2 flex-1 justify-evenly">
+          <View className="px-3.5 sm:px-6 py-1 gap-1.5 flex-1 justify-between">
             {/* CARTE HÉROS DU RESTE À VIVRE */}
             <HomeBalanceCard
               resteAVivreFormatted={renderMoney(simulatedResteAVivre)}

@@ -1,21 +1,20 @@
-import React from 'react';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
+import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Text } from '@/components/ui/text';
+import { AppDialog, ConfirmDialog } from '@/components/confirm-dialog';
 import { NavigationHeader } from '@/components/navigation-header';
-import { ConfirmDialog, AppDialog } from '@/components/confirm-dialog';
+import { Badge } from '@/components/ui/badge';
 import { ListSkeleton } from '@/components/ui/loading-state';
-import { formatEuro, formatEuroRound } from '@/constants/formatters';
+import { Text } from '@/components/ui/text';
+import { formatEuro, formatEuroRound, formatPercent } from '@/constants/formatters';
 
 import {
   useVariableExpenses,
-  VariableExpensesStats,
+  VariableExpenseModal,
   VariableExpenseRow,
   VariableExpensesEmpty,
-  VariableExpenseModal,
 } from '@/features/variable-expenses';
 
 export default function VariableExpensesScreen() {
@@ -81,107 +80,82 @@ export default function VariableExpensesScreen() {
         <ScrollView
           bounces={true}
           showsVerticalScrollIndicator={false}
-          stickyHeaderIndices={variableCategories.length > 0 ? [1] : undefined}
-          contentContainerClassName="pb-[120px] w-full max-w-[800px] self-center">
-          {/* 1. CARTE DU TOTAL DES CHARGES VARIABLES */}
-          <View className="px-4 sm:px-6 pt-3.5 mb-3.5 sm:mb-4">
-            <VariableExpensesStats
-              totalEstimatedVariable={totalEstimatedVariable}
-              count={variableCategories.length}
-              averageExpense={averageExpense}
-              variableExpenseRatio={variableExpenseRatio}
-            />
-          </View>
-
-          {/* 2. EN-TÊTE FIXE DU TABLEAU (TITRE & COLONNES TOUJOURS VISIBLES AU DÉFILEMENT) */}
-          <View
-            style={{ elevation: 4 }}
-            className="w-full max-w-[800px] self-center px-4 sm:px-6 pt-1 bg-background z-20">
-            <View className={`bg-card ${variableCategories.length > 0 ? 'rounded-t-3xl border-t' : 'rounded-3xl border'} border-x border-slate-200/90 shadow-xs overflow-hidden`}>
-              {/* EN-TÊTE DE LA CARTE TABLEAU AVEC TITRE ET ACTION */}
-              <View className="flex-row justify-between items-center p-4 sm:p-5 border-b border-slate-100 bg-card">
-                <View className="flex-row items-center gap-3 flex-1 pr-2">
-                  <View className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/80 justify-center items-center shrink-0">
-                    <Ionicons name="pie-chart-outline" size={19} color="#D97706" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
-                      Charges variables & amortissements
+          contentContainerClassName="pb-[120px] w-full max-w-[800px] self-center px-3.5 sm:px-6 pt-2">
+          {/* CARTE UNIQUE UNIFIÉE DU TABLEAU (APPLE HIG INSET GROUPED) */}
+          <View className="bg-card rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+            {/* 1. LIGNE DU TOTAL DES CHARGES VARIABLES ET STATS */}
+            <View className="flex-row justify-between items-center px-3.5 py-2.5 sm:px-4 sm:py-3 border-b border-slate-100 bg-card">
+              <View className="flex-1 min-w-[130px]">
+                <View className="flex-row items-center gap-1.5 flex-wrap">
+                  <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    TOTAL CHARGES VARIABLES
+                  </Text>
+                  <Badge variant="outline" className="bg-amber-50 border-amber-200 px-1.5 py-0 rounded-full">
+                    <Text className="text-[9px] font-bold text-amber-800">
+                      {variableCategories.length} poste{variableCategories.length > 1 ? 's' : ''}
                     </Text>
-                    <Text className="text-xs text-slate-400 mt-0.5">
-                      {variableCategories.length} poste{variableCategories.length > 1 ? 's' : ''} lissé{variableCategories.length > 1 ? 's' : ''} sur la durée
-                    </Text>
-                  </View>
+                  </Badge>
                 </View>
-
-                <TouchableOpacity
-                  activeOpacity={0.6}
-                  onPress={openAddModal}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  accessibilityRole="button"
-                  accessibilityLabel="Ajouter une charge variable"
-                  className="border border-amber-300/80 bg-amber-50/80 flex-row items-center gap-1.5 rounded-full px-3 py-1.5 min-h-[36px] active:bg-amber-100 shrink-0 shadow-2xs">
-                  <Ionicons name="add-circle" size={16} color="#D97706" />
-                  <Text className="text-xs font-bold text-amber-800">Ajouter</Text>
-                </TouchableOpacity>
+                <View className="flex-row items-baseline gap-1.5 mt-0.5">
+                  <Text className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight" numberOfLines={1}>
+                    {formatEuroRound(totalEstimatedVariable)}
+                  </Text>
+                  <Text className="text-xs font-semibold text-slate-400">
+                    ({formatEuro(totalEstimatedVariable)} / mois)
+                  </Text>
+                </View>
               </View>
 
-              {variableCategories.length === 0 ? (
+              {/* STATISTIQUES COMPACTES (MOYENNE & REVENUS) */}
+              <View className="flex-row items-center bg-slate-100/80 rounded-xl px-2.5 py-1.5 border border-slate-200/70 gap-2.5">
+                <View className="items-center">
+                  <Text className="text-[8px] sm:text-[9px] text-slate-500 font-semibold uppercase">Moyenne</Text>
+                  <Text className="text-[11px] sm:text-xs font-black text-slate-900">
+                    ~{formatEuroRound(averageExpense)}
+                  </Text>
+                </View>
+                <View className="w-px h-5 bg-slate-200" />
+                <View className="items-center">
+                  <Text className="text-[8px] sm:text-[9px] text-slate-500 font-semibold uppercase">Revenus</Text>
+                  <Text className="text-[11px] sm:text-xs font-black text-slate-900">
+                    {formatPercent(variableExpenseRatio)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* 2. LIGNE DES TITRES DE COLONNES DU TABLEAU */}
+            {variableCategories.length > 0 && (
+              <View className="flex-row items-center px-3.5 sm:px-4 py-2 bg-slate-50 border-b border-slate-100">
+                <Text className="flex-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  POSTE & DURÉE
+                </Text>
+                <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right pr-2">
+                  MONTANT (LISSÉ)
+                </Text>
+                <Text className="w-16 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
+                  ACTIONS
+                </Text>
+              </View>
+            )}
+
+            {/* 3. LIGNES DU TABLEAU */}
+            {variableCategories.length === 0 ? (
+              <View className="p-4">
                 <VariableExpensesEmpty onAdd={openAddModal} />
-              ) : (
-                /* LIGNE DES TITRES DE COLONNES DU TABLEAU (STICKY) */
-                <View className="flex-row items-center px-4 py-2.5 bg-slate-50 border-b border-slate-100">
-                  <Text className="flex-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    POSTE & DURÉE
-                  </Text>
-                  <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right pr-2">
-                    MONTANT (LISSÉ)
-                  </Text>
-                  <Text className="w-16 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
-                    ACTIONS
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {/* 3. CORPS DU TABLEAU : LIGNES DÉFILABLES ET TOTAL */}
-          {variableCategories.length > 0 ? (
-            <View className="w-full max-w-[800px] self-center px-4 sm:px-6">
-              <View className="bg-card rounded-b-3xl border-b border-x border-slate-200/90 shadow-sm overflow-hidden">
-                {/* LIGNES DES CHARGES VARIABLES */}
-                {variableCategories.map((item, index) => (
-                  <VariableExpenseRow
-                    key={item.id}
-                    item={item}
-                    isEven={index % 2 === 0}
-                    onEdit={openEditModal}
-                    onDelete={handleDelete}
-                  />
-                ))}
-
-                {/* PIED DU TABLEAU : TOTAL MENSUEL LISSÉ */}
-                <View className="flex-row justify-between items-center px-4 sm:px-5 py-4 bg-slate-50/60 border-t border-slate-100">
-                  <View>
-                    <Text className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                      TOTAL MENSUEL LISSÉ
-                    </Text>
-                    <Text className="text-xs text-slate-400 mt-0.5">
-                      Arrondi unité • {variableCategories.length} charge{variableCategories.length > 1 ? 's' : ''}
-                    </Text>
-                  </View>
-                  <View className="items-end">
-                    <Text className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                      {formatEuroRound(totalEstimatedVariable)}
-                    </Text>
-                    <Text className="text-xs font-medium text-slate-400 mt-0.5">
-                      Exact : {formatEuro(totalEstimatedVariable)} / mois
-                    </Text>
-                  </View>
-                </View>
               </View>
-            </View>
-          ) : null}
+            ) : (
+              variableCategories.map((item, index) => (
+                <VariableExpenseRow
+                  key={item.id}
+                  item={item}
+                  isEven={index % 2 === 0}
+                  onEdit={openEditModal}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
+          </View>
         </ScrollView>
       )}
 

@@ -38,16 +38,16 @@ export function HomeHeader({
     : currentMonthYear;
 
   return (
-    <View className="bg-primary px-4 sm:px-6 pt-2 pb-3 rounded-b-[26px] shadow-sm gap-2">
+    <View className="bg-primary px-4 sm:px-6 pt-1.5 pb-2 rounded-b-2xl shadow-sm gap-1.5">
       {/* 1. TOP BAR : BRANDING & ACTIONS (APPLE HIG NAVIGATION BAR) */}
-      <View className="flex-row justify-between items-center min-h-[38px]">
+      <View className="flex-row justify-between items-center min-h-[34px]">
         {/* Logo & App Title */}
         <View className="flex-row items-center gap-2">
-          <View className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 items-center justify-center shadow-xs">
-            <Ionicons name="wallet-outline" size={18} color={colors.accent} />
+          <View className="w-8 h-8 rounded-xl bg-white/10 border border-white/15 items-center justify-center shadow-xs">
+            <Ionicons name="wallet-outline" size={16} color={colors.accent} />
           </View>
           <View>
-            <Text className="text-lg font-black text-white tracking-tight leading-none">
+            <Text className="text-base sm:text-lg font-black text-white tracking-tight leading-none">
               <Text className="text-accent">Fin</Text>Track
             </Text>
             <Text className="text-[9px] font-semibold text-slate-400 tracking-wider uppercase mt-0.5">
@@ -64,9 +64,9 @@ export function HomeHeader({
               onPress={onOpenBackup}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               accessibilityRole="button"
-              className="w-9 h-9 rounded-full bg-white/10 border border-white/15 items-center justify-center active:bg-white/20"
+              className="w-8 h-8 rounded-full bg-white/10 border border-white/15 items-center justify-center active:bg-white/20"
               accessibilityLabel="Sauvegarde et données">
-              <Ionicons name="cloud-upload-outline" size={17} color="#ffffff" />
+              <Ionicons name="cloud-upload-outline" size={15} color="#ffffff" />
             </TouchableOpacity>
           )}
 
@@ -75,15 +75,15 @@ export function HomeHeader({
             onPress={onOpenInfo}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessibilityRole="button"
-            className="w-9 h-9 rounded-full bg-white/10 border border-white/15 items-center justify-center active:bg-white/20"
+            className="w-8 h-8 rounded-full bg-white/10 border border-white/15 items-center justify-center active:bg-white/20"
             accessibilityLabel="Informations et aide">
-            <Ionicons name="information-circle-outline" size={19} color="#ffffff" />
+            <Ionicons name="information-circle-outline" size={17} color="#ffffff" />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* 2. APPLE-STYLE SEGMENTED MONTH CONTROLLER / STEPPER */}
-      <View className="bg-white/10 rounded-xl p-1 border border-white/15 flex-row items-center justify-between">
+      <View className="bg-white/10 rounded-xl p-0.5 border border-white/15 flex-row items-center justify-between">
         {/* Previous Month Button (44pt accessible hit zone) */}
         <TouchableOpacity
           onPress={onPrevMonth}
@@ -92,10 +92,10 @@ export function HomeHeader({
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityRole="button"
           accessibilityLabel="Mois précédent"
-          className={`w-8 h-8 rounded-lg items-center justify-center ${
+          className={`w-7 h-7 rounded-lg items-center justify-center ${
             selectedMonthOffset === 0 ? 'opacity-20' : 'bg-white/15 active:bg-white/25'
           }`}>
-          <Ionicons name="chevron-back" size={16} color="#ffffff" />
+          <Ionicons name="chevron-back" size={15} color="#ffffff" />
         </TouchableOpacity>
 
         {/* Month Label & Dynamic Status Pills */}
@@ -153,10 +153,10 @@ export function HomeHeader({
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityRole="button"
           accessibilityLabel="Mois suivant"
-          className={`w-8 h-8 rounded-lg items-center justify-center ${
+          className={`w-7 h-7 rounded-lg items-center justify-center ${
             selectedMonthOffset >= 12 ? 'opacity-20' : 'bg-white/15 active:bg-white/25'
           }`}>
-          <Ionicons name="chevron-forward" size={16} color="#ffffff" />
+          <Ionicons name="chevron-forward" size={15} color="#ffffff" />
         </TouchableOpacity>
       </View>
     </View>

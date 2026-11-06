@@ -5,15 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Text } from '@/components/ui/text';
+import { Badge } from '@/components/ui/badge';
 import { NavigationHeader } from '@/components/navigation-header';
 import { ConfirmDialog, AppDialog } from '@/components/confirm-dialog';
 import { ListSkeleton } from '@/components/ui/loading-state';
-import { colors } from '@/theme/colors';
-import { formatEuro, formatEuroRound } from '@/constants/formatters';
+import { formatEuro, formatEuroRound, formatPercent } from '@/constants/formatters';
 
 import {
   useFixedExpenses,
-  FixedExpensesStats,
   FixedExpenseRow,
   FixedExpensesEmpty,
   FixedExpenseModal,
@@ -88,7 +87,7 @@ export default function FixedExpensesScreen() {
   } = useFixedExpenses();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']} style={{ flex: 1, minHeight: 0 }}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
       <StatusBar style="light" />
 
       {/* EN-TÊTE PRINCIPAL ÉPURÉ UNIFIÉ */}
@@ -113,9 +112,7 @@ export default function FixedExpensesScreen() {
       {isLoading ? (
         <ListSkeleton />
       ) : (
-        <View
-          style={{ flex: 1, minHeight: 0 }}
-          className="w-full max-w-[800px] self-center px-3.5 sm:px-6 pt-2 pb-[98px] gap-2 overflow-hidden">
+        <View className="flex-1 w-full max-w-[800px] self-center px-3.5 sm:px-6 pt-2 pb-[98px] gap-2">
           {/* 1. SÉLECTEUR DE SIMULATION MENSUELLE COMPACT */}
           <FixedExpensesMonthSelector
             selectedMonthStr={selectedMonthStr}
@@ -130,114 +127,106 @@ export default function FixedExpensesScreen() {
             onResetToCurrentMonth={handleResetToCurrentMonth}
           />
 
-          {/* 2. CARTE DU TOTAL DES CHARGES FIXES & STATS COMPACTE */}
-          <FixedExpensesStats
-            totalFixedExpenses={simulatedTotalFixedExpenses}
-            activeCount={activeFixedExpenses.length}
-            expiredCreditsCount={expiredCreditsCount}
-            upcomingChargesCount={upcomingChargesCount}
-            averageExpense={averageExpense}
-            fixedExpenseRatio={fixedExpenseRatio}
-            isSimulating={isSimulating}
-            selectedMonthLabel={selectedMonthShort}
-          />
-
-          {/* 3. TABLEAU FIXE SUR L'ÉCRAN (EN-TÊTE & COLONNES FIXES, LIGNES DÉFILABLES EN INTERNE) */}
-          <View
-            style={{ flex: 1, minHeight: 0 }}
-            className="bg-card rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-            {/* EN-TÊTE DU TABLEAU (TOUJOURS VISIBLE) */}
-            <View className="flex-row justify-between items-center px-3.5 py-2.5 sm:px-4 sm:py-3 border-b border-slate-100 bg-card shrink-0">
-              <View className="flex-row items-center gap-2.5 flex-1 pr-2">
-                <View className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200/80 justify-center items-center shrink-0">
-                  <Ionicons name="receipt-outline" size={16} color={colors.lavender} />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-xs sm:text-sm font-black text-slate-900 tracking-tight" numberOfLines={1}>
-                    {isSimulating
-                      ? `Charges actives en ${selectedMonthShort}`
-                      : 'Charges fixes & abonnements'}
+          {/* 2. EN-TÊTE FIXE DU TABLEAU : TOTAL & TITRES DE COLONNES (TOUJOURS VISIBLES) */}
+          <View className="bg-card rounded-t-2xl sm:rounded-t-3xl border-t border-x border-slate-200/90 shadow-xs overflow-hidden shrink-0">
+            {/* LIGNE DU TOTAL DES CHARGES ET STATS */}
+            <View className="flex-row justify-between items-center px-3.5 py-2.5 sm:px-4 sm:py-3 border-b border-slate-100 bg-card">
+              <View className="flex-1 min-w-[140px]">
+                <View className="flex-row items-center gap-1.5 flex-wrap">
+                  <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    {isSimulating ? `TOTAL • ${selectedMonthShort}` : 'TOTAL CHARGES FIXES'}
                   </Text>
-                  <Text className="text-[11px] text-slate-400">
-                    {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
-                    {expiredCreditsCount > 0 && ` • ${expiredCreditsCount} soldé${expiredCreditsCount > 1 ? 's' : ''}`}
-                    {upcomingChargesCount > 0 && ` • ${upcomingChargesCount} à venir`}
+                  <Badge variant="outline" className="bg-indigo-50 border-indigo-200 px-1.5 py-0 rounded-full">
+                    <Text className="text-[9px] font-bold text-lavender">
+                      {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
+                    </Text>
+                  </Badge>
+                  {expiredCreditsCount > 0 && (
+                    <Badge variant="outline" className="bg-emerald-50 border-emerald-200 px-1.5 py-0 rounded-full">
+                      <Text className="text-[9px] font-bold text-emerald-800">
+                        {expiredCreditsCount} soldé{expiredCreditsCount > 1 ? 's' : ''}
+                      </Text>
+                    </Badge>
+                  )}
+                  {upcomingChargesCount > 0 && (
+                    <Badge variant="outline" className="bg-indigo-50 border-indigo-200 px-1.5 py-0 rounded-full">
+                      <Text className="text-[9px] font-bold text-lavender">
+                        {upcomingChargesCount} à venir
+                      </Text>
+                    </Badge>
+                  )}
+                </View>
+                <View className="flex-row items-baseline gap-2 mt-0.5">
+                  <Text className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight" numberOfLines={1}>
+                    {formatEuroRound(simulatedTotalFixedExpenses)}
+                  </Text>
+                  <Text className="text-xs font-semibold text-slate-400">
+                    ({formatEuro(simulatedTotalFixedExpenses)})
                   </Text>
                 </View>
               </View>
 
-              <TouchableOpacity
-                activeOpacity={0.6}
-                onPress={openAddModal}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                accessibilityRole="button"
-                accessibilityLabel="Ajouter une charge"
-                className="border border-indigo-300/80 bg-indigo-50/80 flex-row items-center gap-1 rounded-full px-2.5 py-1 min-h-[32px] active:bg-indigo-100 shrink-0">
-                <Ionicons name="add-circle" size={14} color={colors.lavender} />
-                <Text className="text-[11px] font-bold text-lavender">Ajouter</Text>
-              </TouchableOpacity>
+              {/* STATISTIQUES COMPACTES (MOYENNE & REVENUS) */}
+              <View className="flex-row items-center bg-slate-100/80 rounded-xl px-2.5 py-1.5 border border-slate-200/70 gap-2.5">
+                <View className="items-center">
+                  <Text className="text-[8px] sm:text-[9px] text-slate-500 font-semibold uppercase">Moyenne</Text>
+                  <Text className="text-[11px] sm:text-xs font-black text-slate-900">
+                    ~{formatEuroRound(averageExpense)}
+                  </Text>
+                </View>
+                <View className="w-px h-5 bg-slate-200" />
+                <View className="items-center">
+                  <Text className="text-[8px] sm:text-[9px] text-slate-500 font-semibold uppercase">Revenus</Text>
+                  <Text className="text-[11px] sm:text-xs font-black text-slate-900">
+                    {formatPercent(fixedExpenseRatio)}
+                  </Text>
+                </View>
+              </View>
             </View>
 
-            {fixedExpensesList.length === 0 ? (
-              <ScrollView contentContainerClassName="flex-grow justify-center">
-                <FixedExpensesEmpty onAdd={openAddModal} />
-              </ScrollView>
-            ) : (
-              <View style={{ flex: 1, minHeight: 0 }}>
-                {/* LIGNE DES TITRES DE COLONNES DU TABLEAU (TOUJOURS VISIBLE) */}
-                <View className="flex-row items-center px-3.5 sm:px-4 py-2 bg-slate-50 border-b border-slate-100 shrink-0">
-                  <Text className="flex-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    POSTE DE CHARGE
-                  </Text>
-                  <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right pr-2">
-                    MONTANT
-                  </Text>
-                  <Text className="w-20 sm:w-24 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
-                    ACTIONS
-                  </Text>
-                </View>
-
-                {/* LIGNES DES CHARGES (DÉFILEMENT INTERNE UNIQUEMENT) */}
-                <ScrollView
-                  style={{ flex: 1, minHeight: 0 }}
-                  bounces={true}
-                  showsVerticalScrollIndicator={true}>
-                  {fixedExpensesList.map((item, index) => (
-                    <FixedExpenseRow
-                      key={item.id}
-                      item={item}
-                      isEven={index % 2 === 0}
-                      currentMonthStr={selectedMonthStr}
-                      baseMonthStr={currentMonthStr}
-                      onAdvanceMonth={handleAdvanceMonth}
-                      onEdit={openEditModal}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </ScrollView>
-
-                {/* PIED DU TABLEAU : TOTAL ARRONDI (TOUJOURS VISIBLE EN BAS DU TABLEAU) */}
-                <View className="flex-row justify-between items-center px-3.5 sm:px-4 py-2.5 bg-slate-50/90 border-t border-slate-200/80 shrink-0">
-                  <View>
-                    <Text className="text-[11px] font-black text-slate-900 uppercase tracking-wider">
-                      TOTAL DES CHARGES {isSimulating ? `(${selectedMonthShort})` : ''}
-                    </Text>
-                    <Text className="text-[10px] text-slate-400">
-                      Arrondi unité • {activeFixedExpenses.length} active{activeFixedExpenses.length > 1 ? 's' : ''}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-baseline gap-1.5">
-                    <Text className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                      {formatEuroRound(simulatedTotalFixedExpenses)}
-                    </Text>
-                    <Text className="text-[11px] font-medium text-slate-400">
-                      ({formatEuro(simulatedTotalFixedExpenses)})
-                    </Text>
-                  </View>
-                </View>
+            {/* LIGNE DES TITRES DE COLONNES DU TABLEAU (TOUJOURS VISIBLES) */}
+            {fixedExpensesList.length > 0 && (
+              <View className="flex-row items-center px-3.5 sm:px-4 py-2 bg-slate-50 border-b border-slate-100">
+                <Text className="flex-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  POSTE DE CHARGE
+                </Text>
+                <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right pr-2">
+                  MONTANT
+                </Text>
+                <Text className="w-20 sm:w-24 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
+                  ACTIONS
+                </Text>
               </View>
             )}
           </View>
+
+          {/* 3. CORPS DU TABLEAU : DÉFILEMENT FLUIDE SUR PLUSIEURS PAGES */}
+          {fixedExpensesList.length === 0 ? (
+            <View className="bg-card rounded-b-2xl sm:rounded-b-3xl border-b border-x border-slate-200/90 shadow-sm p-4">
+              <FixedExpensesEmpty onAdd={openAddModal} />
+            </View>
+          ) : (
+            <View className="flex-1 bg-card rounded-b-2xl sm:rounded-b-3xl border-b border-x border-slate-200/90 shadow-sm overflow-hidden min-h-0">
+              <ScrollView
+                className="flex-1"
+                bounces={true}
+                showsVerticalScrollIndicator={true}
+                contentContainerClassName="pb-4">
+                {fixedExpensesList.map((item, index) => (
+                  <FixedExpenseRow
+                    key={item.id}
+                    item={item}
+                    isEven={index % 2 === 0}
+                    currentMonthStr={selectedMonthStr}
+                    baseMonthStr={currentMonthStr}
+                    onAdvanceMonth={handleAdvanceMonth}
+                    onEdit={openEditModal}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
       )}
 

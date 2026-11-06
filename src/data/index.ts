@@ -28,8 +28,59 @@ export const DEFAULT_BUDGET: BudgetData = {
 // Liste des charges fixes par défaut (vide par défaut)
 export const DEFAULT_FIXED_EXPENSES: FixedExpenseItem[] = [];
 
-// Liste des charges variables par défaut (vide par défaut)
-export const DEFAULT_VARIABLE_CATEGORIES: VariableCategory[] = [];
+// Liste des charges variables par défaut (5 postes essentiels minimum)
+export const DEFAULT_VARIABLE_CATEGORIES: VariableCategory[] = [
+  {
+    id: 'var-default-alim',
+    label: 'Alimentation & Courses',
+    totalAmount: 400,
+    durationMonths: 1,
+    estimatedBudget: 400,
+    spent: 0,
+    icon: 'cart-outline',
+    color: '#9b6fba',
+  },
+  {
+    id: 'var-default-resto',
+    label: 'Sorties & Restaurants',
+    totalAmount: 150,
+    durationMonths: 1,
+    estimatedBudget: 150,
+    spent: 0,
+    icon: 'restaurant-outline',
+    color: '#d9822b',
+  },
+  {
+    id: 'var-default-transp',
+    label: 'Carburant & Transports',
+    totalAmount: 100,
+    durationMonths: 1,
+    estimatedBudget: 100,
+    spent: 0,
+    icon: 'car-sport-outline',
+    color: '#2563eb',
+  },
+  {
+    id: 'var-default-shop',
+    label: 'Shopping & Habillement',
+    totalAmount: 100,
+    durationMonths: 1,
+    estimatedBudget: 100,
+    spent: 0,
+    icon: 'shirt-outline',
+    color: '#8557a5',
+  },
+  {
+    id: 'var-default-sante',
+    label: 'Santé & Bien-être',
+    totalAmount: 80,
+    durationMonths: 1,
+    estimatedBudget: 80,
+    spent: 0,
+    icon: 'medkit-outline',
+    color: '#10b981',
+  },
+];
 
 // Historique des dépenses initial (vide par défaut)
 export const DEFAULT_EXPENSE_HISTORY: ExpenseRecord[] = [];

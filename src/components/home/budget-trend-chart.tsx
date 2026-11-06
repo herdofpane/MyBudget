@@ -56,9 +56,9 @@ export function BudgetTrendChart(): React.JSX.Element {
 
   // SVG Geometry (compact height for 1-screen fit)
   const chartWidth = Math.min(Dimensions.get('window').width - 64, 700);
-  const chartHeight = 64;
+  const chartHeight = 44;
   const paddingX = 16;
-  const paddingY = 10;
+  const paddingY = 6;
 
   const minVal = Math.min(...points.map((p) => p.resteAVivre), 0);
   const maxVal = Math.max(...points.map((p) => p.resteAVivre), 100);
@@ -94,9 +94,9 @@ export function BudgetTrendChart(): React.JSX.Element {
   const activePoint = coords[selectedIdx] || coords[0];
 
   return (
-    <View className="bg-card border border-border/80 rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs">
+    <View className="bg-card border border-border/80 rounded-2xl px-3 py-1.5 sm:px-3.5 sm:py-2 shadow-xs">
       {/* Header */}
-      <View className="flex-row items-center justify-between mb-1">
+      <View className="flex-row items-center justify-between mb-0.5">
         <View className="flex-row items-center gap-2">
           <View className="w-7 h-7 rounded-lg bg-accent/10 items-center justify-center">
             <Ionicons name="trending-up" size={14} color="#22c55e" />

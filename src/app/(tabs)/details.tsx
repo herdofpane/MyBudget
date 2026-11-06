@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -51,7 +51,7 @@ export default function DetailsScreen() {
   } = useDetailsSimulation();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']} style={{ flex: 1, minHeight: 0 }}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
       <StatusBar style="light" />
 
       {/* EN-TÊTE PRINCIPAL ÉPURÉ UNIFIÉ */}
@@ -76,49 +76,52 @@ export default function DetailsScreen() {
       {isLoading ? (
         <DetailsSkeleton />
       ) : (
-        <View
-          style={{ flex: 1, minHeight: 0 }}
-          className="w-full max-w-[800px] self-center px-3.5 sm:px-6 pt-2 pb-[98px] gap-2.5 justify-evenly overflow-hidden">
-          {/* 1. SÉLECTEUR D'ONGLET : MENSUELLE vs REVENU PONCTUEL */}
-          <SimulationTabs
-            isMonthly={isMonthly}
-            onSelectTab={setActiveTab}
-          />
+        <ScrollView
+          bounces={true}
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName="pb-[120px] w-full max-w-[800px] self-center">
+          <View className="px-3.5 sm:px-6 pt-2 gap-3">
+            {/* 1. SÉLECTEUR D'ONGLET : MENSUELLE vs REVENU PONCTUEL */}
+            <SimulationTabs
+              isMonthly={isMonthly}
+              onSelectTab={setActiveTab}
+            />
 
-          {/* 2. RÉSULTAT DU CALCUL (BILAN DE SYNTHÈSE DU TABLEUR) */}
-          <SimulationSummaryCard
-            isMonthly={isMonthly}
-            currentIncome={currentIncome}
-            parsedMonthlyFixed={parsedMonthlyFixed}
-            monthlyResteAVivre={monthlyResteAVivre}
-            currentChecking={currentChecking}
-            currentEpargne={currentEpargne}
-            currentNecessary={currentNecessary}
-            currentBaseResteAVivre={currentBaseResteAVivre}
-          />
+            {/* 2. RÉSULTAT DU CALCUL (BILAN DE SYNTHÈSE DU TABLEUR) */}
+            <SimulationSummaryCard
+              isMonthly={isMonthly}
+              currentIncome={currentIncome}
+              parsedMonthlyFixed={parsedMonthlyFixed}
+              monthlyResteAVivre={monthlyResteAVivre}
+              currentChecking={currentChecking}
+              currentEpargne={currentEpargne}
+              currentNecessary={currentNecessary}
+              currentBaseResteAVivre={currentBaseResteAVivre}
+            />
 
-          {/* 3. ZONE POUR MODIFIER LE CALCUL (CHAMPS INTERACTIFS) */}
-          <SimulationControlsCard
-            isMonthly={isMonthly}
-            income={budget.income}
-            totalFixedExpenses={totalFixedExpenses}
-            totalEstimatedVariable={totalEstimatedVariable}
-            isNecessaryModifiedFromDefault={isNecessaryModifiedFromDefault}
-            monthlyNecessaryInput={monthlyNecessaryInput}
-            oneTimeAmountInput={oneTimeAmountInput}
-            oneTimeNecessaryInput={oneTimeNecessaryInput}
-            isSaving={isSaving}
-            onReset={() => setShowResetDialog(true)}
-            onNavigateHome={() => router.push('/')}
-            onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
-            onNavigateVariableExpenses={() => router.push('/variable-expenses')}
-            onChangeMonthlyNecessary={setOverrideMonthlyNecessary}
-            onResetMonthlyNecessaryToDefault={resetMonthlyNecessaryToDefault}
-            onChangeOneTimeAmount={setOverrideOneTimeAmount}
-            onChangeOneTimeNecessary={setOverrideOneTimeNecessary}
-            onApplyBudget={handleApplyBudget}
-          />
-        </View>
+            {/* 3. ZONE POUR MODIFIER LE CALCUL (CHAMPS INTERACTIFS) */}
+            <SimulationControlsCard
+              isMonthly={isMonthly}
+              income={budget.income}
+              totalFixedExpenses={totalFixedExpenses}
+              totalEstimatedVariable={totalEstimatedVariable}
+              isNecessaryModifiedFromDefault={isNecessaryModifiedFromDefault}
+              monthlyNecessaryInput={monthlyNecessaryInput}
+              oneTimeAmountInput={oneTimeAmountInput}
+              oneTimeNecessaryInput={oneTimeNecessaryInput}
+              isSaving={isSaving}
+              onReset={() => setShowResetDialog(true)}
+              onNavigateHome={() => router.push('/')}
+              onNavigateFixedExpenses={() => router.push('/fixed-expenses')}
+              onNavigateVariableExpenses={() => router.push('/variable-expenses')}
+              onChangeMonthlyNecessary={setOverrideMonthlyNecessary}
+              onResetMonthlyNecessaryToDefault={resetMonthlyNecessaryToDefault}
+              onChangeOneTimeAmount={setOverrideOneTimeAmount}
+              onChangeOneTimeNecessary={setOverrideOneTimeNecessary}
+              onApplyBudget={handleApplyBudget}
+            />
+          </View>
+        </ScrollView>
       )}
 
       {/* POP-UP CONFIRMATION DE RÉINITIALISATION */}

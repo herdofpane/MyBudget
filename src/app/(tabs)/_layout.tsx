@@ -39,7 +39,6 @@ export default function TabsLayout() {
   const horizontalMargin = isDesktop ? 32 : isNarrow ? 14 : 20;
   const maxDock = isDesktop ? 580 : 500;
   const dockWidth = Math.min(containerWidth - horizontalMargin, maxDock);
-  const dockLeft = (containerWidth - dockWidth) / 2;
 
   const dockBottom = isDesktop
     ? 16
@@ -68,7 +67,8 @@ export default function TabsLayout() {
               paddingTop: tabBarPaddingTop,
               position: 'absolute',
               bottom: dockBottom,
-              left: dockLeft,
+              left: '50%',
+              transform: [{ translateX: -dockWidth / 2 }],
               width: dockWidth,
               shadowColor: colors.primary,
               shadowOffset: { width: 0, height: 4 },
@@ -81,6 +81,12 @@ export default function TabsLayout() {
               alignItems: 'center',
               paddingVertical: 2,
               paddingHorizontal: 2,
+              ...(Platform.OS === 'web'
+                ? ({
+                    outline: 'none',
+                    userSelect: 'none',
+                  } as any)
+                : {}),
             },
             tabBarActiveTintColor: colors.accent,
             tabBarInactiveTintColor: colors.textMuted,
@@ -166,22 +172,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
     alignItems: 'center',
+    position: 'relative',
     ...(Platform.OS === 'web'
       ? ({
           height: '100vh',
           maxHeight: '100vh',
           overflow: 'hidden',
+          position: 'relative',
         } as any)
       : {}),
   },
   appContainer: {
     flex: 1,
     width: '100%',
+    position: 'relative',
     ...(Platform.OS === 'web'
       ? ({
           height: '100%',
           maxHeight: '100%',
           overflow: 'hidden',
+          position: 'relative',
         } as any)
       : {}),
   },
